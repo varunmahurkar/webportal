@@ -1,0 +1,1 @@
+This folder will contain all the service files like Redis, Auth, DB, etc... Will think later.

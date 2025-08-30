@@ -1,0 +1,1 @@
+This file will store all the enums used in the project from different places not in single but different files and try to add the file names as well.
