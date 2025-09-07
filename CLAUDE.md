@@ -1,0 +1,6 @@
+- always use next js latest, react optimized version, redux, typescript, ant design for components, supabase, tailwind css, modules css, and more as our tech stack for our project "ALEXIKA".
+- always remember to use and update our core folder memory for every files which are their and will be adding in the future
+- never create a new similar functionality components for core folder
+- always use good keywords for classes, function names, css classes, files, and folders, etc don't use generic names highly optimized keywords used for them to define
+- always add the comment for the functionalities and features and what they are used for and make sure that the comments are well formatted and describable
+- always update docker files like Dockerfile, docker-compose,  Dockerfile.dev, docker.md file with the projects update and make sure that it works fine and up to date with latest changes in the project.

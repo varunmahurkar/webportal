@@ -1,3 +1,16 @@
+/**
+ * ALEXIKA AI Theme System - Centralized theme management with intelligent color generation
+ * Supports three theme modes: light, dark, and custom with auto-generated color palettes
+ * 
+ * Features:
+ * - Professional light theme with optimized contrast ratios
+ * - GitHub-inspired dark theme for reduced eye strain
+ * - Dynamic custom theme generation from single primary color
+ * - CSS variable injection for seamless integration
+ * - Local storage persistence for user preferences
+ * - Ant Design theme integration with automatic token mapping
+ */
+
 "use client";
 
 import React, {
@@ -22,41 +35,47 @@ import {
   DownOutlined,
 } from "@ant-design/icons";
 
+// Three theme modes: professional light, GitHub-inspired dark, and dynamic custom
 export type ThemeMode = "light" | "dark" | "custom";
 
+// Complete theme configuration with optional generated color palette for custom themes
 export interface ThemeConfig {
   mode: ThemeMode;
-  primaryColor: string;
-  generatedColors?: {
-    secondary: string;
-    success: string;
-    warning: string;
-    error: string;
-    info: string;
-    backgroundPrimary: string;
-    backgroundSecondary: string;
-    backgroundTertiary: string;
-    textPrimary: string;
-    textSecondary: string;
-    textTertiary: string;
-    borderColor: string;
-    borderHover: string;
+  primaryColor: string; // Main brand color that drives custom theme generation
+  generatedColors?: { // Auto-generated complementary colors for custom themes
+    secondary: string;         // Complementary secondary color
+    success: string;           // Green for positive actions
+    warning: string;           // Orange for warnings
+    error: string;             // Red for errors/destructive actions
+    info: string;              // Blue for informational content
+    backgroundPrimary: string;   // Main background color
+    backgroundSecondary: string; // Secondary background (cards, panels)
+    backgroundTertiary: string;  // Tertiary background (hover states)
+    textPrimary: string;         // Primary text color
+    textSecondary: string;       // Secondary text (descriptions)
+    textTertiary: string;        // Tertiary text (captions)
+    borderColor: string;         // Default border color
+    borderHover: string;         // Border hover color
   };
 }
 
+// Default theme configuration - starts with professional light theme
 const defaultThemeConfig: ThemeConfig = {
   mode: "light",
-  primaryColor: "#386641",
+  primaryColor: "#386641", // Forest green as default primary color
 };
 
+// Context value interface for theme state and actions
 interface ThemeContextValue {
-  config: ThemeConfig;
-  updateTheme: (updates: Partial<ThemeConfig>) => void;
-  isDark: boolean;
+  config: ThemeConfig;                                    // Current theme configuration
+  updateTheme: (updates: Partial<ThemeConfig>) => void;   // Function to update theme settings
+  isDark: boolean;                                        // Boolean indicating if current theme is dark
 }
 
+// React Context for global theme state management
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
+// Hook for accessing theme context in components
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {
@@ -65,90 +84,97 @@ export const useTheme = () => {
   return context;
 };
 
+// Props interface for ThemeWrapper component
 interface ThemeWrapperProps {
   children: ReactNode;
-  initialConfig?: Partial<ThemeConfig>;
+  initialConfig?: Partial<ThemeConfig>; // Optional initial theme overrides
 }
 
+// localStorage keys for theme persistence
 const THEME_STORAGE_KEY = "theme-config";
 
+// Converts hex color to HSL values for intelligent color manipulation
 const hexToHsl = (hex: string): [number, number, number] => {
-  const r = parseInt(hex.slice(1, 3), 16) / 255;
-  const g = parseInt(hex.slice(3, 5), 16) / 255;
-  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const r = parseInt(hex.slice(1, 3), 16) / 255; // Red component (0-1)
+  const g = parseInt(hex.slice(3, 5), 16) / 255; // Green component (0-1)
+  const b = parseInt(hex.slice(5, 7), 16) / 255; // Blue component (0-1)
 
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
-  let h = 0;
-  let s = 0;
-  const l = (max + min) / 2;
+  let h = 0; // Hue (0-360)
+  let s = 0; // Saturation (0-100)
+  const l = (max + min) / 2; // Lightness (0-100)
 
   if (max !== min) {
     const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min); // Calculate saturation
     switch (max) {
       case r:
-        h = (g - b) / d + (g < b ? 6 : 0);
+        h = (g - b) / d + (g < b ? 6 : 0); // Red is dominant
         break;
       case g:
-        h = (b - r) / d + 2;
+        h = (b - r) / d + 2; // Green is dominant
         break;
       case b:
-        h = (r - g) / d + 4;
+        h = (r - g) / d + 4; // Blue is dominant
         break;
     }
-    h /= 6;
+    h /= 6; // Convert to 0-1 range
   }
 
-  return [h * 360, s * 100, l * 100];
+  return [h * 360, s * 100, l * 100]; // Return as [hue, saturation%, lightness%]
 };
 
+// Converts HSL values back to hex color format for CSS usage
 const hslToHex = (h: number, s: number, l: number): string => {
-  h /= 360;
-  s /= 100;
-  l /= 100;
+  h /= 360; // Normalize hue to 0-1
+  s /= 100; // Normalize saturation to 0-1
+  l /= 100; // Normalize lightness to 0-1
 
+  // Helper function to convert hue to RGB component
   const hue2rgb = (p: number, q: number, t: number) => {
     if (t < 0) t += 1;
     if (t > 1) t -= 1;
-    if (t < 1 / 6) return p + (q - p) * 6 * t;
-    if (t < 1 / 2) return q;
-    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    if (t < 1 / 6) return p + (q - p) * 6 * t; // First third of hue spectrum
+    if (t < 1 / 2) return q;                   // Middle third of hue spectrum
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6; // Final third
     return p;
   };
 
   let r, g, b;
 
   if (s === 0) {
-    r = g = b = l;
+    r = g = b = l; // Achromatic (grayscale)
   } else {
-    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s; // Calculate chroma bounds
     const p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1 / 3);
-    g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1 / 3);
+    r = hue2rgb(p, q, h + 1 / 3); // Red component
+    g = hue2rgb(p, q, h);         // Green component
+    b = hue2rgb(p, q, h - 1 / 3); // Blue component
   }
 
+  // Convert RGB components (0-1) to hex values (00-FF)
   const toHex = (c: number) => {
     const hex = Math.round(c * 255).toString(16);
-    return hex.length === 1 ? "0" + hex : hex;
+    return hex.length === 1 ? "0" + hex : hex; // Ensure two-digit hex
   };
 
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`; // Return as hex color string
 };
 
+// Intelligent color palette generator - creates harmonious theme from single primary color
 const generateColorPalette = (primaryColor: string) => {
-  const [h, s, l] = hexToHsl(primaryColor);
+  const [h, s, l] = hexToHsl(primaryColor); // Extract HSL values for manipulation
 
-  // Create a more flexible approach based on the primary color's characteristics
-  const isVibrant = s > 60; // High saturation
-  const isBright = l > 60; // High lightness
-  const isDark = l < 40; // Low lightness
+  // Analyze primary color characteristics for intelligent theme generation
+  const isVibrant = s > 60; // High saturation indicates vibrant/bold color
+  const isBright = l > 60;  // High lightness indicates bright color
+  const isDark = l < 40;    // Low lightness indicates dark color
 
-  // Generate backgrounds that complement the primary color
-  let bgPrimary, bgSecondary, bgTertiary;
-  let textPrimary, textSecondary, textTertiary;
-  let borderColor, borderHover;
+  // Variables for generated theme colors
+  let bgPrimary, bgSecondary, bgTertiary;     // Background color variations
+  let textPrimary, textSecondary, textTertiary; // Text color hierarchy
+  let borderColor, borderHover;               // Border color variations
 
   if (isBright && isVibrant) {
     // Bright, vibrant colors - create a light theme with color tints
@@ -216,36 +242,39 @@ const generateColorPalette = (primaryColor: string) => {
   };
 };
 
-const CUSTOM_COLORS_STORAGE_KEY = "custom-theme-colors";
+const CUSTOM_COLORS_STORAGE_KEY = "custom-theme-colors"; // Separate storage for custom color palettes
 
+// Loads theme configuration from localStorage with SSR safety
 const loadThemeFromStorage = (): Partial<ThemeConfig> => {
-  if (typeof window === "undefined") return {};
+  if (typeof window === "undefined") return {}; // SSR safety check
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : {};
+    return stored ? JSON.parse(stored) : {}; // Return parsed config or empty object
   } catch (error) {
     console.warn("Failed to load theme from localStorage:", error);
-    return {};
+    return {}; // Graceful fallback on parse error
   }
 };
 
+// Loads custom color palette from separate localStorage entry
 const loadCustomColorsFromStorage = () => {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") return null; // SSR safety check
   try {
     const stored = localStorage.getItem(CUSTOM_COLORS_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : null;
+    return stored ? JSON.parse(stored) : null; // Return parsed colors or null
   } catch (error) {
     console.warn("Failed to load custom colors from localStorage:", error);
-    return null;
+    return null; // Graceful fallback on parse error
   }
 };
 
+// Saves theme configuration to localStorage with dual storage for custom themes
 const saveThemeToStorage = (config: ThemeConfig) => {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") return; // SSR safety check
   try {
-    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(config));
+    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(config)); // Save main theme config
 
-    // Also save custom colors separately for persistence
+    // Save custom colors separately for better persistence and restoration
     if (config.mode === "custom" && config.generatedColors) {
       localStorage.setItem(
         CUSTOM_COLORS_STORAGE_KEY,
@@ -260,35 +289,41 @@ const saveThemeToStorage = (config: ThemeConfig) => {
   }
 };
 
+// Main ThemeWrapper component - provides theme context and applies CSS custom properties
 export default function ThemeWrapper({
   children,
   initialConfig = {},
 }: ThemeWrapperProps) {
+  // Initialize theme config with priority: stored > initial > default
   const [config, setConfig] = useState<ThemeConfig>(() => {
-    const storedConfig = loadThemeFromStorage();
+    const storedConfig = loadThemeFromStorage(); // Load from localStorage
     return {
-      ...defaultThemeConfig,
-      ...initialConfig,
-      ...storedConfig,
+      ...defaultThemeConfig, // Start with defaults
+      ...initialConfig,      // Apply any initial overrides
+      ...storedConfig,       // Apply stored user preferences (highest priority)
     };
   });
 
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(false); // Track if current theme is dark for UI logic
 
+  // Effect to manage dark mode detection for custom themes
   useEffect(() => {
     const updateThemeMode = () => {
       if (config.mode === "custom") {
+        // For custom themes, detect system preference for dark/light adaptation
         const prefersDark = window.matchMedia(
           "(prefers-color-scheme: dark)"
         ).matches;
         setIsDark(prefersDark);
       } else {
+        // For light/dark themes, use explicit mode
         setIsDark(config.mode === "dark");
       }
     };
 
-    updateThemeMode();
+    updateThemeMode(); // Initial detection
 
+    // Listen for system theme changes (only relevant for custom theme mode)
     if (config.mode === "custom") {
       const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       mediaQuery.addEventListener("change", updateThemeMode);
@@ -296,21 +331,22 @@ export default function ThemeWrapper({
     }
   }, [config.mode]);
 
+  // Main effect that applies theme by injecting CSS custom properties
   useEffect(() => {
-    const root = document.documentElement;
+    const root = document.documentElement; // Access HTML root for CSS custom properties
 
-    // Apply colors based on theme mode
+    // Theme application logic based on current mode
     if (config.mode === "custom" && config.generatedColors) {
-      // Custom theme: apply all generated colors, backgrounds, and text colors
-      root.style.setProperty("--color-primary", config.primaryColor);
+      // Custom theme: Apply dynamically generated color palette
+      root.style.setProperty("--color-primary", config.primaryColor); // User's chosen primary
       root.style.setProperty(
         "--color-secondary",
-        config.generatedColors.secondary
+        config.generatedColors.secondary  // Generated complementary color
       );
-      root.style.setProperty("--color-success", config.generatedColors.success);
-      root.style.setProperty("--color-warning", config.generatedColors.warning);
-      root.style.setProperty("--color-error", config.generatedColors.error);
-      root.style.setProperty("--color-info", config.generatedColors.info);
+      root.style.setProperty("--color-success", config.generatedColors.success); // Generated green
+      root.style.setProperty("--color-warning", config.generatedColors.warning); // Generated orange  
+      root.style.setProperty("--color-error", config.generatedColors.error);     // Generated red
+      root.style.setProperty("--color-info", config.generatedColors.info);       // Generated blue
 
       // Apply custom backgrounds
       root.style.setProperty(
@@ -462,7 +498,7 @@ export default function ThemeWrapper({
     }
   };
 
-  const handleColorChange = (color: any) => {
+  const handleColorChange = (color: { toHexString: () => string }) => {
     const newPrimaryColor = color.toHexString();
     const generatedColors = generateColorPalette(newPrimaryColor);
     updateTheme({

@@ -1,44 +1,60 @@
+/**
+ * ALEXIKA AI Typography System - Comprehensive responsive typography component
+ * 
+ * Features:
+ * - Responsive scaling using CSS clamp() for all devices (320px to 8K displays)
+ * - Semantic HTML tag support for accessibility and SEO optimization
+ * - Complete color system integration with theme-aware CSS variables
+ * - Font weight, alignment, and spacing customization options
+ * - Special text effects: gradients, truncation, line height control
+ * - Convenience components for common use cases (Heading, Text, Paragraph)
+ * - Full compatibility with ALEXIKA AI Theme System
+ */
+
 import React, { ReactNode, CSSProperties } from 'react';
 
-// Typography variant types
+// Typography variants with responsive sizing using CSS clamp() for all device types (320px to 8K)
 export type TypographyVariant =
-  | 'display-xl'     // 72px - Hero headlines
-  | 'display-lg'     // 60px - Main headlines
-  | 'display-md'     // 48px - Section headlines
-  | 'display-sm'     // 36px - Sub-section headlines
-  | 'heading-xl'     // 30px - Large headings
-  | 'heading-lg'     // 24px - Medium headings
-  | 'heading-md'     // 20px - Small headings
-  | 'heading-sm'     // 18px - Tiny headings
-  | 'body-xl'        // 20px - Large body text
-  | 'body-lg'        // 18px - Medium body text
-  | 'body-md'        // 16px - Default body text
-  | 'body-sm'        // 14px - Small body text
-  | 'body-xs'        // 12px - Tiny body text
-  | 'label-xl'       // 16px - Large labels
-  | 'label-lg'       // 14px - Medium labels
-  | 'label-md'       // 12px - Default labels
-  | 'label-sm'       // 11px - Small labels
-  | 'caption'        // 12px - Captions
-  | 'overline';      // 10px - Overlines
+  | 'display-xl'     // 40-72px - Hero headlines for landing pages
+  | 'display-lg'     // 32-60px - Main headlines for sections
+  | 'display-md'     // 28-48px - Section headlines and features
+  | 'display-sm'     // 24-36px - Sub-section headlines
+  | 'heading-xl'     // 22-30px - Large headings (H1-H2)
+  | 'heading-lg'     // 20-24px - Medium headings (H3-H4)
+  | 'heading-md'     // 18-20px - Small headings (H5-H6)
+  | 'heading-sm'     // 16-18px - Tiny headings for cards/components
+  | 'body-xl'        // 18-20px - Large body text for emphasis
+  | 'body-lg'        // 16-18px - Medium body text for readability
+  | 'body-md'        // 14-16px - Default body text for content
+  | 'body-sm'        // 13-14px - Small body text for descriptions
+  | 'body-xs'        // 12-13px - Tiny body text for footnotes
+  | 'label-xl'       // 14-16px - Large labels for forms
+  | 'label-lg'       // 13-14px - Medium labels for UI elements
+  | 'label-md'       // 12-13px - Default labels for inputs
+  | 'label-sm'       // 11-12px - Small labels for compact UI
+  | 'caption'        // 11-12px - Captions for media/images
+  | 'overline';      // 10-11px - Overlines for categories
 
+// HTML semantic tags for proper accessibility and SEO
 export type TypographyTag =
-  | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-  | 'p' | 'span' | 'div' | 'label' | 'small'
-  | 'strong' | 'em' | 'mark' | 'code' | 'pre'
-  | 'blockquote' | 'cite' | 'time' | 'address';
+  | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' // Semantic headings
+  | 'p' | 'span' | 'div' | 'label' | 'small' // Text elements
+  | 'strong' | 'em' | 'mark' | 'code' | 'pre' // Emphasis elements
+  | 'blockquote' | 'cite' | 'time' | 'address'; // Content elements
 
+// Font weights from light to black for typography hierarchy
 export type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
 
+// Theme-aware color variants that adapt to light/dark/custom themes
 export type TextColor = 
-  | 'primary' 
-  | 'secondary' 
-  | 'tertiary' 
-  | 'success' 
-  | 'warning' 
-  | 'error' 
-  | 'info'
-  | 'inherit';
+  | 'primary'    // Main brand color from theme
+  | 'secondary'  // Secondary brand color
+  | 'tertiary'   // Tertiary text color for hierarchy
+  | 'success'    // Green for positive actions/states
+  | 'warning'    // Yellow/orange for warnings
+  | 'error'      // Red for errors/destructive actions
+  | 'info'       // Blue for informational content
+  | 'inherit';   // Inherit from parent element
 
 export interface TypographyProps {
   children: ReactNode;

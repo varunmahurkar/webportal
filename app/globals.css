@@ -156,3 +156,114 @@ body {
   font-size: 12px;
   color: var(--text-secondary);
 }
+
+/* Grid System */
+:root {
+  /* Grid gaps */
+  --grid-gap-xs: 8px;
+  --grid-gap-sm: 12px;
+  --grid-gap-md: 16px;
+  --grid-gap-lg: 24px;
+  --grid-gap-xl: 32px;
+  
+  /* Container max widths */
+  --container-sm: 576px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1200px;
+  --container-full: 100%;
+  
+  /* Default grid columns */
+  --grid-columns: var(--grid-columns-mobile);
+}
+
+/* Responsive grid columns */
+@media (max-width: 767px) {
+  :root {
+    --grid-columns: var(--grid-columns-mobile);
+  }
+  
+  .grid-item {
+    --item-span: var(--item-span-mobile);
+    --item-offset: var(--item-offset-mobile);
+    --item-order: var(--item-order-mobile);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root {
+    --grid-columns: var(--grid-columns-tablet);
+  }
+  
+  .grid-item {
+    --item-span: var(--item-span-tablet);
+    --item-offset: var(--item-offset-tablet);
+    --item-order: var(--item-order-tablet);
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --grid-columns: var(--grid-columns-desktop);
+  }
+  
+  .grid-item {
+    --item-span: var(--item-span-desktop);
+    --item-offset: var(--item-offset-desktop);
+    --item-order: var(--item-order-desktop);
+  }
+}
+
+/* Grid container */
+.grid-container {
+  width: 100%;
+}
+
+/* Grid item */
+.grid-item {
+  min-width: 0; /* Prevent overflow */
+}
+
+/* Container styles */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.container-sm { max-width: var(--container-sm); }
+.container-md { max-width: var(--container-md); }
+.container-lg { max-width: var(--container-lg); }
+.container-xl { max-width: var(--container-xl); }
+.container-full { max-width: var(--container-full); }
+
+/* Container padding */
+.container-padding-xs { padding: var(--grid-gap-xs); }
+.container-padding-sm { padding: var(--grid-gap-sm); }
+.container-padding-md { padding: var(--grid-gap-md); }
+.container-padding-lg { padding: var(--grid-gap-lg); }
+.container-padding-xl { padding: var(--grid-gap-xl); }
+
+/* Row and Column styles */
+.row, .column {
+  width: 100%;
+}
+
+/* Responsive container padding */
+@media (max-width: 767px) {
+  .container-padding-md { padding: var(--grid-gap-sm); }
+  .container-padding-lg { padding: var(--grid-gap-md); }
+  .container-padding-xl { padding: var(--grid-gap-lg); }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .container-padding-xs { padding: var(--grid-gap-sm); }
+  .container-padding-sm { padding: var(--grid-gap-md); }
+  .container-padding-md { padding: var(--grid-gap-lg); }
+}
+
+@media (min-width: 1024px) {
+  .container-padding-xs { padding: var(--grid-gap-md); }
+  .container-padding-sm { padding: var(--grid-gap-lg); }
+  .container-padding-md { padding: var(--grid-gap-xl); }
+}
