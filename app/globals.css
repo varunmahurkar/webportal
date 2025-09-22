@@ -1,29 +1,84 @@
 @import "tailwindcss";
 
+/* ALEXIKA AI Theme System - CSS-First Approach */
+:root {
+  /* Default theme variables using light-dark() function for system preference */
+  color-scheme: light dark;
+  
+  /* Semantic color tokens */
+  --color-primary: light-dark(#2c2c2c, #e5e5e5);
+  --color-secondary: light-dark(#6b6b6b, #a3a3a3);
+  --color-success: light-dark(#16a34a, #22c55e);
+  --color-warning: light-dark(#d97706, #f59e0b);
+  --color-error: light-dark(#dc2626, #ef4444);
+  --color-info: light-dark(#0ea5e9, #3b82f6);
+  
+  /* Background tokens */
+  --bg-primary: light-dark(#ffffff, #0a0a0a);
+  --bg-secondary: light-dark(#f8f7f4, #171717);
+  --bg-tertiary: light-dark(#f1f0eb, #262626);
+  
+  /* Text tokens */
+  --text-primary: light-dark(#1a1a1a, #f5f5f5);
+  --text-secondary: light-dark(#525252, #d4d4d4);
+  --text-tertiary: light-dark(#737373, #a3a3a3);
+  
+  /* Border tokens */
+  --border-color: light-dark(#e7e5e4, #404040);
+  --border-hover: light-dark(#d6d3d1, #525252);
+  
+  /* Shadow tokens */
+  --shadow-light: light-dark(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.3));
+  --shadow-medium: light-dark(rgba(0, 0, 0, 0.10), rgba(0, 0, 0, 0.5));
+  
+  /* Font family */
+  --font-family: var(--font-geist-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+}
+
+/* Legacy theme classes for backwards compatibility and forced themes */
 .light-theme {
-  --bg-primary: #fafbfc;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f1f3f4;
+  color-scheme: light;
+  --color-primary: #2c2c2c;
+  --color-secondary: #6b6b6b;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+  --color-info: #0ea5e9;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f7f4;
+  --bg-tertiary: #f1f0eb;
   --text-primary: #1a1a1a;
-  --text-secondary: #5f6368;
-  --text-tertiary: #80868b;
-  --border-color: #e8eaed;
-  --border-hover: #dadce0;
-  --shadow-light: rgba(0, 0, 0, 0.08);
-  --shadow-medium: rgba(0, 0, 0, 0.12);
+  --text-secondary: #525252;
+  --text-tertiary: #737373;
+  --border-color: #e7e5e4;
+  --border-hover: #d6d3d1;
+  --shadow-light: rgba(0, 0, 0, 0.05);
+  --shadow-medium: rgba(0, 0, 0, 0.10);
 }
 
 .dark-theme {
-  --bg-primary: #0d1117;
-  --bg-secondary: #161b22;
-  --bg-tertiary: #21262d;
-  --text-primary: #e6edf3;
-  --text-secondary: #7d8590;
-  --text-tertiary: #656d76;
-  --border-color: #30363d;
-  --border-hover: #484f58;
+  color-scheme: dark;
+  --color-primary: #e5e5e5;
+  --color-secondary: #a3a3a3;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #171717;
+  --bg-tertiary: #262626;
+  --text-primary: #f5f5f5;
+  --text-secondary: #d4d4d4;
+  --text-tertiary: #a3a3a3;
+  --border-color: #404040;
+  --border-hover: #525252;
   --shadow-light: rgba(0, 0, 0, 0.3);
-  --shadow-medium: rgba(0, 0, 0, 0.4);
+  --shadow-medium: rgba(0, 0, 0, 0.5);
+}
+
+/* Custom theme class - will be overridden by JS for custom colors */
+.custom-theme {
+  /* Custom theme variables will be injected via JavaScript */
 }
 
 body {
@@ -60,101 +115,42 @@ body {
               border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Theme Wrapper Styles */
-.theme-wrapper-header {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border-color);
-  background-color: var(--bg-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: var(--shadow-light);
-}
-
-.theme-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.theme-selector-button {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  padding: 8px 16px !important;
-  height: auto !important;
-  border-radius: 8px !important;
+/* Enhanced Theme Styles for Custom Color Blending */
+.ant-dropdown {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: var(--shadow-medium) !important;
   border: 1px solid var(--border-color) !important;
-  background-color: var(--bg-primary) !important;
-  color: var(--text-primary) !important;
-  box-shadow: var(--shadow-light) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.ant-dropdown-menu {
+  background-color: var(--bg-secondary) !important;
+  border-radius: 12px !important;
+  padding: 8px !important;
+}
+
+.ant-dropdown-menu-item {
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  margin: 2px 0 !important;
   transition: all 0.2s ease !important;
 }
 
-.theme-label {
-  font-weight: 500;
+.ant-dropdown-menu-item:hover {
+  background-color: var(--bg-tertiary) !important;
 }
 
-.dropdown-arrow {
-  font-size: 12px;
-  opacity: 0.7;
+/* Custom Color Picker Enhancements */
+.ant-color-picker-trigger {
+  border-radius: 8px !important;
+  border: 1px solid var(--border-color) !important;
+  transition: all 0.2s ease !important;
 }
 
-.color-picker-label {
-  font-size: 14px;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.theme-color-picker {
-  border-radius: 6px !important;
-}
-
-/* Theme Dropdown Items */
-.theme-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 4px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.theme-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  border: 2px solid;
-}
-
-.light-theme-icon {
-  background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
-  border-color: #e8eaed;
-  color: #1a1a1a;
-}
-
-.dark-theme-icon {
-  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-  border-color: #30363d;
-  color: #e6edf3;
-}
-
-.custom-theme-icon {
-  /* Background and border set inline via style prop for dynamic colors */
-}
-
-.theme-name {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.theme-description {
-  font-size: 12px;
-  color: var(--text-secondary);
+.ant-color-picker-trigger:hover {
+  border-color: var(--border-hover) !important;
+  transform: scale(1.05);
 }
 
 /* Grid System */

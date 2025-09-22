@@ -1,0 +1,54 @@
+/**
+ * ALEXIKA AI Search - Simple & Clean Page Styles
+ */
+
+.simpleContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 24px;
+  background: var(--bg-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Simple Header */
+.simpleHeader {
+  text-align: center;
+}
+
+.simpleHeader h1 {
+  margin-bottom: 12px;
+}
+
+/* Search Section */
+.searchSection {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  padding: 32px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .simpleContainer {
+    padding: 40px 16px;
+    gap: 24px;
+  }
+
+  .searchSection {
+    padding: 24px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .simpleContainer {
+    padding: 24px 12px;
+  }
+
+  .searchSection {
+    padding: 16px 12px;
+  }
+}
