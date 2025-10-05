@@ -1,8 +1,8 @@
-- always use next js latest, react optimized version, redux, typescript, ant design for components, supabase, tailwind css, modules css, and more as our tech stack for our project "ALEXIKA".
+- always use next js latest, react optimized version, typescript, ant design for components, tailwind css, modules css, and more as our tech stack for our project "ALEXIKA".
 - you must always use Typography, Grid, Icons, Color, and more added core functionalities in the project because I don't want inconsistency means where at some place we are use tags, somewhere ant design and somewhere components, I want consistency every where in my project and also make sure that we make our UI/UX with competitor with Perplexity AI, ChatGPT, Claude, Gemini, Grok etc...
 - we will be using lucide-react icons with rounded borders no sharp corner icons until I command and we also add it inside the /icons to view all the icons we are using in the project.
 - you must update my routes.md file which will be inside app folder and never create new routes.md file anywhere else in the project and it should contain with all the possible routes and their description of what that route has and do nothing else no extra content.
-- also use redux for state management wherever it required
+- keep state management simple and use React's built-in state management (useState, useContext) unless complex state management is absolutely required
 - always update my icons/page.tsx color/page.tsx file whenever we use new icon or any color we add in our project and update it
 - always remove unwanted code and make sure that the current codes must be optimized and scalable and generic for some cases and powerful
 - always add custom hooks in root hooks folder we never create hooks folder anywhere if asked to create a custom hook

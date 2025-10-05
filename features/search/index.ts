@@ -16,9 +16,9 @@
  * - Compact yet powerful interface
  */
 
-// AI Search Component - Main Export (Primary)
-export { default as AISearch } from './AISearch';
-export type { AISearchProps } from './AISearch';
+// Search Component - Main Export (Primary)
+export { default as Search, AISearch } from './AISearch';
+export type { SearchProps } from './AISearch';
 
 // Additional Components
 export { SearchResults } from './SearchResults';
@@ -60,111 +60,8 @@ export const EXPORT_FORMATS = {
 export type ExportFormat = typeof EXPORT_FORMATS[keyof typeof EXPORT_FORMATS];
 
 /**
- * Common search utility functions
+ * Search version for tracking
  */
-export const SearchUtils = {
-  /**
-   * Highlight text matches in search results
-   */
-  highlightMatches: (text: string, query: string): string => {
-    if (!query || !text) return text;
-    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return text.replace(regex, '<mark>$1</mark>');
-  },
-
-  /**
-   * Calculate search relevance score
-   */
-  calculateRelevance: (item: any, query: string): number => {
-    if (!query) return 0;
-    
-    const title = item.title.toLowerCase();
-    const description = (item.description || '').toLowerCase();
-    const searchQuery = query.toLowerCase();
-    
-    let score = 0;
-    
-    // Title exact match
-    if (title === searchQuery) score += 1.0;
-    // Title starts with query
-    else if (title.startsWith(searchQuery)) score += 0.8;
-    // Title contains query
-    else if (title.includes(searchQuery)) score += 0.6;
-    
-    // Description contains query
-    if (description.includes(searchQuery)) score += 0.3;
-    
-    // Category match
-    if (item.category?.toLowerCase().includes(searchQuery)) score += 0.2;
-    
-    // Tag matches
-    if (item.tags?.some((tag: string) => tag.toLowerCase().includes(searchQuery))) score += 0.1;
-    
-    return Math.min(score, 1.0);
-  },
-
-  /**
-   * Sort search results by relevance
-   */
-  sortByRelevance: (results: any[], query: string): any[] => {
-    return results
-      .map(item => ({
-        ...item,
-        score: item.score || SearchUtils.calculateRelevance(item, query)
-      }))
-      .sort((a, b) => (b.score || 0) - (a.score || 0));
-  },
-
-  /**
-   * Filter results by category
-   */
-  filterByCategory: (results: any[], category: string): any[] => {
-    if (!category || category === 'all') return results;
-    return results.filter(item => item.category === category);
-  },
-
-  /**
-   * Get unique categories from results
-   */
-  getCategories: (results: any[]): string[] => {
-    const categories = results
-      .map(item => item.category)
-      .filter((category): category is string => Boolean(category));
-    return Array.from(new Set(categories)).sort();
-  },
-
-  /**
-   * Generate search query suggestions
-   */
-  generateSuggestions: (history: any[], currentQuery: string = ''): string[] => {
-    const suggestions = history
-      .filter(item => 
-        item.query.toLowerCase().includes(currentQuery.toLowerCase()) &&
-        item.query !== currentQuery
-      )
-      .map(item => item.query)
-      .slice(0, 5);
-    
-    return Array.from(new Set(suggestions));
-  },
-
-  /**
-   * Format search statistics
-   */
-  formatStats: (total: number, query?: string, timeMs?: number): string => {
-    let stats = `${total.toLocaleString()} result${total !== 1 ? 's' : ''}`;
-    
-    if (query) {
-      stats += ` for "${query}"`;
-    }
-    
-    if (timeMs !== undefined) {
-      stats += ` (${timeMs.toFixed(0)}ms)`;
-    }
-    
-    return stats;
-  }
-};
 
 /**
  * Predefined search configurations for common use cases

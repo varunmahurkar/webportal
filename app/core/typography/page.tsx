@@ -13,12 +13,17 @@
  */
 
 import React, { useState } from 'react';
-import { Card, Space, Divider, Switch, Select, Row, Col, Button } from 'antd';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
 import Typography, { 
   Heading, 
   Text, 
   Paragraph, 
-  Label, 
+  Label as CustomLabel, 
   Caption, 
   Code,
   TypographyVariant,
@@ -28,8 +33,6 @@ import Typography, {
 import { Copy, Check } from '../icons';
 import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard';
 import styles from './page.module.css';
-
-const { Option } = Select;
 
 // Sample content for demonstrating typography variants
 const sampleHeading = 'ALEXIKA AI Typography System';
@@ -91,12 +94,12 @@ export default function TypographyShowcase() {
     
     return (
       <Button
-        size="small"
-        icon={isThisCodeCopied ? <Check size={14} /> : <Copy size={14} />}
+        size="sm"
+        variant={isThisCodeCopied ? "default" : "outline"}
         onClick={() => copyToClipboard(code)}
-        className={styles.copyButton}
-        type={isThisCodeCopied ? "primary" : "default"}
+        className="flex items-center gap-1"
       >
+        {isThisCodeCopied ? <Check size={14} /> : <Copy size={14} />}
         {isThisCodeCopied ? 'Copied!' : 'Copy Code'}
       </Button>
     );
@@ -107,448 +110,452 @@ export default function TypographyShowcase() {
     variants: TypographyVariant[],
     description: string
   ) => (
-    <Card 
-      title={<Heading level={3} color="primary">{title}</Heading>} 
-      className={styles.cardContainer}
-    >
-      <Paragraph color="secondary" className={styles.cardContent}>
-        {description}
-      </Paragraph>
-      <Space direction="vertical" size="large" className={styles.variantContainer}>
-        {variants.map((variant) => (
-          <section key={variant} className={styles.variantItem}>
-            <section className={styles.variantHeader}>
-              <Label color="tertiary" className={styles.variantLabel}>
-                {variant}
-              </Label>
-              {renderCopyButton(variant)}
-            </section>
-            <Typography
-              variant={variant}
-              color={selectedColor}
-              weight={selectedWeight}
-              align={selectedAlign}
-              transform={selectedTransform}
-              decoration={selectedDecoration}
-              spacing={selectedSpacing}
-              italic={showItalic}
-              gradient={showGradient}
-              truncate={showTruncate && variant.includes('body')}
-            >
-              {variant.includes('display') || variant.includes('heading') 
-                ? sampleHeading 
-                : variant.includes('overline') 
-                  ? 'Category Label'
-                  : showTruncate ? sampleLongText : sampleText
-              }
-            </Typography>
-          </section>
-        ))}
-      </Space>
+    <Card className={styles.cardContainer}>
+      <CardHeader>
+        <CardTitle>
+          <Heading level={3} color="primary">{title}</Heading>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Paragraph color="secondary" className="mb-6">
+          {description}
+        </Paragraph>
+        <div className="space-y-6">
+          {variants.map((variant) => (
+            <div key={variant} className="space-y-2">
+              <div className="flex items-center justify-between">
+                <CustomLabel color="tertiary" className="text-sm font-medium">
+                  {variant}
+                </CustomLabel>
+                {renderCopyButton(variant)}
+              </div>
+              <Typography
+                variant={variant}
+                color={selectedColor}
+                weight={selectedWeight}
+                align={selectedAlign}
+                transform={selectedTransform}
+                decoration={selectedDecoration}
+                spacing={selectedSpacing}
+                italic={showItalic}
+                gradient={showGradient}
+                truncate={showTruncate && variant.includes('body')}
+              >
+                {variant.includes('display') || variant.includes('heading') 
+                  ? sampleHeading 
+                  : variant.includes('overline') 
+                    ? 'Category Label'
+                    : showTruncate ? sampleLongText : sampleText
+                }
+              </Typography>
+            </div>
+          ))}
+        </div>
+      </CardContent>
     </Card>
   );
 
   const renderConvenienceComponents = () => (
-    <Card 
-      title={<Heading level={3} color="primary">Convenience Components</Heading>} 
-      className={styles.cardContainer}
-    >
-      <Paragraph color="secondary" className={styles.cardContent}>
-        Pre-configured components for common use cases with semantic HTML tags.
-      </Paragraph>
-      <Space direction="vertical" size="large" className={styles.variantContainer}>
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Heading Component (H1-H6)</Label>
-          <Space direction="vertical" className={styles.convenienceSection}>
-            {[1, 2, 3, 4, 5, 6].map(level => (
-              <Heading key={level} level={level as 1 | 2 | 3 | 4 | 5 | 6} color={selectedColor}>
-                Heading Level {level}
-              </Heading>
-            ))}
-          </Space>
-        </section>
-        
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Text Component (Span)</Label>
-          <section className={styles.convenienceSection}>
-            <Text variant="body-lg" color={selectedColor}>
-              Inline text component using span tag.
-            </Text>
-          </section>
-        </section>
-        
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Paragraph Component</Label>
-          <Paragraph variant="body-md" color={selectedColor} className={styles.convenienceSection}>
-            {sampleText}
-          </Paragraph>
-        </section>
-        
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Label Component</Label>
-          <section className={styles.convenienceSection}>
-            <Label color={selectedColor}>Form Label</Label>
-          </section>
-        </section>
-        
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Caption Component</Label>
-          <section className={styles.convenienceSection}>
-            <Caption color={selectedColor}>Image caption or small descriptive text</Caption>
-          </section>
-        </section>
-        
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Code Component</Label>
-          <section className={styles.convenienceSection}>
-            <Code variant="body-sm" color={selectedColor} className={styles.codeBlock}>
-              {sampleCode}
-            </Code>
-          </section>
-        </section>
-      </Space>
+    <Card className={styles.cardContainer}>
+      <CardHeader>
+        <CardTitle>
+          <Heading level={3} color="primary">Convenience Components</Heading>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Paragraph color="secondary" className="mb-6">
+          Pre-configured components for common use cases with semantic HTML tags.
+        </Paragraph>
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Heading Component (H1-H6)</CustomLabel>
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5, 6].map(level => (
+                <Heading key={level} level={level as 1 | 2 | 3 | 4 | 5 | 6} color={selectedColor}>
+                  Heading Level {level}
+                </Heading>
+              ))}
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Text Component (Span)</CustomLabel>
+            <div>
+              <Text variant="body-lg" color={selectedColor}>
+                Inline text component using span tag.
+              </Text>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Paragraph Component</CustomLabel>
+            <Paragraph variant="body-md" color={selectedColor}>
+              {sampleText}
+            </Paragraph>
+          </div>
+          
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Label Component</CustomLabel>
+            <div>
+              <CustomLabel color={selectedColor}>Form Label</CustomLabel>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Caption Component</CustomLabel>
+            <div>
+              <Caption color={selectedColor}>Image caption or small descriptive text</Caption>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Code Component</CustomLabel>
+            <div>
+              <Code variant="body-sm" color={selectedColor} className="bg-muted p-2 rounded">
+                {sampleCode}
+              </Code>
+            </div>
+          </div>
+        </div>
+      </CardContent>
     </Card>
   );
 
   const renderColorShowcase = () => (
-    <Card 
-      title={<Heading level={3} color="primary">Color System</Heading>} 
-      className={styles.cardContainer}
-    >
-      <Paragraph color="secondary" className={styles.cardContent}>
-        Theme-aware color system that adapts to light, dark, and custom themes.
-      </Paragraph>
-      <Row gutter={[16, 16]}>
-        {colorOptions.map((color) => (
-          <Col key={color} xs={24} sm={12} md={8} lg={6}>
-            <section className={styles.colorGrid}>
-              <Label color="tertiary">{color}</Label>
-              <Typography
-                variant="heading-sm"
-                color={color}
-                className={styles.colorSample}
-              >
-                Sample Text
-              </Typography>
-              <Typography
-                variant="body-sm"
-                color={color}
-                className={styles.colorDescription}
-              >
-                Body text in {color}
-              </Typography>
-            </section>
-          </Col>
-        ))}
-      </Row>
+    <Card className={styles.cardContainer}>
+      <CardHeader>
+        <CardTitle>
+          <Heading level={3} color="primary">Color System</Heading>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Paragraph color="secondary" className="mb-6">
+          Theme-aware color system that adapts to light, dark, and custom themes.
+        </Paragraph>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {colorOptions.map((color) => (
+            <div key={color} className="space-y-2">
+              <CustomLabel color="tertiary">{color}</CustomLabel>
+              <div className="space-y-1">
+                <Typography
+                  variant="heading-sm"
+                  color={color}
+                >
+                  Sample Text
+                </Typography>
+                <Typography
+                  variant="body-sm"
+                  color={color}
+                >
+                  Body text in {color}
+                </Typography>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
     </Card>
   );
 
   const renderSpecialEffects = () => (
-    <Card 
-      title={<Heading level={3} color="primary">Special Effects & Features</Heading>} 
-      className={styles.cardContainer}
-    >
-      <Paragraph color="secondary" className={styles.cardContent}>
-        Advanced typography features including gradients, truncation, and text styling options.
-      </Paragraph>
-      <Space direction="vertical" size="large" className={styles.variantContainer}>
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Gradient Text Effect</Label>
-          <Typography
-            variant="display-md"
-            gradient={true}
-            weight={700}
-            className={styles.convenienceSection}
-          >
-            Gradient Text Effect
-          </Typography>
-        </section>
-        
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Text Truncation</Label>
-          <section className={styles.truncationDemo}>
+    <Card className={styles.cardContainer}>
+      <CardHeader>
+        <CardTitle>
+          <Heading level={3} color="primary">Special Effects & Features</Heading>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Paragraph color="secondary" className="mb-6">
+          Advanced typography features including gradients, truncation, and text styling options.
+        </Paragraph>
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Gradient Text Effect</CustomLabel>
             <Typography
-              variant="body-md"
-              truncate={true}
-              color="primary"
+              variant="display-md"
+              gradient={true}
+              weight={700}
             >
-              {sampleLongText}
+              Gradient Text Effect
             </Typography>
-          </section>
-        </section>
-        
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Text Decorations</Label>
-          <Space direction="vertical" className={styles.convenienceSection}>
-            <Typography variant="body-md" decoration="underline">Underlined text</Typography>
-            <Typography variant="body-md" decoration="line-through">Strikethrough text</Typography>
-            <Typography variant="body-md" decoration="overline">Overlined text</Typography>
-          </Space>
-        </section>
-        
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Text Transformations</Label>
-          <Space direction="vertical" className={styles.convenienceSection}>
-            <Typography variant="body-md" transform="uppercase">uppercase text</Typography>
-            <Typography variant="body-md" transform="lowercase">LOWERCASE TEXT</Typography>
-            <Typography variant="body-md" transform="capitalize">capitalize each word</Typography>
-          </Space>
-        </section>
-        
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Letter Spacing</Label>
-          <Space direction="vertical" className={styles.convenienceSection}>
-            <Typography variant="body-md" spacing="tight">Tight letter spacing</Typography>
-            <Typography variant="body-md" spacing="normal">Normal letter spacing</Typography>
-            <Typography variant="body-md" spacing="relaxed">Relaxed letter spacing</Typography>
-            <Typography variant="body-md" spacing="loose">Loose letter spacing</Typography>
-          </Space>
-        </section>
-        
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Font Weights</Label>
-          <Space direction="vertical" className={styles.convenienceSection}>
-            {[100, 300, 400, 500, 600, 700, 800, 900].map(weight => (
-              <Typography key={weight} variant="body-md" weight={weight as FontWeight}>
-                Font Weight {weight}
+          </div>
+          
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Text Truncation</CustomLabel>
+            <div className="max-w-md">
+              <Typography
+                variant="body-md"
+                truncate={true}
+                color="primary"
+              >
+                {sampleLongText}
               </Typography>
-            ))}
-          </Space>
-        </section>
-        
-        <section className={styles.variantItem}>
-          <Label color="tertiary">Text Alignment</Label>
-          <Space direction="vertical" className={styles.alignmentDemo}>
-            <Typography variant="body-md" align="left" className={styles.variantContainer}>Left aligned text</Typography>
-            <Typography variant="body-md" align="center" className={styles.variantContainer}>Center aligned text</Typography>
-            <Typography variant="body-md" align="right" className={styles.variantContainer}>Right aligned text</Typography>
-            <Typography variant="body-md" align="justify" className={styles.variantContainer}>
-              Justified text that spreads across the full width of the container, creating even spacing between words to align both left and right edges.
-            </Typography>
-          </Space>
-        </section>
-      </Space>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Text Decorations</CustomLabel>
+            <div className="space-y-2">
+              <Typography variant="body-md" decoration="underline">Underlined text</Typography>
+              <Typography variant="body-md" decoration="line-through">Strikethrough text</Typography>
+              <Typography variant="body-md" decoration="overline">Overlined text</Typography>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Text Transformations</CustomLabel>
+            <div className="space-y-2">
+              <Typography variant="body-md" transform="uppercase">uppercase text</Typography>
+              <Typography variant="body-md" transform="lowercase">LOWERCASE TEXT</Typography>
+              <Typography variant="body-md" transform="capitalize">capitalize each word</Typography>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Letter Spacing</CustomLabel>
+            <div className="space-y-2">
+              <Typography variant="body-md" spacing="tight">Tight letter spacing</Typography>
+              <Typography variant="body-md" spacing="normal">Normal letter spacing</Typography>
+              <Typography variant="body-md" spacing="relaxed">Relaxed letter spacing</Typography>
+              <Typography variant="body-md" spacing="loose">Loose letter spacing</Typography>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Font Weights</CustomLabel>
+            <div className="space-y-2">
+              {[100, 300, 400, 500, 600, 700, 800, 900].map(weight => (
+                <Typography key={weight} variant="body-md" weight={weight as FontWeight}>
+                  Font Weight {weight}
+                </Typography>
+              ))}
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <CustomLabel color="tertiary">Text Alignment</CustomLabel>
+            <div className="space-y-3">
+              <Typography variant="body-md" align="left" className="w-full">Left aligned text</Typography>
+              <Typography variant="body-md" align="center" className="w-full">Center aligned text</Typography>
+              <Typography variant="body-md" align="right" className="w-full">Right aligned text</Typography>
+              <Typography variant="body-md" align="justify" className="w-full">
+                Justified text that spreads across the full width of the container, creating even spacing between words to align both left and right edges.
+              </Typography>
+            </div>
+          </div>
+        </div>
+      </CardContent>
     </Card>
   );
 
   const renderInteractiveControls = () => (
-    <Card 
-      title={<Heading level={2} color="primary">Interactive Controls & Live Preview</Heading>} 
-      className={styles.controlsCard}
-    >
-      <Paragraph color="secondary" className={styles.cardContent}>
-        Adjust these settings to see real-time changes across all typography examples
-      </Paragraph>
-      
-      {/* Controls Grid - Full Width */}
-      <Row gutter={[20, 20]} className={styles.controlsGrid}>
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Label>Variant</Label>
-          <Select
-            value={selectedVariant}
-            onChange={setSelectedVariant}
-            style={{ width: '100%' }}
-            className={styles.controlRow}
-          >
-            {[...displayVariants, ...headingVariants, ...bodyVariants, ...labelVariants, ...specialVariants].map(variant => (
-              <Option key={variant} value={variant}>{variant}</Option>
-            ))}
-          </Select>
-        </Col>
+    <Card className="mb-8">
+      <CardHeader>
+        <CardTitle>
+          <Heading level={2} color="primary">Interactive Controls & Live Preview</Heading>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Paragraph color="secondary" className="mb-6">
+          Adjust these settings to see real-time changes across all typography examples
+        </Paragraph>
         
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Label>Color</Label>
-          <Select
-            value={selectedColor}
-            onChange={setSelectedColor}
-            style={{ width: '100%' }}
-            className={styles.controlRow}
-          >
-            {colorOptions.map(color => (
-              <Option key={color} value={color}>{color}</Option>
-            ))}
-          </Select>
-        </Col>
-        
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Label>Font Weight</Label>
-          <Select
-            value={selectedWeight}
-            onChange={setSelectedWeight}
-            style={{ width: '100%' }}
-            className={styles.controlRow}
-          >
-            {fontWeights.map(weight => (
-              <Option key={weight} value={weight}>{weight}</Option>
-            ))}
-          </Select>
-        </Col>
-        
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Label>Text Align</Label>
-          <Select
-            value={selectedAlign}
-            onChange={setSelectedAlign}
-            style={{ width: '100%' }}
-            className={styles.controlRow}
-          >
-            <Option value="left">Left</Option>
-            <Option value="center">Center</Option>
-            <Option value="right">Right</Option>
-            <Option value="justify">Justify</Option>
-          </Select>
-        </Col>
-        
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Label>Transform</Label>
-          <Select
-            value={selectedTransform}
-            onChange={setSelectedTransform}
-            style={{ width: '100%' }}
-            className={styles.controlRow}
-          >
-            <Option value="none">None</Option>
-            <Option value="uppercase">Uppercase</Option>
-            <Option value="lowercase">Lowercase</Option>
-            <Option value="capitalize">Capitalize</Option>
-          </Select>
-        </Col>
-        
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Label>Decoration</Label>
-          <Select
-            value={selectedDecoration}
-            onChange={setSelectedDecoration}
-            style={{ width: '100%' }}
-            className={styles.controlRow}
-          >
-            <Option value="none">None</Option>
-            <Option value="underline">Underline</Option>
-            <Option value="line-through">Strike-through</Option>
-            <Option value="overline">Overline</Option>
-          </Select>
-        </Col>
-        
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Label>Letter Spacing</Label>
-          <Select
-            value={selectedSpacing}
-            onChange={setSelectedSpacing}
-            style={{ width: '100%' }}
-            className={styles.controlRow}
-          >
-            <Option value="tight">Tight</Option>
-            <Option value="normal">Normal</Option>
-            <Option value="relaxed">Relaxed</Option>
-            <Option value="loose">Loose</Option>
-          </Select>
-        </Col>
-        
-        <Col xs={24} sm={12} md={8}>
-          <section className={styles.switchContainer}>
-            <Switch checked={showGradient} onChange={setShowGradient} size="small" />
-            <Label>Gradient</Label>
-          </section>
-        </Col>
-        
-        <Col xs={24} sm={12} md={8}>
-          <section className={styles.switchContainer}>
-            <Switch checked={showItalic} onChange={setShowItalic} size="small" />
-            <Label>Italic</Label>
-          </section>
-        </Col>
-        
-        <Col xs={24} sm={12} md={8}>
-          <section className={styles.switchContainer}>
-            <Switch checked={showTruncate} onChange={setShowTruncate} size="small" />
-            <Label>Truncate</Label>
-          </section>
-        </Col>
-      </Row>
-      
-      <Divider />
-      
-      {/* Live Preview and Copy Section */}
-      <section className={styles.previewSection}>
-        <Heading level={4} color="primary" className={styles.sectionTitle}>
-          Live Preview & Copy Code
-        </Heading>
-        
-        <section className={styles.previewContainer}>
-          <section className={styles.previewOutput}>
-            <Typography
-              variant={selectedVariant}
-              color={selectedColor}
-              weight={selectedWeight}
-              align={selectedAlign}
-              transform={selectedTransform}
-              decoration={selectedDecoration}
-              spacing={selectedSpacing}
-              italic={showItalic}
-              gradient={showGradient}
-              truncate={showTruncate}
-            >
-              {selectedVariant.includes('display') || selectedVariant.includes('heading') 
-                ? 'Sample Heading Text' 
-                : selectedVariant.includes('overline') 
-                  ? 'CATEGORY LABEL'
-                  : showTruncate 
-                    ? 'This is a long text that will be truncated to show how the truncate property works with different text lengths.'
-                    : 'Sample text content to demonstrate typography styling'
-              }
-            </Typography>
-          </section>
+        {/* Controls Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+          <div className="space-y-2">
+            <Label>Variant</Label>
+            <Select value={selectedVariant} onValueChange={(value) => setSelectedVariant(value as TypographyVariant)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[...displayVariants, ...headingVariants, ...bodyVariants, ...labelVariants, ...specialVariants].map(variant => (
+                  <SelectItem key={variant} value={variant}>{variant}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           
-          <section className={styles.copySection}>
-            <section className={styles.copyHeader}>
-              <Label color="secondary">Component Usage:</Label>
-              {renderCopyButton(selectedVariant)}
-            </section>
-            
-            <Code className={styles.codePreview}>
-              {generateComponentCode()}
-            </Code>
-          </section>
-        </section>
+          <div className="space-y-2">
+            <Label>Color</Label>
+            <Select value={selectedColor} onValueChange={(value) => setSelectedColor(value as TextColor)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {colorOptions.map(color => (
+                  <SelectItem key={color} value={color}>{color}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Font Weight</Label>
+            <Select value={selectedWeight.toString()} onValueChange={(value) => setSelectedWeight(parseInt(value) as FontWeight)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {fontWeights.map(weight => (
+                  <SelectItem key={weight} value={weight.toString()}>{weight}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Text Align</Label>
+            <Select value={selectedAlign} onValueChange={(value) => setSelectedAlign(value as 'left' | 'center' | 'right' | 'justify')}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="left">Left</SelectItem>
+                <SelectItem value="center">Center</SelectItem>
+                <SelectItem value="right">Right</SelectItem>
+                <SelectItem value="justify">Justify</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Transform</Label>
+            <Select value={selectedTransform} onValueChange={(value) => setSelectedTransform(value as 'none' | 'uppercase' | 'lowercase' | 'capitalize')}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="uppercase">Uppercase</SelectItem>
+                <SelectItem value="lowercase">Lowercase</SelectItem>
+                <SelectItem value="capitalize">Capitalize</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Decoration</Label>
+            <Select value={selectedDecoration} onValueChange={(value) => setSelectedDecoration(value as 'none' | 'underline' | 'line-through' | 'overline')}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="underline">Underline</SelectItem>
+                <SelectItem value="line-through">Strike-through</SelectItem>
+                <SelectItem value="overline">Overline</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Letter Spacing</Label>
+            <Select value={selectedSpacing} onValueChange={(value) => setSelectedSpacing(value as 'tight' | 'normal' | 'relaxed' | 'loose')}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tight">Tight</SelectItem>
+                <SelectItem value="normal">Normal</SelectItem>
+                <SelectItem value="relaxed">Relaxed</SelectItem>
+                <SelectItem value="loose">Loose</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Switch checked={showGradient} onCheckedChange={setShowGradient} />
+            <Label>Gradient</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Switch checked={showItalic} onCheckedChange={setShowItalic} />
+            <Label>Italic</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Switch checked={showTruncate} onCheckedChange={setShowTruncate} />
+            <Label>Truncate</Label>
+          </div>
+        </div>
         
-        {/* Convenience Component Examples */}
-        <section className={styles.convenienceExamples}>
-          <Label color="secondary">Convenience Components:</Label>
-          <Row gutter={[12, 12]} className={styles.convenienceGrid}>
-            <Col xs={24} sm={12} md={8}>
-              <section className={styles.convenienceItem}>
-                <Label color="tertiary">Heading</Label>
-                {renderCopyButton('heading-md', 'Heading')}
-              </section>
-            </Col>
-            <Col xs={24} sm={12} md={8}>
-              <section className={styles.convenienceItem}>
-                <Label color="tertiary">Text</Label>
-                {renderCopyButton('body-md', 'Text')}
-              </section>
-            </Col>
-            <Col xs={24} sm={12} md={8}>
-              <section className={styles.convenienceItem}>
-                <Label color="tertiary">Paragraph</Label>
-                {renderCopyButton('body-md', 'Paragraph')}
-              </section>
-            </Col>
-          </Row>
-        </section>
-      </section>
+        <Separator className="my-6" />
+        
+        {/* Live Preview and Copy Section */}
+        <div className="space-y-4">
+          <Heading level={4} color="primary">
+            Live Preview & Copy Code
+          </Heading>
+          
+          <div className="space-y-4">
+            <div className="p-4 border rounded-lg">
+              <Typography
+                variant={selectedVariant}
+                color={selectedColor}
+                weight={selectedWeight}
+                align={selectedAlign}
+                transform={selectedTransform}
+                decoration={selectedDecoration}
+                spacing={selectedSpacing}
+                italic={showItalic}
+                gradient={showGradient}
+                truncate={showTruncate}
+              >
+                {selectedVariant.includes('display') || selectedVariant.includes('heading') 
+                  ? 'Sample Heading Text' 
+                  : selectedVariant.includes('overline') 
+                    ? 'CATEGORY LABEL'
+                    : showTruncate 
+                      ? 'This is a long text that will be truncated to show how the truncate property works with different text lengths.'
+                      : 'Sample text content to demonstrate typography styling'
+                }
+              </Typography>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <CustomLabel color="secondary">Component Usage:</CustomLabel>
+                {renderCopyButton(selectedVariant)}
+              </div>
+              
+              <Code className="block p-3 bg-muted rounded">
+                {generateComponentCode()}
+              </Code>
+            </div>
+            
+            {/* Convenience Component Examples */}
+            <div className="space-y-3">
+              <CustomLabel color="secondary">Convenience Components:</CustomLabel>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="flex items-center justify-between p-2 bg-muted rounded">
+                  <CustomLabel color="tertiary">Heading</CustomLabel>
+                  {renderCopyButton('heading-md', 'Heading')}
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted rounded">
+                  <CustomLabel color="tertiary">Text</CustomLabel>
+                  {renderCopyButton('body-md', 'Text')}
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted rounded">
+                  <CustomLabel color="tertiary">Paragraph</CustomLabel>
+                  {renderCopyButton('body-md', 'Paragraph')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
     </Card>
   );
 
   return (
-    <main className={styles.typographyShowcaseContainer}>
+    <main className="container max-w-7xl mx-auto px-4 py-8 space-y-8">
       {/* Page Header */}
-      <header className={styles.pageHeader}>
+      <header className="text-center space-y-4">
         <Typography 
           variant="display-xl" 
           gradient={true} 
           weight={800}
-          className={styles.pageTitle}
         >
           ALEXIKA AI Typography
         </Typography>
@@ -558,14 +565,12 @@ export default function TypographyShowcase() {
       </header>
       
       {/* Interactive Controls - Full Width at Top */}
-      <section className={styles.controlsSection}>
-        {renderInteractiveControls()}
-      </section>
+      {renderInteractiveControls()}
       
       {/* Main Content - Two Column Grid */}
-      <Row gutter={[32, 32]} className={styles.contentGrid}>
+      <div className="grid lg:grid-cols-2 gap-8">
         {/* Left Column */}
-        <Col xs={24} lg={12}>
+        <div className="space-y-8">
           {/* Display Variants */}
           {renderVariantSection(
             'Display Variants',
@@ -589,10 +594,10 @@ export default function TypographyShowcase() {
           
           {/* Color System */}
           {renderColorShowcase()}
-        </Col>
+        </div>
         
         {/* Right Column */}
-        <Col xs={24} lg={12}>
+        <div className="space-y-8">
           {/* Heading Variants */}
           {renderVariantSection(
             'Heading Variants',
@@ -612,8 +617,8 @@ export default function TypographyShowcase() {
           
           {/* Special Effects */}
           {renderSpecialEffects()}
-        </Col>
-      </Row>
+        </div>
+      </div>
     </main>
   );
 }

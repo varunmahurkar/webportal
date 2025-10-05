@@ -1,1 +1,0 @@
-This folder will contain all the root components used in the entire project. And try to add all the component names and uses.

@@ -326,341 +326,208 @@ All text scales smoothly using CSS `clamp()` functions for optimal readability a
 
 ## Grid System
 
-Auto-responsive grid layout system that adapts to ANY device viewport automatically.
+Simple and optimized grid layout system for modern web applications.
 
 ### Import Options
 
 ```tsx
 // Default import
-import Grid from "./core/Grid";
+import GridContainer from "./core/Grid";
 
-// Named imports
-import Grid, { 
-  GridItem, 
-  Container, 
-  Row, 
-  Column,
-  GridContainer  // Edge-to-edge grid
+// Named imports  
+import {
+  GridContainer,
+  GridRow,
+  GridColumn,
+  FlexRow,
+  FlexColumn
 } from "./core/Grid";
 
-// Viewport hook
-import { useViewport } from "../hooks/useViewport";
+// Backward compatibility aliases
+import { Grid, GridItem, Container, Row, Column } from "./core/Grid";
 ```
 
-### Auto-Detection System
+### Grid Components
 
-**No manual breakpoints needed!** The system automatically detects device type and optimizes:
+The system provides five main components for flexible layouts:
 
-- **Flip Phones** (≤320px): 2 columns, xs gap
-- **Mobile** (≤768px): 4 columns, sm gap  
-- **Tablet** (≤1024px): 8 columns, md gap
-- **Laptop** (≤1440px): 12 columns, lg gap
-- **Desktop** (≤1920px): 12 columns, lg gap
-- **TV/Ultra-wide** (>1920px): 16 columns, xl gap
-
-### Grid Containers
-
-#### Standard Grid (with container padding)
+#### 1. GridContainer - Main layout wrapper
 ```tsx
-<Container padding={true}>
-  <Grid gap="auto" align="stretch">
-    <GridItem span={0.5}>Half width</GridItem>
-    <GridItem span={0.5}>Half width</GridItem>
-  </Grid>
-</Container>
-```
-
-#### Edge-to-Edge Grid (no screen padding, just gutters)
-```tsx
-<GridContainer gap="auto">
-  <GridItem span={1}>Full width - touches edges</GridItem>
-  <GridItem span={0.5}>Half width with gutters</GridItem>
-  <GridItem span={0.5}>Half width with gutters</GridItem>
+<GridContainer maxWidth="large" padding={true}>
+  {children}
 </GridContainer>
 ```
 
 **Props:**
-- `gap`: `'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'auto'` (auto uses device-optimized gap)
-- `align`: `'start' | 'center' | 'end' | 'stretch'`
-- `justify`: `'start' | 'center' | 'end' | 'between' | 'around' | 'evenly'`
+- `maxWidth`: `'small' | 'medium' | 'large' | 'full'` - Container width limits
+- `padding`: `boolean` - Whether to add internal padding
 
-### Grid Items
-
+#### 2. GridRow - Horizontal CSS Grid layout
 ```tsx
-// Fraction-based spans (automatic)
-<GridItem span={0.5}>50% of available columns</GridItem>
-<GridItem span={0.33}>33% of available columns</GridItem>
-<GridItem span={1}>100% of available columns</GridItem>
-
-// Device-specific overrides
-<GridItem 
-  span={0.25}      // Default: 25%
-  mobile={1}       // 100% on mobile
-  tablet={0.5}     // 50% on tablet  
-  desktop={0.25}   // 25% on desktop
-  tv={0.2}         // 20% on TV
->
-  Smart responsive content
-</GridItem>
+<GridRow columns={12} gap={1}>
+  <GridColumn span={6}>Half width</GridColumn>
+  <GridColumn span={6}>Half width</GridColumn>
+</GridRow>
 ```
 
 **Props:**
-- `span`: Fraction of columns (0.5 = 50%, 0.33 = 33%, 1 = 100%)
-- `mobile`, `tablet`, `laptop`, `desktop`, `tv`: Device-specific overrides
-- `align`: Individual item alignment
+- `columns`: `number` - Number of grid columns (default: 12)
+- `gap`: `number` - Gap between items in rem (default: 1)
 
-### Common Layouts
-
-#### Full Width
+#### 3. GridColumn - Individual grid items
 ```tsx
-<GridItem span={{ mobile: 4, tablet: 8, desktop: 12 }}>
-  Full width content
-</GridItem>
-```
-
-#### Two Column
-```tsx
-<GridItem span={{ mobile: 4, tablet: 4, desktop: 6 }}>
-  Left column
-</GridItem>
-<GridItem span={{ mobile: 4, tablet: 4, desktop: 6 }}>
-  Right column
-</GridItem>
-```
-
-#### Three Column (Desktop only)
-```tsx
-<GridItem span={{ mobile: 4, tablet: 8, desktop: 4 }}>
-  Column 1
-</GridItem>
-<GridItem span={{ mobile: 4, tablet: 4, desktop: 4 }}>
-  Column 2
-</GridItem>
-<GridItem span={{ mobile: 4, tablet: 4, desktop: 4 }}>
-  Column 3
-</GridItem>
-```
-
-#### Sidebar Layout
-```tsx
-<GridItem span={{ mobile: 4, tablet: 6, desktop: 8 }}>
-  Main content
-</GridItem>
-<GridItem span={{ mobile: 4, tablet: 2, desktop: 4 }}>
-  Sidebar
-</GridItem>
-```
-
-### Container Component
-
-```tsx
-// Standard container with padding
-<Container padding={true}>
-  Content with responsive padding
-</Container>
-
-// Edge-to-edge container (no padding)
-<Container padding={false}>
-  Content touches screen edges
-</Container>
+<GridColumn span={4} offset={2}>
+  Content spanning 4 columns with 2 column offset
+</GridColumn>
 ```
 
 **Props:**
-- `padding`: `boolean` - Whether to add responsive padding or not
+- `span`: `number` - How many columns to span (1-12)
+- `offset`: `number` - How many columns to offset from left
 
-### Row & Column Components
-
-#### Row (Horizontal Layout)
+#### 4. FlexRow - Horizontal Flexbox layout
 ```tsx
-<Row 
-  gap="md" 
-  align="center" 
-  justify="between" 
-  wrap={true}
->
+<FlexRow gap={1} align="center" justify="between" wrap={true}>
   <div>Item 1</div>
   <div>Item 2</div>
   <div>Item 3</div>
-</Row>
+</FlexRow>
 ```
 
-#### Column (Vertical Layout)
+**Props:**
+- `gap`: `number` - Gap between items in rem
+- `align`: `'start' | 'center' | 'end' | 'stretch'` - Vertical alignment
+- `justify`: `'start' | 'center' | 'end' | 'between' | 'around'` - Horizontal alignment
+- `wrap`: `boolean` - Allow items to wrap to next line
+
+#### 5. FlexColumn - Vertical Flexbox layout
 ```tsx
-<Column 
-  gap="lg" 
-  align="center" 
-  justify="start"
->
+<FlexColumn gap={2} align="center">
   <div>Item 1</div>
   <div>Item 2</div>
   <div>Item 3</div>
-</Column>
+</FlexColumn>
+```
+
+**Props:**
+- `gap`: `number` - Gap between items in rem
+- `align`: `'start' | 'center' | 'end' | 'stretch'` - Horizontal alignment
+
+### Common Layout Patterns
+
+#### Two Column Layout
+```tsx
+<GridContainer maxWidth="large" padding={true}>
+  <GridRow columns={12} gap={1}>
+    <GridColumn span={8}>Main content</GridColumn>
+    <GridColumn span={4}>Sidebar</GridColumn>
+  </GridRow>
+</GridContainer>
+```
+
+#### Three Column Layout
+```tsx
+<GridRow columns={12} gap={1}>
+  <GridColumn span={4}>Column 1</GridColumn>
+  <GridColumn span={4}>Column 2</GridColumn>
+  <GridColumn span={4}>Column 3</GridColumn>
+</GridRow>
+```
+
+#### Centered Content
+```tsx
+<FlexRow justify="center" align="center">
+  <div>Centered content</div>
+</FlexRow>
 ```
 
 ### Complete Example
 
 ```tsx
-import Grid, { GridItem, Container, Row, Column } from "./core/Grid";
+import { 
+  GridContainer, 
+  GridRow, 
+  GridColumn, 
+  FlexRow, 
+  FlexColumn 
+} from "./core/Grid";
 import Typography from "./core/Typography";
 
 function ResponsivePage() {
   return (
-    <Container maxWidth="xl" padding="lg">
-      {/* Hero Section */}
-      <Row justify="center" gap="lg">
-        <Column align="center" gap="md">
-          <Typography variant="display-xl">Page Title</Typography>
-          <Typography variant="body-lg" color="secondary">
-            Page description
-          </Typography>
-        </Column>
-      </Row>
+    <GridContainer maxWidth="large" padding={true}>
+      {/* Hero Section - Flexbox Layout */}
+      <FlexColumn gap={2} align="center">
+        <Typography variant="display-xl">Page Title</Typography>
+        <Typography variant="body-lg" color="secondary">
+          Page description
+        </Typography>
+      </FlexColumn>
 
-      {/* Content Grid */}
-      <Grid gap="lg">
+      {/* Content Grid - CSS Grid Layout */}
+      <GridRow columns={12} gap={2}>
         {/* Main Content */}
-        <GridItem span={{ mobile: 4, tablet: 6, desktop: 8 }}>
-          <div>
-            <Typography variant="heading-lg">Main Content</Typography>
-            <Typography variant="body-md">
-              Primary content goes here...
-            </Typography>
-          </div>
-        </GridItem>
+        <GridColumn span={8}>
+          <Typography variant="heading-lg">Main Content</Typography>
+          <Typography variant="body-md">
+            Primary content goes here...
+          </Typography>
+        </GridColumn>
 
         {/* Sidebar */}
-        <GridItem span={{ mobile: 4, tablet: 2, desktop: 4 }}>
-          <div>
-            <Typography variant="heading-md">Sidebar</Typography>
-            <Typography variant="body-sm">
-              Secondary content...
-            </Typography>
-          </div>
-        </GridItem>
+        <GridColumn span={4}>
+          <Typography variant="heading-md">Sidebar</Typography>
+          <Typography variant="body-sm">
+            Secondary content...
+          </Typography>
+        </GridColumn>
+      </GridRow>
 
-        {/* Feature Cards */}
-        <GridItem span={{ mobile: 4, tablet: 8, desktop: 4 }}>
-          <div>Feature 1</div>
-        </GridItem>
-        <GridItem span={{ mobile: 4, tablet: 4, desktop: 4 }}>
-          <div>Feature 2</div>
-        </GridItem>
-        <GridItem span={{ mobile: 4, tablet: 4, desktop: 4 }}>
-          <div>Feature 3</div>
-        </GridItem>
-      </Grid>
-    </Container>
+      {/* Feature Cards - Equal Width */}
+      <GridRow columns={3} gap={1}>
+        <GridColumn span={1}>Feature 1</GridColumn>
+        <GridColumn span={1}>Feature 2</GridColumn>
+        <GridColumn span={1}>Feature 3</GridColumn>
+      </GridRow>
+
+      {/* Navigation Bar - Flexbox Layout */}
+      <FlexRow justify="between" align="center" gap={1}>
+        <div>Logo</div>
+        <FlexRow gap={1}>
+          <div>Home</div>
+          <div>About</div>
+          <div>Contact</div>
+        </FlexRow>
+      </FlexRow>
+    </GridContainer>
   );
 }
 ```
 
-### Gap System
+### Responsive Design
 
-- `xs`: 8px
-- `sm`: 12px  
-- `md`: 16px
-- `lg`: 24px
-- `xl`: 32px
+The grid system automatically adapts to different screen sizes using CSS media queries. Use CSS `@media` rules in your stylesheets for responsive behavior:
 
-### Edge-to-Edge Grid Features
+```css
+.my-component {
+  /* Default desktop layout */
+  grid-template-columns: repeat(12, 1fr);
+}
 
-The `GridContainer` component provides a special layout that:
-
-- **Touches screen edges** - No padding from viewport boundaries
-- **Automatic gutters** - Gaps between grid items based on device type
-- **Full viewport usage** - Uses 100vw width and 100vh minimum height
-- **Perfect for layouts** - Navigation bars, hero sections, dashboards
-
-```tsx
-// Perfect for full-page layouts
-<GridContainer>
-  {/* Header - spans full width */}
-  <GridItem span={1}>
-    <Header />
-  </GridItem>
-  
-  {/* Navigation - 25% width */}
-  <GridItem span={0.25} mobile={1}>
-    <Navigation />
-  </GridItem>
-  
-  {/* Main content - 75% width */}
-  <GridItem span={0.75} mobile={1}>
-    <MainContent />
-  </GridItem>
-  
-  {/* Footer - spans full width */}
-  <GridItem span={1}>
-    <Footer />
-  </GridItem>
-</GridContainer>
-```
-
-**Benefits:**
-- ✅ No manual padding calculations
-- ✅ Responsive gaps automatically optimized  
-- ✅ Content can use full viewport
-- ✅ Clean edge-to-edge design
-- ✅ Works on any device size
-
-### Advanced Features
-
-#### Viewport Hook
-```tsx
-import { useViewport } from "../hooks/useViewport";
-
-function MyComponent() {
-  const viewport = useViewport();
-  
-  return (
-    <div>
-      <p>Device: {viewport.device}</p>
-      <p>Size: {viewport.width}×{viewport.height}</p>
-      <p>Columns: {viewport.columns}</p>
-      <p>Gap: {viewport.gap}</p>
-    </div>
-  );
+@media (max-width: 768px) {
+  .my-component {
+    /* Mobile layout */
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 ```
 
-#### Device-Specific Overrides
-```tsx
-<GridItem 
-  span={{ mobile: 4, tablet: 4, desktop: 4 }}
-  order={{ mobile: 2, tablet: 1, desktop: 1 }}
->
-  Shows second on mobile, first on tablet/desktop
-</GridItem>
-```
+### Container Width Presets
 
-#### Column Offset
-```tsx
-<GridItem 
-  span={{ mobile: 2, tablet: 3, desktop: 4 }}
-  offset={{ mobile: 1, tablet: 2, desktop: 2 }}
->
-  Content with left margin
-</GridItem>
-```
-
-#### Mixed Layouts
-```tsx
-<Grid gap="md">
-  {/* Full header */}
-  <GridItem span={{ mobile: 4, tablet: 8, desktop: 12 }}>
-    Header
-  </GridItem>
-  
-  {/* Asymmetric content */}
-  <GridItem span={{ mobile: 4, tablet: 5, desktop: 7 }}>
-    Main content (wider)
-  </GridItem>
-  
-  <GridItem span={{ mobile: 4, tablet: 3, desktop: 5 }}>
-    Sidebar (narrower)
-  </GridItem>
-</Grid>
-```
+- `small`: 640px (Mobile-first layouts)
+- `medium`: 768px (Tablet layouts)  
+- `large`: 1024px (Desktop layouts)
+- `full`: 100% (Full-width layouts)
 
 ---
 

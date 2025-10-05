@@ -79,6 +79,13 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   const endIndex = startIndex + pageSize;
   const paginatedResults = enablePagination ? results.slice(startIndex, endIndex) : results;
 
+  // Handle pagination (moved to top to satisfy Rules of Hooks)
+  const handlePageChange = useCallback((page: number) => {
+    if (onPageChange) {
+      onPageChange(page, pageSize);
+    }
+  }, [onPageChange, pageSize]);
+
   // Highlight query text
   const highlightText = useCallback((text: string, searchQuery: string): React.ReactNode => {
     if (!searchQuery || !text) return text;
@@ -179,6 +186,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     >
       {item.thumbnail && (
         <div className={styles.resultThumbnail}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={item.thumbnail} alt={item.title} />
         </div>
       )}
@@ -357,13 +365,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       </div>
     );
   };
-
-  // Handle pagination
-  const handlePageChange = useCallback((page: number) => {
-    if (onPageChange) {
-      onPageChange(page, pageSize);
-    }
-  }, [onPageChange, pageSize]);
 
   return (
     <div className={`${styles.searchResults} ${className}`} style={style}>

@@ -4,7 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { message } from 'antd';
+import { toast } from 'sonner';
 
 interface CopyState {
   copiedText: string | null;
@@ -31,7 +31,7 @@ export const useCopyToClipboard = (resetDelay: number = 2000): UseCopyToClipboar
 
   const copyToClipboard = useCallback(async (text: string): Promise<boolean> => {
     if (!text) {
-      message.error('No text to copy');
+      toast.error('No text to copy');
       return false;
     }
 
@@ -65,7 +65,7 @@ export const useCopyToClipboard = (resetDelay: number = 2000): UseCopyToClipboar
       });
 
       // Show success message
-      message.success('Copied to clipboard!');
+      toast.success('Copied to clipboard!');
 
       // Reset state after delay
       setTimeout(() => {
@@ -78,7 +78,7 @@ export const useCopyToClipboard = (resetDelay: number = 2000): UseCopyToClipboar
       return true;
     } catch (error) {
       console.error('Failed to copy text: ', error);
-      message.error('Failed to copy to clipboard');
+      toast.error('Failed to copy to clipboard');
       
       // Reset state on error
       setCopyState({

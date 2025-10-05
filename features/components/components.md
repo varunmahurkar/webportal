@@ -1,1 +1,0 @@
-This folder will contain all the components used only in the features not in the root. And also try to add the names of the files and their uses.

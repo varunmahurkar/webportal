@@ -16,13 +16,15 @@
  */
 
 import React, { useState, useMemo } from "react";
-import { Card, Space, Input, Select, Row, Col, Button, message } from "antd";
-import { Heading, Paragraph, Label, Text } from "../Typography";
-import { useCopyToClipboard } from "../../../hooks/useCopyToClipboard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { Heading, Paragraph, Text } from "../Typography";
+import { GridContainer, GridRow, GridColumn } from "../Grid";
 import * as Icons from "../icons";
-
-const { Search } = Input;
-const { Option } = Select;
 
 // Icon categories with their corresponding icon names
 const iconCategories = {
@@ -230,8 +232,6 @@ export default function IconShowcase() {
   const [selectedColor, setSelectedColor] = useState("var(--text-primary)");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const { copyToClipboard } = useCopyToClipboard();
-  const [messageApi, contextHolder] = message.useMessage();
 
   // Filter icons based on search term and category
   const filteredIcons = useMemo(() => {
@@ -260,15 +260,17 @@ export default function IconShowcase() {
     const usageExample = `<${iconName} size="md" strokeWidth={2} />`;
     try {
       await navigator.clipboard.writeText(usageExample);
-      messageApi.success("Icon usage copied to clipboard!");
+      toast.success("Icon usage copied to clipboard!", {
+        description: usageExample,
+      });
     } catch (error) {
-      messageApi.error("Failed to copy icon usage");
+      toast.error("Failed to copy icon usage");
       console.error("Copy failed:", error);
     }
   };
 
   // Render individual icon card
-  const renderIconCard = (iconName: string, category: string) => {
+  const renderIconCard = (iconName: string) => {
     const IconComponent = Icons[
       iconName as keyof typeof Icons
     ] as React.ComponentType<{
@@ -280,43 +282,29 @@ export default function IconShowcase() {
     if (!IconComponent) return null;
 
     return (
-      <Col key={iconName} xs={12} sm={8} md={6} lg={4} xl={3}>
+      <GridColumn key={iconName} span={4} className="flex">
         <Card
-          hoverable
-          size="small"
-          style={{
-            textAlign: "center",
-            height: "120px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
+          className="w-full h-[120px] cursor-pointer alexika-feature-card flex flex-col justify-center items-center text-center"
           onClick={() => handleCopyIcon(iconName)}
         >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: "8px",
-              height: "60px",
-            }}
-          >
-            <IconComponent
-              size={Icons.getIconSize(selectedSize)}
-              color={selectedColor}
-              strokeWidth={2}
-            />
-          </div>
-          <Text
-            variant="body-sm"
-            color="primary"
-            style={{ fontSize: "11px", lineHeight: 1.2 }}
-          >
-            {iconName}
-          </Text>
+          <CardContent className="p-3 flex flex-col items-center justify-center h-full">
+            <div className="flex justify-center items-center mb-2 h-[60px]">
+              <IconComponent
+                size={Icons.getIconSize(selectedSize)}
+                color={selectedColor}
+                strokeWidth={2}
+              />
+            </div>
+            <Text
+              variant="body-sm"
+              color="primary"
+              className="text-xs leading-tight"
+            >
+              {iconName}
+            </Text>
+          </CardContent>
         </Card>
-      </Col>
+      </GridColumn>
     );
   };
 
@@ -329,110 +317,111 @@ export default function IconShowcase() {
     if (visibleIcons.length === 0) return null;
 
     return (
-      <div key={categoryName} style={{ marginBottom: "2rem" }}>
-        <Heading level={4} color="primary" style={{ marginBottom: "1rem" }}>
+      <div key={categoryName} className="mb-8">
+        <Heading level={4} color="primary" className="mb-4">
           {categoryName}
         </Heading>
-        <Row gutter={[12, 12]}>
-          {visibleIcons.map((iconName) =>
-            renderIconCard(iconName, categoryName)
-          )}
-        </Row>
+        <GridRow columns={12} gap={1.5}>
+          {visibleIcons.map((iconName) => renderIconCard(iconName))}
+        </GridRow>
       </div>
     );
   };
 
   const renderControls = () => (
-    <Card
-      title={
-        <Heading level={4} color="primary">
-          Icon Controls
-        </Heading>
-      }
-      style={{ marginBottom: "2rem" }}
-    >
-      <Row gutter={[16, 16]} align="middle">
-        <Col xs={24} sm={12} md={6}>
-          <Label>Search Icons</Label>
-          <Search
-            placeholder="Search icon names..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            allowClear
-            style={{ marginTop: "4px" }}
-          />
-        </Col>
+    <Card className="mb-8">
+      <CardHeader>
+        <CardTitle>
+          <Heading level={4} color="primary">
+            Icon Controls
+          </Heading>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+          <div className="space-y-2">
+            <Label>Search Icons</Label>
+            <Input
+              placeholder="Search icon names..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full"
+            />
+          </div>
 
-        <Col xs={24} sm={12} md={6}>
-          <Label>Category</Label>
-          <Select
-            value={selectedCategory}
-            onChange={setSelectedCategory}
-            style={{ width: "100%", marginTop: "4px" }}
-          >
-            <Option value="all">All Categories</Option>
-            {Object.keys(iconCategories).map((category) => (
-              <Option key={category} value={category}>
-                {category}
-              </Option>
-            ))}
-          </Select>
-        </Col>
+          <div className="space-y-2">
+            <Label>Category</Label>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {Object.keys(iconCategories).map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <Col xs={12} sm={6} md={3}>
-          <Label>Size</Label>
-          <Select
-            value={selectedSize}
-            onChange={setSelectedSize}
-            style={{ width: "100%", marginTop: "4px" }}
-          >
-            {sizeOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-        </Col>
+          <div className="space-y-2">
+            <Label>Size</Label>
+            <Select value={selectedSize} onValueChange={(value) => setSelectedSize(value as Icons.IconSize)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {sizeOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <Col xs={12} sm={6} md={6}>
-          <Label>Color</Label>
-          <Select
-            value={selectedColor}
-            onChange={setSelectedColor}
-            style={{ width: "100%", marginTop: "4px" }}
-          >
-            {colorOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-        </Col>
+          <div className="space-y-2">
+            <Label>Color</Label>
+            <Select value={selectedColor} onValueChange={setSelectedColor}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {colorOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <Col xs={24} md={3}>
-          <Button
-            type="primary"
-            block
-            onClick={() => {
-              setSearchTerm("");
-              setSelectedCategory("all");
-              setSelectedSize("md");
-              setSelectedColor("var(--text-primary)");
-            }}
-            style={{ marginTop: "20px" }}
-          >
-            Reset
-          </Button>
-        </Col>
-      </Row>
+          <div className="lg:col-span-2">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedCategory("all");
+                setSelectedSize("md");
+                setSelectedColor("var(--text-primary)");
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      </CardContent>
     </Card>
   );
 
   const renderStatistics = () => (
-    <Card style={{ marginBottom: "2rem" }}>
-      <Row gutter={[16, 16]} align="middle">
-        <Col flex="auto">
-          <Space direction="vertical" size="small">
+    <Card className="mb-8">
+      <CardContent className="pt-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="space-y-1">
             <Text variant="body-lg" weight={600} color="primary">
               ALEXIKA Icon Library Statistics
             </Text>
@@ -441,37 +430,27 @@ export default function IconShowcase() {
               Categories: {Object.keys(iconCategories).length} | Showing:{" "}
               {filteredIcons.length} icons
             </Text>
-          </Space>
-        </Col>
-        <Col>
+          </div>
           <Text variant="body-xs" color="tertiary">
             Click any icon to copy its usage example
           </Text>
-        </Col>
-      </Row>
+        </div>
+      </CardContent>
     </Card>
   );
 
   return (
-    <>
-      {contextHolder}
-      <div
-        style={{
-          padding: "2rem",
-          maxWidth: "1400px",
-          margin: "0 auto",
-          backgroundColor: "var(--bg-primary)",
-          minHeight: "100vh",
-        }}
-      >
+    <GridContainer maxWidth="large" padding={true}>
+      <div className="space-y-8 py-8">
         {/* Page Header */}
-        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+        <div className="text-center space-y-4">
           <Heading
             level={1}
             gradient={true}
             weight={800}
-            style={{ marginBottom: "1rem" }}
+            className="flex items-center justify-center gap-3"
           >
+            <Icons.Palette className="h-8 w-8 text-primary" />
             ALEXIKA Icon Library
           </Heading>
           <Paragraph variant="body-xl" color="secondary" align="center">
@@ -498,81 +477,65 @@ export default function IconShowcase() {
 
         {/* No Results */}
         {filteredIcons.length === 0 && (
-          <Card style={{ textAlign: "center", padding: "3rem" }}>
-            <Icons.Search
-              size={48}
-              color="var(--text-tertiary)"
-              style={{ marginBottom: "1rem" }}
-            />
-            <Heading level={4} color="secondary">
-              No icons found
-            </Heading>
-            <Paragraph color="tertiary">
-              Try adjusting your search terms or category filter
-            </Paragraph>
+          <Card className="py-12">
+            <CardContent className="text-center">
+              <Icons.Search
+                size={48}
+                color="var(--text-tertiary)"
+                className="mx-auto mb-4"
+              />
+              <Heading level={4} color="secondary">
+                No icons found
+              </Heading>
+              <Paragraph color="tertiary">
+                Try adjusting your search terms or category filter
+              </Paragraph>
+            </CardContent>
           </Card>
         )}
 
         {/* Usage Instructions */}
-        <Card
-          title={
-            <Heading level={4} color="primary">
-              Usage Instructions
-            </Heading>
-          }
-          style={{ marginTop: "3rem" }}
-        >
-          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-            <div>
-              <Label>1. Import from centralized icon system:</Label>
-              <Text
-                variant="body-sm"
-                style={{
-                  display: "block",
-                  backgroundColor: "var(--bg-secondary)",
-                  padding: "8px 12px",
-                  borderRadius: "4px",
-                  marginTop: "4px",
-                  fontFamily: "monospace",
-                }}
-              >
-                import &#123; Home, Settings, User &#125; from
-                &apos;@/app/core/icons&apos;;
-              </Text>
-            </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Heading level={4} color="primary">
+                Usage Instructions
+              </Heading>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid md:grid-cols-3 gap-6">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">1. Import from centralized icon system:</Label>
+                <div className="bg-muted p-3 rounded-md">
+                  <code className="text-sm">
+                    import &#123; Home, Settings, User &#125; from
+                    &apos;@/app/core/icons&apos;;
+                  </code>
+                </div>
+              </div>
 
-            <div>
-              <Label>2. Use with consistent sizing:</Label>
-              <Text
-                variant="body-sm"
-                style={{
-                  display: "block",
-                  backgroundColor: "var(--bg-secondary)",
-                  padding: "8px 12px",
-                  borderRadius: "4px",
-                  marginTop: "4px",
-                  fontFamily: "monospace",
-                }}
-              >
-                &lt;Home size=&#123;ICON_SIZES.md&#125;
-                color=&quot;var(--color-primary)&quot; /&gt;
-              </Text>
-            </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">2. Use with consistent sizing:</Label>
+                <div className="bg-muted p-3 rounded-md">
+                  <code className="text-sm">
+                    &lt;Home size=&#123;ICON_SIZES.md&#125;
+                    color=&quot;var(--color-primary)&quot; /&gt;
+                  </code>
+                </div>
+              </div>
 
-            <div>
-              <Label>3. Available size constants:</Label>
-              <Text
-                variant="body-sm"
-                color="secondary"
-                style={{ marginTop: "4px" }}
-              >
-                xs (12px), sm (16px), md (20px), lg (24px), xl (32px), xxl
-                (48px)
-              </Text>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">3. Available size constants:</Label>
+                <Text variant="body-sm" color="secondary">
+                  xs (12px), sm (16px), md (20px), lg (24px), xl (32px), xxl
+                  (48px)
+                </Text>
+              </div>
             </div>
-          </Space>
+          </CardContent>
         </Card>
       </div>
-    </>
+    </GridContainer>
   );
 }

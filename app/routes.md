@@ -2,56 +2,57 @@
 
 ## Application Routes
 
-- **/** - Home page with ALEXIKA AI branding and hero section
-- **/core/typography** - Typography system showcase with interactive controls  
-- **/core/icons** - Icon library with search and filtering capabilities (uses SearchBox component)
-- **/core/color** - Color system showcase with theme switching and CSS variable display (uses SearchBox component)
+- **/** - Empty home page ready for development
+- **/core/typography** - Typography system showcase with interactive controls and copy-to-clipboard functionality
+- **/core/icons** - Icon library showcase with all Lucide React icons organized by category
+- **/core/color** - Color system showcase with theme switching and CSS variable display (includes search functionality)
 
-## Search System Examples
+## Search System
 
-The ALEXIKA project uses a comprehensive generic search system located in `features/search/`. Here are implementation examples:
+The ALEXIKA project uses a simplified and optimized search system located in `features/search/`. 
 
-### Current Search Implementations
+### Current Search Implementation
 
-- **Icon Search** (`/core/icons`) - Real-time search through Lucide React icons with instant filtering
-- **Color Search** (`/core/color`) - Search through design system colors and CSS variables
+- **Color Search** (`/core/color`) - Simple search through design system colors and CSS variables
 
 ### Search System Features
 
-- **Generic Components**: `SearchBox`, `SearchResults`, `SearchProvider`
-- **Multiple Modes**: Instant, debounced, and manual search
-- **State Management**: Global search context with history tracking
-- **Flexible Display**: List, grid, and card view modes
-- **Export Capabilities**: JSON, CSV, and XML export formats
-- **Keyboard Shortcuts**: Cmd/Ctrl+K for quick access
-- **Performance**: Debouncing, caching, and infinite scroll
+- **Simple Components**: `Search`, `SearchResults`
+- **Search Modes**: Instant, debounced, and manual search modes
+- **Clean Interface**: Minimal UI with clear search input and results display
+- **Performance**: Debounced search with configurable delay
 - **Theme Integration**: Full ALEXIKA design system support
 
 ### Usage Pattern
 
 ```tsx
-import { SearchBox, SearchResults, SearchProvider } from '@/features/search';
+import { Search } from '@/features/search';
 
-// Wrap app with SearchProvider for global state
-<SearchProvider>
-  <SearchBox 
-    placeholder="Search anything..."
-    mode="debounced" 
-    onSearch={handleSearch}
-    enableShortcuts
-  />
-  <SearchResults 
-    results={searchResults}
-    viewMode="grid"
-    enablePagination
-  />
-</SearchProvider>
+<Search
+  placeholder="Search colors, variables, themes..."
+  label="Color Search"
+  searchFunction={async (query) => {
+    // Your search implementation
+    return results;
+  }}
+  mode="debounced"
+  debounceDelay={300}
+/>
 ```
 
-### Future Search Implementations
+### Search Component API
 
-- **Product Search** - E-commerce search with filters and sorting
-- **Documentation Search** - Knowledge base and FAQ search
-- **User Search** - Team member and profile search
-- **Content Search** - Media and document search
-- **Analytics Search** - Metrics and dashboard search
+- **Props**: `placeholder`, `label`, `searchFunction`, `mode`, `debounceDelay`, `className`, `style`
+- **Search Modes**: `'instant'`, `'debounced'`, `'manual'`
+- **Result Type**: `SearchResultItem[]` with `id`, `title`, `description`, `category` properties
+
+## Core Components
+
+- **Grid System** (`/app/core/Grid.tsx`) - Simple CSS Grid and Flexbox layout components
+- **Typography** (`/app/core/Typography.tsx`) - Comprehensive responsive typography system
+- **ThemeWrapper** (`/app/core/ThemeWrapper.tsx`) - Theme management with light/dark/custom modes
+- **Icons** (`/app/core/icons.ts`) - Centralized Lucide React icon exports
+
+## Hooks
+
+- **useCopyToClipboard** (`/hooks/useCopyToClipboard.ts`) - Copy text to clipboard functionality

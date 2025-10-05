@@ -1,164 +1,224 @@
 import React, { ReactNode, CSSProperties } from 'react';
-import { useViewport } from '../../hooks/useViewport';
 
-// Main Grid container - automatically adapts columns and gaps based on device type
-export interface GridProps {
+/**
+ * ALEXIKA Grid System
+ * Simple, clean, and optimized layout components for modern web applications
+ * 
+ * Components:
+ * - GridContainer: Main container with responsive behavior
+ * - GridRow: Horizontal layout with CSS Grid
+ * - GridColumn: Individual grid items with column spanning
+ * - FlexRow: Horizontal flexbox layout
+ * - FlexColumn: Vertical flexbox layout
+ */
+
+// Base props interface for all grid components
+interface BaseGridProps {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
 }
 
-// Grid items with fraction-based sizing - 1=full width, 0.5=half, 0.33=third, 0.25=quarter
-export interface GridItemProps {
-  children: ReactNode;
-  size?: number; // Fraction of available width (auto-converts to columns)
-  className?: string;
-  style?: CSSProperties;
+// Container component for main layout wrapper
+export interface GridContainerProps extends BaseGridProps {
+  maxWidth?: 'small' | 'medium' | 'large' | 'full'; // Container width limits
+  padding?: boolean; // Whether to add internal padding
 }
 
-// Main Grid component - CSS Grid with auto-responsive columns (2-16 cols) and device-optimized gaps
-export const Grid: React.FC<GridProps> = ({
+// Row component for horizontal grid layouts
+export interface GridRowProps extends BaseGridProps {
+  columns?: number; // Number of grid columns (default: 12)
+  gap?: number; // Gap between items in rem (default: 1)
+}
+
+// Column component for individual grid items
+export interface GridColumnProps extends BaseGridProps {
+  span?: number; // How many columns to span (1-12)
+  offset?: number; // How many columns to offset from left
+}
+
+// Flex row component for horizontal flexbox layouts
+export interface FlexRowProps extends BaseGridProps {
+  gap?: number; // Gap between items in rem
+  align?: 'start' | 'center' | 'end' | 'stretch'; // Vertical alignment
+  justify?: 'start' | 'center' | 'end' | 'between' | 'around'; // Horizontal alignment
+  wrap?: boolean; // Allow items to wrap to next line
+}
+
+// Flex column component for vertical flexbox layouts
+export interface FlexColumnProps extends BaseGridProps {
+  gap?: number; // Gap between items in rem
+  align?: 'start' | 'center' | 'end' | 'stretch'; // Horizontal alignment
+}
+
+/**
+ * Main container component for page layouts
+ * Provides responsive max-width and optional padding
+ */
+export const GridContainer: React.FC<GridContainerProps> = ({
   children,
+  maxWidth = 'large',
+  padding = true,
   className = '',
   style = {}
 }) => {
-  const viewport = useViewport(); // Get device type, columns, and gap size
+  // Define responsive max-width values
+  const maxWidthValues = {
+    small: '640px',   // Mobile-first layouts
+    medium: '768px',  // Tablet layouts
+    large: '1024px',  // Desktop layouts
+    full: '100%'      // Full-width layouts
+  };
 
-  const gridStyle: CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: `repeat(${viewport.columns}, 1fr)`, // Auto columns based on device
-    gap: `var(--grid-gap-${viewport.gap})`, // Auto gap size (xs/sm/md/lg/xl)
+  const containerStyles: CSSProperties = {
     width: '100%',
+    maxWidth: maxWidthValues[maxWidth],
+    margin: '0 auto', // Center the container
+    padding: padding ? '0 1rem' : '0',
     boxSizing: 'border-box',
-    overflow: 'hidden', // Prevents any content overflow issues
     ...style
   };
 
   return (
-    <div 
-      className={`perfect-grid ${className}`}
-      style={gridStyle}
-    >
+    <div className={`grid-container ${className}`} style={containerStyles}>
       {children}
     </div>
   );
 };
 
-// Grid Item component - converts fraction sizes to columns with smart device optimization
-export const GridItem: React.FC<GridItemProps> = ({
+/**
+ * Grid row component for horizontal layouts using CSS Grid
+ * Creates equal-width columns that automatically wrap
+ */
+export const GridRow: React.FC<GridRowProps> = ({
   children,
-  size = 1,
+  columns = 12,
+  gap = 1,
   className = '',
   style = {}
 }) => {
-  const viewport = useViewport(); // Get current device info for smart sizing
-  
-  let actualSize = size; // Start with requested size
-  
-  // Smart mobile optimization - prevents tiny items on small screens
-  if (viewport.device === 'flip' && size < 1) {
-    actualSize = 1; // Force full width on flip phones for readability
-  } else if (viewport.device === 'mobile' && size < 0.5) {
-    actualSize = 0.5; // Minimum half width on mobile for usability
-  }
-  
-  // Convert fraction to column span (e.g., 0.5 * 12 cols = 6 col span)
-  const columns = Math.round(actualSize * viewport.columns);
-  const finalColumns = Math.max(1, Math.min(columns, viewport.columns)); // Clamp between 1 and max cols
-
-  const itemStyle: CSSProperties = {
-    gridColumn: `span ${finalColumns}`, // CSS Grid column span
-    minWidth: 0, // Allows content to shrink below min-content
-    boxSizing: 'border-box',
-    overflow: 'hidden', // Prevents content from breaking grid layout
+  const rowStyles: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: `repeat(${columns}, 1fr)`,
+    gap: `${gap}rem`,
+    width: '100%',
     ...style
   };
 
   return (
-    <div
-      className={`perfect-item ${className}`}
-      style={itemStyle}
-    >
+    <div className={`grid-row ${className}`} style={rowStyles}>
       {children}
     </div>
   );
 };
 
-// Container component - responsive wrapper with optional padding and max-width control
-export const Container: React.FC<{
-  children: ReactNode;
-  edge?: boolean; // true = edge-to-edge layout, false = padded container
-  className?: string;
-  style?: CSSProperties;
-}> = ({ children, edge = false, className = '', style = {} }) => {
-  const viewport = useViewport(); // Get device info for responsive padding
-  
+/**
+ * Grid column component for individual items within a grid row
+ * Allows spanning multiple columns and offset positioning
+ */
+export const GridColumn: React.FC<GridColumnProps> = ({
+  children,
+  span = 1,
+  offset = 0,
+  className = '',
+  style = {}
+}) => {
+  const columnStyles: CSSProperties = {
+    gridColumn: `${offset + 1} / span ${span}`,
+    minWidth: 0, // Prevents overflow issues
+    ...style
+  };
+
   return (
-    <div 
-      className={`perfect-container ${className}`}
-      style={{
-        width: '100%',
-        maxWidth: viewport.device === 'tv' ? '2000px' : '100%', // Prevent ultra-wide layouts on TVs
-        margin: '0 auto', // Center container
-        padding: edge ? 0 : `var(--grid-gap-${viewport.gap})`, // Conditional padding based on edge prop
-        boxSizing: 'border-box',
-        overflow: 'hidden', // Prevents horizontal scrolling
-        ...style
-      }}
-    >
+    <div className={`grid-column ${className}`} style={columnStyles}>
       {children}
     </div>
   );
 };
 
-// Row component - horizontal flexbox layout with responsive gaps and auto-wrapping
-export const Row: React.FC<{
-  children: ReactNode;
-  className?: string;
-  style?: CSSProperties;
-}> = ({ children, className = '', style = {} }) => {
-  const viewport = useViewport(); // Get device-specific gap size
-  
+/**
+ * Flex row component for horizontal layouts using Flexbox
+ * More flexible than CSS Grid for dynamic content
+ */
+export const FlexRow: React.FC<FlexRowProps> = ({
+  children,
+  gap = 1,
+  align = 'stretch',
+  justify = 'start',
+  wrap = true,
+  className = '',
+  style = {}
+}) => {
+  // Map alignment props to CSS values
+  const alignmentMap = {
+    start: 'flex-start',
+    center: 'center',
+    end: 'flex-end',
+    stretch: 'stretch'
+  };
+
+  const justificationMap = {
+    start: 'flex-start',
+    center: 'center',
+    end: 'flex-end',
+    between: 'space-between',
+    around: 'space-around'
+  };
+
+  const rowStyles: CSSProperties = {
+    display: 'flex',
+    gap: `${gap}rem`,
+    alignItems: alignmentMap[align],
+    justifyContent: justificationMap[justify],
+    flexWrap: wrap ? 'wrap' : 'nowrap',
+    ...style
+  };
+
   return (
-    <div 
-      className={`perfect-row ${className}`}
-      style={{
-        display: 'flex',
-        gap: `var(--grid-gap-${viewport.gap})`, // Auto gap based on device type
-        alignItems: 'stretch', // Equal height for all flex items
-        flexWrap: 'wrap', // Allows items to wrap on small screens
-        overflow: 'hidden',
-        ...style
-      }}
-    >
+    <div className={`flex-row ${className}`} style={rowStyles}>
       {children}
     </div>
   );
 };
 
-// Column component - vertical flexbox layout with responsive gaps and stretch alignment
-export const Column: React.FC<{
-  children: ReactNode;
-  className?: string;
-  style?: CSSProperties;
-}> = ({ children, className = '', style = {} }) => {
-  const viewport = useViewport(); // Get device-specific gap size
-  
+/**
+ * Flex column component for vertical layouts using Flexbox
+ * Stacks items vertically with configurable spacing and alignment
+ */
+export const FlexColumn: React.FC<FlexColumnProps> = ({
+  children,
+  gap = 1,
+  align = 'stretch',
+  className = '',
+  style = {}
+}) => {
+  const alignmentMap = {
+    start: 'flex-start',
+    center: 'center',
+    end: 'flex-end',
+    stretch: 'stretch'
+  };
+
+  const columnStyles: CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: `${gap}rem`,
+    alignItems: alignmentMap[align],
+    ...style
+  };
+
   return (
-    <div 
-      className={`perfect-column ${className}`}
-      style={{
-        display: 'flex',
-        flexDirection: 'column', // Stack items vertically
-        gap: `var(--grid-gap-${viewport.gap})`, // Auto gap based on device type
-        alignItems: 'stretch', // Full width for all flex items
-        overflow: 'hidden',
-        ...style
-      }}
-    >
+    <div className={`flex-column ${className}`} style={columnStyles}>
       {children}
     </div>
   );
 };
 
-export default Grid;
+// Export aliases for backward compatibility
+export const Grid = GridRow;
+export const GridItem = GridColumn;
+export const Container = GridContainer;
+export const Row = FlexRow;
+export const Column = FlexColumn;
+
+export default GridContainer;

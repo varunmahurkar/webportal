@@ -1,37 +1,25 @@
 /**
- * ALEXIKA AI Theme System - Centralized theme management with intelligent color generation
- * Automatically detects system preference and allows user overrides
+ * ALEXIKA AI Theme System - Centralized theme management with shadcn/ui integration
+ * Properly integrates with next-themes for shadcn/ui compatibility
  * 
  * Features:
  * - Automatic system theme preference detection
  * - Professional light theme with optimized contrast ratios
- * - GitHub-inspired dark theme for reduced eye strain
+ * - Dark theme for reduced eye strain
  * - Dynamic custom theme generation from single primary color
  * - CSS variable injection for seamless integration
  * - Local storage persistence for user preferences
- * - Ant Design theme integration with automatic token mapping
+ * - shadcn/ui theme integration via next-themes
  */
 
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import {
-  ConfigProvider,
-  theme as antdTheme,
-  ColorPicker,
-  Select,
-  Space,
-} from "antd";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from "next-themes";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sun, Moon, Palette } from './icons';
 import { Label } from './Typography';
-
-const { Option } = Select;
 
 // Theme modes: light/dark themes or custom generated palette
 export type ThemeMode = "light" | "dark" | "custom";
@@ -100,19 +88,15 @@ const hexToHsl = (hex: string): [number, number, number] => {
   let s = 0;
   const l = (max + min) / 2;
 
-  if (max !== min) {
+  if (max === min) {
+    h = s = 0; // achromatic
+  } else {
     const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
     switch (max) {
-      case r:
-        h = (g - b) / d + (g < b ? 6 : 0);
-        break;
-      case g:
-        h = (b - r) / d + 2;
-        break;
-      case b:
-        h = (r - g) / d + 4;
-        break;
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
     }
     h /= 6;
   }
@@ -120,515 +104,389 @@ const hexToHsl = (hex: string): [number, number, number] => {
   return [h * 360, s * 100, l * 100];
 };
 
-// Converts HSL values back to hex color format for CSS usage
+// Converts HSL values back to hex color
 const hslToHex = (h: number, s: number, l: number): string => {
-  h /= 360;
-  s /= 100;
-  l /= 100;
+  h = h / 360;
+  s = s / 100;
+  l = l / 100;
 
   const hue2rgb = (p: number, q: number, t: number) => {
     if (t < 0) t += 1;
     if (t > 1) t -= 1;
-    if (t < 1 / 6) return p + (q - p) * 6 * t;
-    if (t < 1 / 2) return q;
-    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    if (t < 1/6) return p + (q - p) * 6 * t;
+    if (t < 1/2) return q;
+    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
     return p;
   };
 
   let r, g, b;
 
   if (s === 0) {
-    r = g = b = l;
+    r = g = b = l; // achromatic
   } else {
     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
     const p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1 / 3);
+    r = hue2rgb(p, q, h + 1/3);
     g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1 / 3);
+    b = hue2rgb(p, q, h - 1/3);
   }
 
   const toHex = (c: number) => {
     const hex = Math.round(c * 255).toString(16);
-    return hex.length === 1 ? "0" + hex : hex;
+    return hex.length === 1 ? '0' + hex : hex;
   };
 
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 };
 
-// Intelligent color palette generator
+// Generates a comprehensive color palette from a primary color
 const generateColorPalette = (primaryColor: string) => {
   const [h, s, l] = hexToHsl(primaryColor);
-
-  const isVibrant = s > 60;
-  const isBright = l > 60;
-  const isDark = l < 40;
-
-  let bgPrimary, bgSecondary, bgTertiary;
-  let textPrimary, textSecondary, textTertiary;
-  let borderColor, borderHover;
-
-  if (isBright && isVibrant) {
-    bgPrimary = hslToHex(h, Math.max(s - 80, 8), Math.min(l + 35, 97));
-    bgSecondary = hslToHex(h, Math.max(s - 85, 5), Math.min(l + 40, 100));
-    bgTertiary = hslToHex(h, Math.max(s - 75, 12), Math.min(l + 30, 94));
-    textPrimary = "#1a1a1a";
-    textSecondary = "#5f6368";
-    textTertiary = "#80868b";
-    borderColor = hslToHex(h, Math.max(s - 60, 15), Math.min(l + 20, 85));
-    borderHover = hslToHex(h, Math.max(s - 50, 20), Math.min(l + 15, 80));
-  } else if (isDark) {
-    bgPrimary = hslToHex(h, Math.max(s - 60, 15), Math.max(l - 30, 6));
-    bgSecondary = hslToHex(h, Math.max(s - 65, 12), Math.max(l - 25, 10));
-    bgTertiary = hslToHex(h, Math.max(s - 55, 18), Math.max(l - 20, 14));
-    textPrimary = "#e6edf3";
-    textSecondary = "#7d8590";
-    textTertiary = "#656d76";
-    borderColor = hslToHex(h, Math.max(s - 40, 25), Math.max(l - 10, 20));
-    borderHover = hslToHex(h, Math.max(s - 30, 30), Math.max(l - 5, 25));
-  } else {
-    const shouldBeLightTheme = l > 45;
-
-    if (shouldBeLightTheme) {
-      bgPrimary = hslToHex(h, Math.max(s - 70, 12), Math.min(l + 30, 96));
-      bgSecondary = hslToHex(h, Math.max(s - 75, 8), Math.min(l + 35, 99));
-      bgTertiary = hslToHex(h, Math.max(s - 65, 15), Math.min(l + 25, 93));
-      textPrimary = "#1a1a1a";
-      textSecondary = "#5f6368";
-      textTertiary = "#80868b";
-      borderColor = hslToHex(h, Math.max(s - 50, 20), Math.min(l + 15, 82));
-      borderHover = hslToHex(h, Math.max(s - 40, 25), Math.min(l + 10, 77));
-    } else {
-      bgPrimary = hslToHex(h, Math.max(s - 50, 20), Math.max(l - 25, 8));
-      bgSecondary = hslToHex(h, Math.max(s - 55, 17), Math.max(l - 20, 12));
-      bgTertiary = hslToHex(h, Math.max(s - 45, 23), Math.max(l - 15, 16));
-      textPrimary = "#e6edf3";
-      textSecondary = "#7d8590";
-      textTertiary = "#656d76";
-      borderColor = hslToHex(h, Math.max(s - 30, 30), Math.max(l - 5, 22));
-      borderHover = hslToHex(h, Math.max(s - 20, 35), Math.max(l, 27));
-    }
-  }
-
+  
+  // Create complementary and analogous colors
+  const complementaryHue = (h + 180) % 360;
+  const analogousHue1 = (h + 30) % 360;
+  const analogousHue2 = (h - 30 + 360) % 360;
+  
   return {
-    secondary: hslToHex(
-      (h + 40) % 360,
-      Math.max(s - 15, 20),
-      Math.max(Math.min(l, 65), 35)
-    ),
-    success: hslToHex(142, Math.max(s - 20, 50), isBright ? 45 : 55),
-    warning: hslToHex(38, Math.max(s - 10, 70), isBright ? 50 : 60),
-    error: hslToHex(0, Math.max(s - 15, 65), isBright ? 48 : 58),
-    info: hslToHex(212, Math.max(s - 25, 60), isBright ? 45 : 55),
-    backgroundPrimary: bgPrimary,
-    backgroundSecondary: bgSecondary,
-    backgroundTertiary: bgTertiary,
-    textPrimary: textPrimary,
-    textSecondary: textSecondary,
-    textTertiary: textTertiary,
-    borderColor: borderColor,
-    borderHover: borderHover,
+    secondary: hslToHex(analogousHue1, Math.max(15, s - 15), Math.min(90, l + 10)),
+    success: hslToHex(142, 71, 45), // Enhanced green
+    warning: hslToHex(38, 92, 50),  // Enhanced orange
+    error: hslToHex(0, 84, 60),     // Red
+    info: hslToHex(199, 89, 48),    // Blue
+    backgroundPrimary: hslToHex(h, Math.max(5, s - 30), 98),
+    backgroundSecondary: hslToHex(h, Math.max(5, s - 35), 96),
+    backgroundTertiary: hslToHex(h, Math.max(5, s - 40), 94),
+    textPrimary: hslToHex(h, Math.min(50, s + 10), 10),
+    textSecondary: hslToHex(h, Math.max(10, s - 10), 40),
+    textTertiary: hslToHex(h, Math.max(5, s - 15), 60),
+    borderColor: hslToHex(h, Math.max(5, s - 25), 88),
+    borderHover: hslToHex(h, Math.max(10, s - 20), 82),
   };
 };
 
-// Loads theme configuration from localStorage with SSR safety
-const loadThemeFromStorage = (): Partial<ThemeConfig> => {
-  if (typeof window === "undefined") return {};
-  try {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch (error) {
-    console.warn("Failed to load theme from localStorage:", error);
-    return {};
-  }
+// Default theme configuration
+const defaultThemeConfig: ThemeConfig = {
+  mode: "light",
+  primaryColor: "#2c2c2c",
+  userOverride: false,
+  generatedColors: undefined,
 };
 
-// Loads custom color palette from separate localStorage entry
-const loadCustomColorsFromStorage = () => {
-  if (typeof window === "undefined") return null;
-  try {
-    const stored = localStorage.getItem(CUSTOM_COLORS_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : null;
-  } catch (error) {
-    console.warn("Failed to load custom colors from localStorage:", error);
-    return null;
-  }
-};
+/**
+ * Internal Theme Provider that manages ALEXIKA theme state
+ */
+const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({ 
+  children, 
+  initialConfig = {} 
+}) => {
+  const { theme, setTheme } = useNextTheme();
+  const [config, setConfig] = useState<ThemeConfig>(() => ({
+    ...defaultThemeConfig,
+    ...initialConfig,
+  }));
 
-// Saves theme configuration to localStorage
-const saveThemeToStorage = (config: ThemeConfig) => {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(config));
+  // Computed property for dark theme detection
+  const isDark = theme === "dark" || config.mode === "dark";
 
-    if (config.mode === "custom" && config.generatedColors) {
-      localStorage.setItem(
-        CUSTOM_COLORS_STORAGE_KEY,
-        JSON.stringify({
-          primaryColor: config.primaryColor,
-          generatedColors: config.generatedColors,
-        })
-      );
-    }
-  } catch (error) {
-    console.warn("Failed to save theme to localStorage:", error);
-  }
-};
+  // Detects system theme preference using CSS media query
+  const getSystemTheme = (): ThemeMode => {
+    if (typeof window === "undefined") return "light";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  };
 
-// Detects system theme preference
-const getSystemThemePreference = (): ThemeMode => {
-  if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-};
-
-// Main ThemeWrapper component
-export default function ThemeWrapper({
-  children,
-  initialConfig = {},
-}: ThemeWrapperProps) {
-  // Initialize theme config with system preference or stored config
-  const [config, setConfig] = useState<ThemeConfig>(() => {
-    const storedConfig = loadThemeFromStorage();
+  // Loads saved theme configuration from localStorage
+  const loadSavedTheme = (): ThemeConfig => {
+    if (typeof window === "undefined") return defaultThemeConfig;
     
-    // If user has no stored config, use system preference
-    if (!storedConfig.mode) {
-      const systemPreference = getSystemThemePreference();
-      return {
-        mode: systemPreference,
-        primaryColor: "#386641",
-        userOverride: false,
-        ...initialConfig,
-      };
-    }
-    
-    // Use stored config
-    return {
-      mode: "light",
-      primaryColor: "#386641",
-      userOverride: false,
-      ...initialConfig,
-      ...storedConfig,
-    };
-  });
-
-  const [isDark, setIsDark] = useState(false);
-
-  // Effect to manage theme mode and automatic system preference detection
-  useEffect(() => {
-    const updateThemeMode = () => {
-      if (config.mode === "custom") {
-        // For custom themes, determine darkness from background
-        if (config.generatedColors) {
-          const [, , bgLightness] = hexToHsl(config.generatedColors.backgroundPrimary);
-          setIsDark(bgLightness < 50);
-        } else {
-          setIsDark(false);
-        }
-      } else if (!config.userOverride) {
-        // Follow system preference if no user override
-        const systemPreference = getSystemThemePreference();
-        setIsDark(systemPreference === "dark");
-        
-        // Update config if it differs from system preference
-        if (config.mode !== systemPreference) {
-          const newConfig = { ...config, mode: systemPreference };
-          setConfig(newConfig);
-          saveThemeToStorage(newConfig);
-        }
-      } else {
-        // Use user's explicit choice
-        setIsDark(config.mode === "dark");
-      }
-    };
-
-    updateThemeMode();
-
-    // Listen for system theme changes only if user hasn't overridden
-    if (!config.userOverride) {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      mediaQuery.addEventListener("change", updateThemeMode);
-      return () => mediaQuery.removeEventListener("change", updateThemeMode);
-    }
-  }, [config]);
-
-  // Main effect that applies theme colors and classes
-  useEffect(() => {
-    const root = document.documentElement;
-
-    requestAnimationFrame(() => {
-      // Remove all theme classes first
-      root.classList.remove("light-theme", "dark-theme", "custom-theme");
+    try {
+      const saved = localStorage.getItem(THEME_STORAGE_KEY);
+      const savedColors = localStorage.getItem(CUSTOM_COLORS_STORAGE_KEY);
       
-      if (config.mode === "custom" && config.generatedColors) {
-        // Apply custom theme
-        root.classList.add("custom-theme");
-        
-        const [, , bgLightness] = hexToHsl(config.generatedColors.backgroundPrimary);
-        
-        const customColors: Record<string, string> = {
-          "--color-primary": config.primaryColor,
-          "--color-secondary": config.generatedColors.secondary,
-          "--color-success": config.generatedColors.success,
-          "--color-warning": config.generatedColors.warning,
-          "--color-error": config.generatedColors.error,
-          "--color-info": config.generatedColors.info,
-          "--bg-primary": config.generatedColors.backgroundPrimary,
-          "--bg-secondary": config.generatedColors.backgroundSecondary,
-          "--bg-tertiary": config.generatedColors.backgroundTertiary,
-          "--text-primary": config.generatedColors.textPrimary,
-          "--text-secondary": config.generatedColors.textSecondary,
-          "--text-tertiary": config.generatedColors.textTertiary,
-          "--border-color": config.generatedColors.borderColor,
-          "--border-hover": config.generatedColors.borderHover,
-          "--shadow-light": bgLightness > 50 ? "rgba(0, 0, 0, 0.08)" : "rgba(0, 0, 0, 0.3)",
-          "--shadow-medium": bgLightness > 50 ? "rgba(0, 0, 0, 0.12)" : "rgba(0, 0, 0, 0.4)",
-        };
-
-        root.style.setProperty("color-scheme", bgLightness > 50 ? "light" : "dark");
-
-        Object.entries(customColors).forEach(([property, value]) => {
-          root.style.setProperty(property, value);
-        });
-      } else {
-        // Remove custom overrides
-        const customProperties = [
-          "--color-primary", "--color-secondary", "--color-success", "--color-warning", 
-          "--color-error", "--color-info", "--bg-primary", "--bg-secondary", 
-          "--bg-tertiary", "--text-primary", "--text-secondary", "--text-tertiary", 
-          "--border-color", "--border-hover", "--shadow-light", "--shadow-medium"
-        ];
-        
-        customProperties.forEach(property => {
-          root.style.removeProperty(property);
-        });
-
-        // Apply theme class only if user has overridden system preference
-        if (config.userOverride) {
-          if (config.mode === "light") {
-            root.classList.add("light-theme");
-          } else if (config.mode === "dark") {
-            root.classList.add("dark-theme");
-          }
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (savedColors && parsed.mode === "custom") {
+          parsed.generatedColors = JSON.parse(savedColors);
         }
-        // No class = automatic system preference via CSS light-dark()
+        return { ...defaultThemeConfig, ...parsed };
       }
-    });
-  }, [config, isDark]);
+    } catch (error) {
+      console.warn("Failed to load saved theme:", error);
+    }
+    
+    return {
+      ...defaultThemeConfig,
+      mode: getSystemTheme(),
+    };
+  };
 
+  // Saves current theme configuration to localStorage
+  const saveTheme = (themeConfig: ThemeConfig) => {
+    if (typeof window === "undefined") return;
+    
+    try {
+      const { generatedColors, ...configToSave } = themeConfig;
+      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(configToSave));
+      
+      if (generatedColors && themeConfig.mode === "custom") {
+        localStorage.setItem(CUSTOM_COLORS_STORAGE_KEY, JSON.stringify(generatedColors));
+      }
+    } catch (error) {
+      console.warn("Failed to save theme:", error);
+    }
+  };
+
+  // Updates theme configuration and applies CSS variables
   const updateTheme = (updates: Partial<ThemeConfig>) => {
-    setConfig((prev) => {
-      const newConfig = {
-        ...prev,
-        ...updates,
-      };
-
-      saveThemeToStorage(newConfig);
+    setConfig(prev => {
+      const newConfig = { ...prev, ...updates, userOverride: true };
+      
+      // Generate color palette for custom themes
+      if (updates.mode === "custom" || (updates.primaryColor && newConfig.mode === "custom")) {
+        const primaryColor = updates.primaryColor || newConfig.primaryColor;
+        newConfig.generatedColors = generateColorPalette(primaryColor);
+      }
+      
+      // Update next-themes
+      if (updates.mode && updates.mode !== "custom") {
+        setTheme(updates.mode);
+      } else if (updates.mode === "custom") {
+        setTheme("light"); // Use light as base for custom themes
+      }
+      
+      saveTheme(newConfig);
       return newConfig;
     });
   };
 
-  const handleThemeModeChange = (value: ThemeMode) => {
-    if (value === "light" || value === "dark") {
-      // User is explicitly choosing a theme
-      updateTheme({ 
-        mode: value, 
-        generatedColors: undefined, 
-        userOverride: true 
-      });
-    } else if (value === "custom") {
-      // When switching to custom, restore saved custom colors or generate new ones
-      const savedCustomColors = loadCustomColorsFromStorage();
-
-      if (savedCustomColors && savedCustomColors.generatedColors) {
-        updateTheme({
-          mode: value,
-          primaryColor: savedCustomColors.primaryColor,
-          generatedColors: savedCustomColors.generatedColors,
-          userOverride: true,
-        });
-      } else if (config.primaryColor) {
-        const generatedColors = generateColorPalette(config.primaryColor);
-        updateTheme({
-          mode: value,
-          generatedColors: generatedColors,
-          userOverride: true,
-        });
-      } else {
-        updateTheme({ mode: value, userOverride: true });
-      }
-    }
-  };
-
-  const handleColorChange = (color: { toHexString: () => string }) => {
-    const newPrimaryColor = color.toHexString();
-    const generatedColors = generateColorPalette(newPrimaryColor);
-    updateTheme({
-      primaryColor: newPrimaryColor,
-      generatedColors: generatedColors,
-    });
-  };
-
+  // Resets theme to system preference
   const resetToSystemPreference = () => {
-    const systemPreference = getSystemThemePreference();
-    updateTheme({ 
-      mode: systemPreference, 
-      generatedColors: undefined,
-      userOverride: false 
-    });
-  };
-
-  const getThemeIcon = (mode: ThemeMode) => {
-    switch (mode) {
-      case "light":
-        return <Sun size={16} />;
-      case "dark":
-        return <Moon size={16} />;
-      case "custom":
-        return <Palette size={16} />;
-      default:
-        return <Sun size={16} />;
+    const systemTheme = getSystemTheme();
+    const resetConfig = {
+      ...defaultThemeConfig,
+      mode: systemTheme,
+      userOverride: false,
+    };
+    
+    setConfig(resetConfig);
+    setTheme(systemTheme);
+    saveTheme(resetConfig);
+    
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(CUSTOM_COLORS_STORAGE_KEY);
     }
   };
 
-  const getAntdThemeConfig = () => {
-    const isDarkMode =
-      config.mode === "dark" ||
-      (config.mode === "custom" &&
-        config.generatedColors &&
-        hexToHsl(config.generatedColors.backgroundPrimary)[2] < 50);
+  // Load saved theme on component mount
+  useEffect(() => {
+    const savedTheme = loadSavedTheme();
+    setConfig(savedTheme);
+    
+    // Set next-themes theme
+    if (savedTheme.mode !== "custom") {
+      setTheme(savedTheme.mode);
+    }
+  }, [setTheme, loadSavedTheme]);
 
-    return {
-      algorithm: isDarkMode
-        ? antdTheme.darkAlgorithm
-        : antdTheme.defaultAlgorithm,
-      token: {
-        colorPrimary:
-          config.mode === "custom"
-            ? config.primaryColor
-            : isDarkMode
-            ? "#e5e5e5"
-            : "#2c2c2c",
-        colorSuccess:
-          config.mode === "custom" && config.generatedColors
-            ? config.generatedColors.success
-            : isDarkMode
-            ? "#22c55e"
-            : "#16a34a",
-        colorWarning:
-          config.mode === "custom" && config.generatedColors
-            ? config.generatedColors.warning
-            : isDarkMode
-            ? "#f59e0b"
-            : "#d97706",
-        colorError:
-          config.mode === "custom" && config.generatedColors
-            ? config.generatedColors.error
-            : isDarkMode
-            ? "#ef4444"
-            : "#dc2626",
-        colorInfo:
-          config.mode === "custom" && config.generatedColors
-            ? config.generatedColors.info
-            : isDarkMode
-            ? "#3b82f6"
-            : "#0ea5e9",
-        colorBgContainer: isDarkMode ? "#171717" : "#ffffff",
-        colorBgElevated: isDarkMode ? "#262626" : "#f8f7f4",
-        colorBgLayout: isDarkMode ? "#0a0a0a" : "#ffffff",
-        colorText: isDarkMode ? "#f5f5f5" : "#1a1a1a",
-        colorTextSecondary: isDarkMode ? "#d4d4d4" : "#525252",
-        colorTextTertiary: isDarkMode ? "#a3a3a3" : "#737373",
-        colorBorder: isDarkMode ? "#404040" : "#e7e5e4",
-        colorBorderSecondary: isDarkMode ? "#525252" : "#d6d3d1",
-        fontFamily: "var(--font-geist-sans)",
-        boxShadow: isDarkMode
-          ? "0 2px 8px rgba(0, 0, 0, 0.3)"
-          : "0 2px 8px rgba(0, 0, 0, 0.05)",
-        boxShadowSecondary: isDarkMode
-          ? "0 4px 16px rgba(0, 0, 0, 0.4)"
-          : "0 4px 16px rgba(0, 0, 0, 0.10)",
-      },
-      components: {
-        Card: {
-          colorBgContainer: isDarkMode ? "#171717" : "#ffffff",
-          colorBorder: isDarkMode ? "#404040" : "#e7e5e4",
-        },
-        Input: {
-          colorBgContainer: isDarkMode ? "#262626" : "#ffffff",
-          colorBorder: isDarkMode ? "#404040" : "#e7e5e4",
-        },
-        Select: {
-          colorBgContainer: isDarkMode ? "#262626" : "#ffffff",
-          colorBorder: isDarkMode ? "#404040" : "#e7e5e4",
-        },
-        Dropdown: {
-          colorBgElevated: isDarkMode ? "#262626" : "#f8f7f4",
-          colorBorder: isDarkMode ? "#404040" : "#e7e5e4",
-          boxShadowSecondary: isDarkMode
-            ? "0 6px 20px rgba(0, 0, 0, 0.4)"
-            : "0 6px 20px rgba(0, 0, 0, 0.08)",
-        },
-        Button: {
-          colorBgContainer: isDarkMode ? "#171717" : "#ffffff",
-          colorBorder: isDarkMode ? "#404040" : "#e7e5e4",
-        },
-      },
+  // Apply CSS variables when theme changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const root = document.documentElement;
+    
+    // Apply theme class and CSS variables
+    if (config.mode === "custom" && config.generatedColors) {
+      // Apply custom generated colors to both ALEXIKA and shadcn/ui variables
+      const colors = config.generatedColors;
+      
+      // ALEXIKA custom variables
+      root.style.setProperty("--color-primary", colors.textPrimary);
+      root.style.setProperty("--color-secondary", colors.secondary);
+      root.style.setProperty("--color-success", colors.success);
+      root.style.setProperty("--color-warning", colors.warning);
+      root.style.setProperty("--color-error", colors.error);
+      root.style.setProperty("--color-info", colors.info);
+      root.style.setProperty("--bg-primary", colors.backgroundPrimary);
+      root.style.setProperty("--bg-secondary", colors.backgroundSecondary);
+      root.style.setProperty("--bg-tertiary", colors.backgroundTertiary);
+      root.style.setProperty("--text-primary", colors.textPrimary);
+      root.style.setProperty("--text-secondary", colors.textSecondary);
+      root.style.setProperty("--text-tertiary", colors.textTertiary);
+      root.style.setProperty("--border-color", colors.borderColor);
+      root.style.setProperty("--border-hover", colors.borderHover);
+      
+      // Convert hex colors to HSL for shadcn/ui compatibility
+      const primaryHsl = hexToHsl(config.primaryColor);
+      const secondaryHsl = hexToHsl(colors.secondary);
+      const backgroundHsl = hexToHsl(colors.backgroundPrimary);
+      const textHsl = hexToHsl(colors.textPrimary);
+      const borderHsl = hexToHsl(colors.borderColor);
+      
+      // Apply shadcn/ui CSS variables for custom theme
+      root.style.setProperty("--background", `${backgroundHsl[0]} ${backgroundHsl[1]}% ${backgroundHsl[2]}%`);
+      root.style.setProperty("--foreground", `${textHsl[0]} ${textHsl[1]}% ${textHsl[2]}%`);
+      root.style.setProperty("--card", `${backgroundHsl[0]} ${backgroundHsl[1]}% ${Math.max(backgroundHsl[2] - 2, 95)}%`);
+      root.style.setProperty("--card-foreground", `${textHsl[0]} ${textHsl[1]}% ${textHsl[2]}%`);
+      root.style.setProperty("--popover", `${backgroundHsl[0]} ${backgroundHsl[1]}% ${backgroundHsl[2]}%`);
+      root.style.setProperty("--popover-foreground", `${textHsl[0]} ${textHsl[1]}% ${textHsl[2]}%`);
+      root.style.setProperty("--primary", `${primaryHsl[0]} ${primaryHsl[1]}% ${primaryHsl[2]}%`);
+      root.style.setProperty("--primary-foreground", `${backgroundHsl[0]} ${backgroundHsl[1]}% ${backgroundHsl[2]}%`);
+      root.style.setProperty("--secondary", `${secondaryHsl[0]} ${secondaryHsl[1]}% ${secondaryHsl[2]}%`);
+      root.style.setProperty("--secondary-foreground", `${textHsl[0]} ${textHsl[1]}% ${textHsl[2]}%`);
+      root.style.setProperty("--muted", `${backgroundHsl[0]} ${Math.max(backgroundHsl[1] - 5, 5)}% ${Math.max(backgroundHsl[2] - 4, 92)}%`);
+      root.style.setProperty("--muted-foreground", `${textHsl[0]} ${Math.max(textHsl[1] - 20, 10)}% ${Math.min(textHsl[2] + 35, 55)}%`);
+      root.style.setProperty("--accent", `${secondaryHsl[0]} ${Math.max(secondaryHsl[1] - 10, 10)}% ${Math.max(secondaryHsl[2] - 5, 90)}%`);
+      root.style.setProperty("--accent-foreground", `${textHsl[0]} ${textHsl[1]}% ${textHsl[2]}%`);
+      root.style.setProperty("--border", `${borderHsl[0]} ${borderHsl[1]}% ${borderHsl[2]}%`);
+      root.style.setProperty("--input", `${borderHsl[0]} ${borderHsl[1]}% ${borderHsl[2]}%`);
+      root.style.setProperty("--ring", `${primaryHsl[0]} ${primaryHsl[1]}% ${primaryHsl[2]}%`);
+      
+      // Add custom theme class
+      document.body.classList.add("alexika-custom-theme");
+      document.body.classList.remove("dark");
+    } else {
+      // Remove custom theme class for light/dark themes
+      document.body.classList.remove("alexika-custom-theme");
+    }
+  }, [config]);
+
+  // Listen for system theme changes (only if user hasn't overridden)
+  useEffect(() => {
+    if (config.userOverride || typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    
+    const handleChange = (e: MediaQueryListEvent) => {
+      const newMode = e.matches ? "dark" : "light";
+      setConfig(prev => ({
+        ...prev,
+        mode: newMode,
+      }));
+      setTheme(newMode);
     };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [config.userOverride, setTheme]);
+
+  // Context value with theme state and actions
+  const contextValue: ThemeContextValue = {
+    config,
+    updateTheme,
+    isDark,
+    resetToSystemPreference,
   };
 
   return (
-    <ThemeContext.Provider value={{ config, updateTheme, isDark, resetToSystemPreference }}>
-      <section 
-        style={{
-          position: 'fixed',
-          top: '20px',
-          right: '20px',
-          zIndex: 1000,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-        }}
-      >
-        <Space>
-          <Select
-            value={config.mode}
-            onChange={handleThemeModeChange}
-            style={{ minWidth: 140 }}
-            suffixIcon={getThemeIcon(config.mode)}
-          >
-            <Option value="light">
-              <Space>
-                <Sun size={16} />
-                Light Theme
-              </Space>
-            </Option>
-            <Option value="dark">
-              <Space>
-                <Moon size={16} />
-                Dark Theme
-              </Space>
-            </Option>
-            <Option value="custom">
-              <Space>
-                <Palette size={16} />
-                Custom Theme
-              </Space>
-            </Option>
-          </Select>
-
-          {config.mode === "custom" && (
-            <Space>
-              <Label>Color:</Label>
-              <ColorPicker
-                value={config.primaryColor}
-                onChange={handleColorChange}
-                showText={false}
-                size="small"
-              />
-            </Space>
-          )}
-        </Space>
-      </section>
-      <ConfigProvider theme={getAntdThemeConfig()}>{children}</ConfigProvider>
+    <ThemeContext.Provider value={contextValue}>
+      {children}
     </ThemeContext.Provider>
   );
-}
+};
+
+/**
+ * Main ThemeWrapper component that provides theme context and next-themes integration
+ */
+const ThemeWrapper: React.FC<ThemeWrapperProps> = ({ children, initialConfig }) => {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <InternalThemeProvider initialConfig={initialConfig}>
+        {children}
+      </InternalThemeProvider>
+    </NextThemesProvider>
+  );
+};
+
+/**
+ * Theme Control Panel Component
+ * Provides UI controls for theme switching and customization
+ */
+export const ThemeControls: React.FC = () => {
+  const { config, updateTheme, resetToSystemPreference } = useTheme();
+
+  const handleModeChange = (mode: ThemeMode) => {
+    updateTheme({ mode });
+  };
+
+  const handleColorChange = (color: string) => {
+    updateTheme({ primaryColor: color, mode: "custom" });
+  };
+
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Palette className="h-5 w-5" />
+          Theme Settings
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label>Theme Mode</Label>
+          <div className="flex gap-2">
+            <Button
+              variant={config.mode === "light" ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleModeChange("light")}
+              className="flex items-center gap-1"
+            >
+              <Sun className="h-4 w-4" />
+              Light
+            </Button>
+            <Button
+              variant={config.mode === "dark" ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleModeChange("dark")}
+              className="flex items-center gap-1"
+            >
+              <Moon className="h-4 w-4" />
+              Dark
+            </Button>
+            <Button
+              variant={config.mode === "custom" ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleModeChange("custom")}
+              className="flex items-center gap-1"
+            >
+              <Palette className="h-4 w-4" />
+              Custom
+            </Button>
+          </div>
+        </div>
+
+        {config.mode === "custom" && (
+          <div className="space-y-2">
+            <Label>Primary Color</Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={config.primaryColor}
+                onChange={(e) => handleColorChange(e.target.value)}
+                className="w-12 h-8 border border-border rounded cursor-pointer"
+              />
+              <span className="text-sm text-muted-foreground">
+                {config.primaryColor}
+              </span>
+            </div>
+          </div>
+        )}
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={resetToSystemPreference}
+          className="w-full"
+        >
+          Reset to System
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default ThemeWrapper;
