@@ -238,20 +238,13 @@ const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({
   const updateTheme = (updates: Partial<ThemeConfig>) => {
     setConfig(prev => {
       const newConfig = { ...prev, ...updates, userOverride: true };
-      
+
       // Generate color palette for custom themes
       if (updates.mode === "custom" || (updates.primaryColor && newConfig.mode === "custom")) {
         const primaryColor = updates.primaryColor || newConfig.primaryColor;
         newConfig.generatedColors = generateColorPalette(primaryColor);
       }
-      
-      // Update next-themes
-      if (updates.mode && updates.mode !== "custom") {
-        setTheme(updates.mode);
-      } else if (updates.mode === "custom") {
-        setTheme("light"); // Use light as base for custom themes
-      }
-      
+
       saveTheme(newConfig);
       return newConfig;
     });
@@ -265,11 +258,10 @@ const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({
       mode: systemTheme,
       userOverride: false,
     };
-    
+
     setConfig(resetConfig);
-    setTheme(systemTheme);
     saveTheme(resetConfig);
-    
+
     if (typeof window !== "undefined") {
       localStorage.removeItem(CUSTOM_COLORS_STORAGE_KEY);
     }
@@ -279,12 +271,16 @@ const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({
   useEffect(() => {
     const savedTheme = loadSavedTheme();
     setConfig(savedTheme);
+  }, [loadSavedTheme]);
 
-    // Set next-themes theme
-    if (savedTheme.mode !== "custom") {
-      setTheme(savedTheme.mode);
+  // Sync config.mode changes with next-themes (separate effect to avoid setState during render)
+  useEffect(() => {
+    if (config.mode !== "custom") {
+      setTheme(config.mode);
+    } else {
+      setTheme("light"); // Use light as base for custom themes
     }
-  }, [setTheme, loadSavedTheme]);
+  }, [config.mode, setTheme]);
 
   // Apply CSS variables when theme changes
   useEffect(() => {
@@ -349,19 +345,19 @@ const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({
     if (config.userOverride || typeof window === "undefined") return;
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    
+
     const handleChange = (e: MediaQueryListEvent) => {
       const newMode = e.matches ? "dark" : "light";
       setConfig(prev => ({
         ...prev,
         mode: newMode,
       }));
-      setTheme(newMode);
+      // No setTheme here - the config.mode effect will handle it
     };
 
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [config.userOverride, setTheme]);
+  }, [config.userOverride]);
 
   // Context value with theme state and actions
   const contextValue: ThemeContextValue = {

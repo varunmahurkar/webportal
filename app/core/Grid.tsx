@@ -192,6 +192,7 @@ export const GridColumn: React.FC<GridColumnProps> = ({
   md,
   lg,
   xl,
+  auto, // Extract auto prop to prevent it from being passed to DOM
   className = '',
   style = {}
 }) => {

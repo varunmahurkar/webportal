@@ -89,7 +89,7 @@ html {
   font-size: 16px;
   line-height: 1.5;
   -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth; - Removed: Next.js now uses data-scroll-behavior="smooth" attribute instead */
 }
 
 body {
