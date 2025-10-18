@@ -362,17 +362,26 @@ The system provides five main components for flexible layouts:
 - `maxWidth`: `'small' | 'medium' | 'large' | 'full'` - Container width limits
 - `padding`: `boolean` - Whether to add internal padding
 
-#### 2. GridRow - Horizontal CSS Grid layout
+#### 2. GridRow - Horizontal CSS Grid layout with Auto-Layout
 ```tsx
+// Manual layout (traditional)
 <GridRow columns={12} gap={1}>
   <GridColumn span={6}>Half width</GridColumn>
   <GridColumn span={6}>Half width</GridColumn>
+</GridRow>
+
+// Auto-layout (intelligent distribution)
+<GridRow columns={12} gap={1} autoLayout={true}>
+  <GridColumn>Auto-distributed column</GridColumn>
+  <GridColumn>Auto-distributed column</GridColumn>
+  <GridColumn>Auto-distributed column</GridColumn>
 </GridRow>
 ```
 
 **Props:**
 - `columns`: `number` - Number of grid columns (default: 12)
 - `gap`: `number` - Gap between items in rem (default: 1)
+- `autoLayout`: `boolean` - Automatically distribute columns based on children count (default: false)
 
 #### 3. GridColumn - Individual grid items
 ```tsx
@@ -413,24 +422,52 @@ The system provides five main components for flexible layouts:
 - `gap`: `number` - Gap between items in rem
 - `align`: `'start' | 'center' | 'end' | 'stretch'` - Horizontal alignment
 
+### Auto-Layout Distribution Rules
+
+The `autoLayout` feature intelligently distributes columns based on child count and total columns:
+
+**12-Column Grid:**
+- 1 child: Full width (12 columns)
+- 2 children: Half width each (6 columns each)
+- 3 children: Third width each (4 columns each)
+- 4 children: Quarter width each (3 columns each)
+- 5+ children: Distributed evenly
+
+**8-Column Grid:**
+- 1 child: Full width (8 columns)
+- 2 children: Half width each (4 columns each)
+- 3 children: 2 in first row (4 cols), 1 in second row (4 cols)
+- 4+ children: Distributed evenly
+
+**4-Column Grid:**
+- Each child takes full width (stacked vertically)
+
 ### Common Layout Patterns
 
-#### Two Column Layout
+#### Two Column Layout (Auto)
 ```tsx
 <GridContainer maxWidth="large" padding={true}>
-  <GridRow columns={12} gap={1}>
-    <GridColumn span={8}>Main content</GridColumn>
-    <GridColumn span={4}>Sidebar</GridColumn>
+  <GridRow columns={12} gap={1} autoLayout={true}>
+    <GridColumn>Column 1 (auto 6-span)</GridColumn>
+    <GridColumn>Column 2 (auto 6-span)</GridColumn>
   </GridRow>
 </GridContainer>
 ```
 
-#### Three Column Layout
+#### Three Column Layout (Auto)
+```tsx
+<GridRow columns={12} gap={1} autoLayout={true}>
+  <GridColumn>Column 1 (auto 4-span)</GridColumn>
+  <GridColumn>Column 2 (auto 4-span)</GridColumn>
+  <GridColumn>Column 3 (auto 4-span)</GridColumn>
+</GridRow>
+```
+
+#### Manual Control (Traditional)
 ```tsx
 <GridRow columns={12} gap={1}>
-  <GridColumn span={4}>Column 1</GridColumn>
-  <GridColumn span={4}>Column 2</GridColumn>
-  <GridColumn span={4}>Column 3</GridColumn>
+  <GridColumn span={8}>Main content (8 cols)</GridColumn>
+  <GridColumn span={4}>Sidebar (4 cols)</GridColumn>
 </GridRow>
 ```
 

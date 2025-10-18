@@ -282,29 +282,28 @@ export default function IconShowcase() {
     if (!IconComponent) return null;
 
     return (
-      <GridColumn key={iconName} span={4} className="flex">
-        <Card
-          className="w-full h-[120px] cursor-pointer alexika-feature-card flex flex-col justify-center items-center text-center"
-          onClick={() => handleCopyIcon(iconName)}
-        >
-          <CardContent className="p-3 flex flex-col items-center justify-center h-full">
-            <div className="flex justify-center items-center mb-2 h-[60px]">
-              <IconComponent
-                size={Icons.getIconSize(selectedSize)}
-                color={selectedColor}
-                strokeWidth={2}
-              />
-            </div>
-            <Text
-              variant="body-sm"
-              color="primary"
-              className="text-xs leading-tight"
-            >
-              {iconName}
-            </Text>
-          </CardContent>
-        </Card>
-      </GridColumn>
+      <Card
+        key={iconName}
+        className="w-full h-[120px] cursor-pointer alexika-feature-card flex flex-col justify-center items-center text-center"
+        onClick={() => handleCopyIcon(iconName)}
+      >
+        <CardContent className="p-3 flex flex-col items-center justify-center h-full">
+          <div className="flex justify-center items-center mb-2 h-[60px]">
+            <IconComponent
+              size={Icons.getIconSize(selectedSize)}
+              color={selectedColor}
+              strokeWidth={2}
+            />
+          </div>
+          <Text
+            variant="body-sm"
+            color="primary"
+            className="text-xs leading-tight"
+          >
+            {iconName}
+          </Text>
+        </CardContent>
+      </Card>
     );
   };
 
@@ -321,9 +320,9 @@ export default function IconShowcase() {
         <Heading level={4} color="primary" className="mb-4">
           {categoryName}
         </Heading>
-        <GridRow columns={12} gap={1.5}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
           {visibleIcons.map((iconName) => renderIconCard(iconName))}
-        </GridRow>
+        </div>
       </div>
     );
   };
@@ -504,8 +503,8 @@ export default function IconShowcase() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid md:grid-cols-3 gap-6">
-              <div>
+            <GridRow columns={12} gap={1.5} autoLayout={true}>
+              <GridColumn>
                 <Label className="text-sm font-medium mb-2 block">1. Import from centralized icon system:</Label>
                 <div className="bg-muted p-3 rounded-md">
                   <code className="text-sm">
@@ -513,9 +512,9 @@ export default function IconShowcase() {
                     &apos;@/app/core/icons&apos;;
                   </code>
                 </div>
-              </div>
+              </GridColumn>
 
-              <div>
+              <GridColumn>
                 <Label className="text-sm font-medium mb-2 block">2. Use with consistent sizing:</Label>
                 <div className="bg-muted p-3 rounded-md">
                   <code className="text-sm">
@@ -523,16 +522,16 @@ export default function IconShowcase() {
                     color=&quot;var(--color-primary)&quot; /&gt;
                   </code>
                 </div>
-              </div>
+              </GridColumn>
 
-              <div>
+              <GridColumn>
                 <Label className="text-sm font-medium mb-2 block">3. Available size constants:</Label>
                 <Text variant="body-sm" color="secondary">
                   xs (12px), sm (16px), md (20px), lg (24px), xl (32px), xxl
                   (48px)
                 </Text>
-              </div>
-            </div>
+              </GridColumn>
+            </GridRow>
           </CardContent>
         </Card>
       </div>

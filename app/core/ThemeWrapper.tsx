@@ -142,12 +142,10 @@ const hslToHex = (h: number, s: number, l: number): string => {
 // Generates a comprehensive color palette from a primary color
 const generateColorPalette = (primaryColor: string) => {
   const [h, s, l] = hexToHsl(primaryColor);
-  
-  // Create complementary and analogous colors
-  const complementaryHue = (h + 180) % 360;
+
+  // Create analogous colors for secondary palette
   const analogousHue1 = (h + 30) % 360;
-  const analogousHue2 = (h - 30 + 360) % 360;
-  
+
   return {
     secondary: hslToHex(analogousHue1, Math.max(15, s - 15), Math.min(90, l + 10)),
     success: hslToHex(142, 71, 45), // Enhanced green
@@ -195,14 +193,14 @@ const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   };
 
-  // Loads saved theme configuration from localStorage
-  const loadSavedTheme = (): ThemeConfig => {
+  // Loads saved theme configuration from localStorage (memoized)
+  const loadSavedTheme = React.useCallback((): ThemeConfig => {
     if (typeof window === "undefined") return defaultThemeConfig;
-    
+
     try {
       const saved = localStorage.getItem(THEME_STORAGE_KEY);
       const savedColors = localStorage.getItem(CUSTOM_COLORS_STORAGE_KEY);
-      
+
       if (saved) {
         const parsed = JSON.parse(saved);
         if (savedColors && parsed.mode === "custom") {
@@ -213,12 +211,12 @@ const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({
     } catch (error) {
       console.warn("Failed to load saved theme:", error);
     }
-    
+
     return {
       ...defaultThemeConfig,
       mode: getSystemTheme(),
     };
-  };
+  }, []);
 
   // Saves current theme configuration to localStorage
   const saveTheme = (themeConfig: ThemeConfig) => {
@@ -281,7 +279,7 @@ const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({
   useEffect(() => {
     const savedTheme = loadSavedTheme();
     setConfig(savedTheme);
-    
+
     // Set next-themes theme
     if (savedTheme.mode !== "custom") {
       setTheme(savedTheme.mode);
@@ -293,36 +291,27 @@ const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({
     if (typeof window === "undefined") return;
 
     const root = document.documentElement;
-    
-    // Apply theme class and CSS variables
+
+    // Define all custom variables that need cleanup
+    const customVarsList = [
+      "background", "foreground", "card", "card-foreground", "popover", "popover-foreground",
+      "primary", "primary-foreground", "secondary", "secondary-foreground",
+      "muted", "muted-foreground", "accent", "accent-foreground",
+      "border", "input", "ring"
+    ];
+
     if (config.mode === "custom" && config.generatedColors) {
-      // Apply custom generated colors to both ALEXIKA and shadcn/ui variables
+      // Apply custom theme
       const colors = config.generatedColors;
-      
-      // ALEXIKA custom variables
-      root.style.setProperty("--color-primary", colors.textPrimary);
-      root.style.setProperty("--color-secondary", colors.secondary);
-      root.style.setProperty("--color-success", colors.success);
-      root.style.setProperty("--color-warning", colors.warning);
-      root.style.setProperty("--color-error", colors.error);
-      root.style.setProperty("--color-info", colors.info);
-      root.style.setProperty("--bg-primary", colors.backgroundPrimary);
-      root.style.setProperty("--bg-secondary", colors.backgroundSecondary);
-      root.style.setProperty("--bg-tertiary", colors.backgroundTertiary);
-      root.style.setProperty("--text-primary", colors.textPrimary);
-      root.style.setProperty("--text-secondary", colors.textSecondary);
-      root.style.setProperty("--text-tertiary", colors.textTertiary);
-      root.style.setProperty("--border-color", colors.borderColor);
-      root.style.setProperty("--border-hover", colors.borderHover);
-      
+
       // Convert hex colors to HSL for shadcn/ui compatibility
       const primaryHsl = hexToHsl(config.primaryColor);
       const secondaryHsl = hexToHsl(colors.secondary);
       const backgroundHsl = hexToHsl(colors.backgroundPrimary);
       const textHsl = hexToHsl(colors.textPrimary);
       const borderHsl = hexToHsl(colors.borderColor);
-      
-      // Apply shadcn/ui CSS variables for custom theme
+
+      // Apply shadcn/ui CSS variables - use HSL format for better compatibility
       root.style.setProperty("--background", `${backgroundHsl[0]} ${backgroundHsl[1]}% ${backgroundHsl[2]}%`);
       root.style.setProperty("--foreground", `${textHsl[0]} ${textHsl[1]}% ${textHsl[2]}%`);
       root.style.setProperty("--card", `${backgroundHsl[0]} ${backgroundHsl[1]}% ${Math.max(backgroundHsl[2] - 2, 95)}%`);
@@ -340,12 +329,17 @@ const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({
       root.style.setProperty("--border", `${borderHsl[0]} ${borderHsl[1]}% ${borderHsl[2]}%`);
       root.style.setProperty("--input", `${borderHsl[0]} ${borderHsl[1]}% ${borderHsl[2]}%`);
       root.style.setProperty("--ring", `${primaryHsl[0]} ${primaryHsl[1]}% ${primaryHsl[2]}%`);
-      
+
       // Add custom theme class
       document.body.classList.add("alexika-custom-theme");
       document.body.classList.remove("dark");
     } else {
-      // Remove custom theme class for light/dark themes
+      // CRITICAL: Remove ALL inline style overrides to let CSS handle light/dark themes
+      customVarsList.forEach(varName => {
+        root.style.removeProperty(`--${varName}`);
+      });
+
+      // Remove custom theme class
       document.body.classList.remove("alexika-custom-theme");
     }
   }, [config]);

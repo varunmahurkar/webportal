@@ -439,17 +439,11 @@ const ColorShowcasePage: React.FC = () => {
 
         {/* Color Grid */}
         {filteredColors.length > 0 ? (
-          <GridRow columns={12} gap={1.5}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredColors.map((color) => (
-              <GridColumn 
-                key={color.id} 
-                span={4}
-                className="flex"
-              >
-                <ColorCard color={color} />
-              </GridColumn>
+              <ColorCard key={color.id} color={color} />
             ))}
-          </GridRow>
+          </div>
         ) : (
           <Card className="py-12">
             <CardContent className="text-center">
@@ -471,8 +465,8 @@ const ColorShowcasePage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
+            <GridRow columns={12} gap={1.5} autoLayout={true}>
+              <GridColumn>
                 <Heading level={4} className="mb-2">CSS Variables</Heading>
                 <Text variant="body-sm" color="secondary" className="mb-3">
                   Use CSS variables for automatic theme switching:
@@ -484,8 +478,8 @@ const ColorShowcasePage: React.FC = () => {
                     background-color: var(--bg-secondary);
                   </code>
                 </div>
-              </div>
-              <div>
+              </GridColumn>
+              <GridColumn>
                 <Heading level={4} className="mb-2">Design Tokens</Heading>
                 <Text variant="body-sm" color="secondary" className="mb-3">
                   Semantic naming ensures consistent usage:
@@ -496,8 +490,8 @@ const ColorShowcasePage: React.FC = () => {
                   <li>• Use --text-* for text hierarchy</li>
                   <li>• Use --border-* for component borders</li>
                 </ul>
-              </div>
-            </div>
+              </GridColumn>
+            </GridRow>
           </CardContent>
         </Card>
       </div>

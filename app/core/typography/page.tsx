@@ -19,17 +19,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import Typography, { 
-  Heading, 
-  Text, 
-  Paragraph, 
-  Label as CustomLabel, 
-  Caption, 
+import Typography, {
+  Heading,
+  Text,
+  Paragraph,
+  Label as CustomLabel,
+  Caption,
   Code,
   TypographyVariant,
   TextColor,
-  FontWeight 
+  FontWeight
 } from '../Typography';
+import { GridContainer, GridRow, GridColumn } from '../Grid';
 import { Copy, Check } from '../icons';
 import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard';
 import styles from './page.module.css';
@@ -232,9 +233,9 @@ export default function TypographyShowcase() {
         <Paragraph color="secondary" className="mb-6">
           Theme-aware color system that adapts to light, dark, and custom themes.
         </Paragraph>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <GridRow columns={12} gap={1} autoLayout={true}>
           {colorOptions.map((color) => (
-            <div key={color} className="space-y-2">
+            <GridColumn key={color} className="space-y-2">
               <CustomLabel color="tertiary">{color}</CustomLabel>
               <div className="space-y-1">
                 <Typography
@@ -250,9 +251,9 @@ export default function TypographyShowcase() {
                   Body text in {color}
                 </Typography>
               </div>
-            </div>
+            </GridColumn>
           ))}
-        </div>
+        </GridRow>
       </CardContent>
     </Card>
   );
@@ -361,7 +362,7 @@ export default function TypographyShowcase() {
         </Paragraph>
         
         {/* Controls Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+        <GridRow columns={12} gap={1} autoLayout={true} className="mb-6">
           <div className="space-y-2">
             <Label>Variant</Label>
             <Select value={selectedVariant} onValueChange={(value) => setSelectedVariant(value as TypographyVariant)}>
@@ -478,7 +479,7 @@ export default function TypographyShowcase() {
             <Switch checked={showTruncate} onCheckedChange={setShowTruncate} />
             <Label>Truncate</Label>
           </div>
-        </div>
+        </GridRow>
         
         <Separator className="my-6" />
         
@@ -527,20 +528,20 @@ export default function TypographyShowcase() {
             {/* Convenience Component Examples */}
             <div className="space-y-3">
               <CustomLabel color="secondary">Convenience Components:</CustomLabel>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="flex items-center justify-between p-2 bg-muted rounded">
+              <GridRow columns={12} gap={1} autoLayout={true}>
+                <GridColumn className="flex items-center justify-between p-2 bg-muted rounded">
                   <CustomLabel color="tertiary">Heading</CustomLabel>
                   {renderCopyButton('heading-md', 'Heading')}
-                </div>
-                <div className="flex items-center justify-between p-2 bg-muted rounded">
+                </GridColumn>
+                <GridColumn className="flex items-center justify-between p-2 bg-muted rounded">
                   <CustomLabel color="tertiary">Text</CustomLabel>
                   {renderCopyButton('body-md', 'Text')}
-                </div>
-                <div className="flex items-center justify-between p-2 bg-muted rounded">
+                </GridColumn>
+                <GridColumn className="flex items-center justify-between p-2 bg-muted rounded">
                   <CustomLabel color="tertiary">Paragraph</CustomLabel>
                   {renderCopyButton('body-md', 'Paragraph')}
-                </div>
-              </div>
+                </GridColumn>
+              </GridRow>
             </div>
           </div>
         </div>
@@ -568,7 +569,7 @@ export default function TypographyShowcase() {
       {renderInteractiveControls()}
       
       {/* Main Content - Two Column Grid */}
-      <div className="grid lg:grid-cols-2 gap-8">
+      <GridRow columns={12} gap={2} autoLayout={true}>
         {/* Left Column */}
         <div className="space-y-8">
           {/* Display Variants */}
@@ -618,7 +619,7 @@ export default function TypographyShowcase() {
           {/* Special Effects */}
           {renderSpecialEffects()}
         </div>
-      </div>
+      </GridRow>
     </main>
   );
 }

@@ -61,9 +61,9 @@ export default function HomePage() {
         </div>
 
         {/* Features Grid */}
-        <GridRow columns={12} gap={2}>
-          <GridColumn span={4} className="flex">
-            <Card className="w-full alexika-feature-card">
+        <GridRow columns={12} gap={1.5} autoLayout={true}>
+          <GridColumn className="flex">
+            <Card className="w-full alexika-feature-card h-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Icons.Palette className="h-5 w-5 text-primary" />
@@ -84,8 +84,8 @@ export default function HomePage() {
             </Card>
           </GridColumn>
 
-          <GridColumn span={4} className="flex">
-            <Card className="w-full alexika-feature-card">
+          <GridColumn className="flex">
+            <Card className="w-full alexika-feature-card h-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Icons.FileText className="h-5 w-5 text-primary" />
@@ -106,8 +106,8 @@ export default function HomePage() {
             </Card>
           </GridColumn>
 
-          <GridColumn span={4} className="flex">
-            <Card className="w-full alexika-feature-card">
+          <GridColumn className="flex">
+            <Card className="w-full alexika-feature-card h-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Icons.Grid3x3 className="h-5 w-5 text-primary" />
@@ -138,8 +138,8 @@ export default function HomePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <GridRow columns={12} gap={2}>
-              <GridColumn span={6}>
+            <GridRow columns={12} gap={2} autoLayout={true}>
+              <GridColumn>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Icons.Check className="h-4 w-4 text-success" />
@@ -159,7 +159,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </GridColumn>
-              <GridColumn span={6}>
+              <GridColumn>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Icons.Check className="h-4 w-4 text-success" />
