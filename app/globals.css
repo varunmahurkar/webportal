@@ -206,6 +206,27 @@ body {
 
 /* Shadcn Component Styles */
 @layer components {
+  /* Responsive Grid/Flex Utilities */
+  .alexika-grid,
+  .alexika-flex,
+  .alexika-stack,
+  .alexika-columns {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .alexika-grid-item,
+  .alexika-flex-item {
+    min-width: 0; /* Prevent grid/flex blowout */
+    box-sizing: border-box;
+  }
+
+  /* Fluid container with auto-responsive padding */
+  .alexika-container {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
   .card {
     background-color: hsl(var(--card));
     border: 1px solid hsl(var(--border));
