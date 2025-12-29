@@ -1,5 +1,5 @@
 /**
- * ALEXIKA AI Copy to Clipboard Hook
+ * Nurav AI Copy to Clipboard Hook
  * Reusable hook for copying text to clipboard with success/error handling
  */
 

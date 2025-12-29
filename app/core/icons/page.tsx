@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * ALEXIKA AI Icon Showcase Page
+ * Nurav AI Icon Showcase Page
  *
- * This page demonstrates all Lucide React icons used in the ALEXIKA project.
+ * This page demonstrates all Lucide React icons used in the Nurav project.
  * Features only rounded corner icons (no sharp corner icons) following design guidelines.
  *
  * Features:
@@ -284,7 +284,7 @@ export default function IconShowcase() {
     return (
       <Card
         key={iconName}
-        className="w-full h-[120px] cursor-pointer alexika-feature-card flex flex-col justify-center items-center text-center"
+        className="w-full h-[120px] cursor-pointer nurav-feature-card flex flex-col justify-center items-center text-center"
         onClick={() => handleCopyIcon(iconName)}
       >
         <CardContent className="p-3 flex flex-col items-center justify-center h-full">
@@ -422,7 +422,7 @@ export default function IconShowcase() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-1">
             <Text variant="body-lg" weight={600} color="primary">
-              ALEXIKA Icon Library Statistics
+              Nurav Icon Library Statistics
             </Text>
             <Text variant="body-sm" color="secondary">
               Total Icons: {Object.values(iconCategories).flat().length} |
@@ -450,7 +450,7 @@ export default function IconShowcase() {
             className="flex items-center justify-center gap-3"
           >
             <Icons.Palette className="h-8 w-8 text-primary" />
-            ALEXIKA Icon Library
+            Nurav Icon Library
           </Heading>
           <Paragraph variant="body-xl" color="secondary" align="center">
             Comprehensive Lucide React icons with rounded corners only. Click

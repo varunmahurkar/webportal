@@ -1,4 +1,4 @@
-# ALEXIKA AI - Production-Ready Next.js Docker Container
+# Nurav AI - Production-Ready Next.js Docker Container
 # Multi-stage build for optimized image size and security
 
 # Stage 1: Dependencies installation

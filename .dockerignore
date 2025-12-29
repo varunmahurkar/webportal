@@ -1,4 +1,4 @@
-# ALEXIKA AI - Docker Ignore Configuration
+# Nurav AI - Docker Ignore Configuration
 # Excludes unnecessary files from Docker build context for faster builds and smaller images
 
 # Dependencies

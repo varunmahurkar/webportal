@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# ALEXIKA AI - Automated Docker Update Script
+# Nurav AI - Automated Docker Update Script
 # Handles automatic updates with zero downtime and rollback capability
 
 set -e  # Exit on any error
 
 # Configuration
-PROJECT_NAME="alexika-ai"
+PROJECT_NAME="nurav-ai"
 LOG_FILE="./logs/docker-update.log"
 BACKUP_DIR="./backups"
 MAX_BACKUPS=5
@@ -138,7 +138,7 @@ rolling_update() {
     
     # Scale up with new version
     log "Scaling up with new version..."
-    if ! docker-compose up -d --scale alexika-ai=2 --no-recreate; then
+    if ! docker-compose up -d --scale nurav-ai=2 --no-recreate; then
         log_error "Failed to scale up with new version"
         return 1
     fi
@@ -147,7 +147,7 @@ rolling_update() {
     sleep 30
     
     # Check health of new instances
-    local new_container_id=$(docker-compose ps -q alexika-ai | head -n 1)
+    local new_container_id=$(docker-compose ps -q nurav-ai | head -n 1)
     if ! docker exec "$new_container_id" curl -f http://localhost:3000 >/dev/null 2>&1; then
         log_error "New instance health check failed"
         rollback
@@ -156,7 +156,7 @@ rolling_update() {
     
     # Scale down to remove old instances
     log "Scaling down old instances..."
-    if ! docker-compose up -d --scale alexika-ai=1; then
+    if ! docker-compose up -d --scale nurav-ai=1; then
         log_error "Failed to scale down"
         return 1
     fi
@@ -181,7 +181,7 @@ simple_update() {
     sleep 10
     
     # Perform health check
-    if health_check "alexika-ai"; then
+    if health_check "nurav-ai"; then
         log_success "Simple update completed successfully"
     else
         log_error "Health check failed after update"
@@ -246,7 +246,7 @@ cleanup() {
 
 # Main update process
 main() {
-    log "Starting ALEXIKA AI update process..."
+    log "Starting Nurav AI update process..."
     
     # Pre-flight checks
     create_directories
@@ -289,7 +289,7 @@ main() {
     esac
     
     # Final health check
-    if health_check "alexika-ai"; then
+    if health_check "nurav-ai"; then
         log_success "Final health check passed"
     else
         log_error "Final health check failed"
@@ -300,13 +300,13 @@ main() {
     # Cleanup
     cleanup
     
-    log_success "ALEXIKA AI update process completed successfully!"
+    log_success "Nurav AI update process completed successfully!"
 }
 
 # Handle script arguments
 case "${1:-}" in
     "--help" | "-h")
-        echo "ALEXIKA AI Docker Update Script"
+        echo "Nurav AI Docker Update Script"
         echo ""
         echo "Usage: $0 [OPTIONS]"
         echo ""

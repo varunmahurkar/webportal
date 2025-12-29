@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# ALEXIKA AI - Health Check and Monitoring Script
+# Nurav AI - Health Check and Monitoring Script
 # Comprehensive health monitoring for Docker containers
 
 set -e
 
 # Configuration
-PROJECT_NAME="alexika-ai"
+PROJECT_NAME="nurav-ai"
 LOG_FILE="./logs/health-check.log"
 ALERT_WEBHOOK=${ALERT_WEBHOOK:-""}  # Optional webhook for alerts
 
@@ -42,7 +42,7 @@ send_alert() {
     if [ -n "$ALERT_WEBHOOK" ]; then
         curl -X POST "$ALERT_WEBHOOK" \
              -H "Content-Type: application/json" \
-             -d "{\"text\":\"ALEXIKA AI Alert [$severity]: $message\"}" \
+             -d "{\"text\":\"Nurav AI Alert [$severity]: $message\"}" \
              >/dev/null 2>&1 || true
     fi
     
@@ -127,7 +127,7 @@ check_resource_usage() {
     log "Checking resource usage..."
     
     # Get container stats
-    local stats=$(docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}" | grep alexika || true)
+    local stats=$(docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}" | grep nurav || true)
     
     if [ -n "$stats" ]; then
         echo "$stats" | while read -r line; do
@@ -173,7 +173,7 @@ check_docker_system() {
     log "Checking Docker system health..."
     
     # Check for failed containers
-    local failed_containers=$(docker ps -a --filter "status=exited" --filter "status=dead" --format "{{.Names}}" | grep alexika || true)
+    local failed_containers=$(docker ps -a --filter "status=exited" --filter "status=dead" --format "{{.Names}}" | grep nurav || true)
     
     if [ -n "$failed_containers" ]; then
         send_alert "Failed containers detected: $failed_containers"
@@ -206,7 +206,7 @@ generate_health_report() {
         echo "  \"resources\": {"
         
         # Resource usage
-        docker stats --no-stream --format json | grep alexika | head -1 | jq -r '
+        docker stats --no-stream --format json | grep nurav | head -1 | jq -r '
             "    \"cpu_percent\": \"" + .CPUPerc + "\","
             "    \"memory_usage\": \"" + .MemUsage + "\","
             "    \"memory_percent\": \"" + .MemPerc + "\""
@@ -225,7 +225,7 @@ main() {
     mkdir -p "$(dirname "$LOG_FILE")"
     mkdir -p "./logs"
     
-    log "Starting ALEXIKA AI health check..."
+    log "Starting Nurav AI health check..."
     
     local overall_status=0
     
@@ -235,7 +235,7 @@ main() {
     fi
     
     # Check main application container
-    case $(check_container_health "alexika-ai") in
+    case $(check_container_health "nurav-ai") in
         1) overall_status=1 ;;
         2) log_warning "Container is in transitional state" ;;
     esac
@@ -269,7 +269,7 @@ main() {
 # Handle script arguments
 case "${1:-}" in
     "--help" | "-h")
-        echo "ALEXIKA AI Health Check Script"
+        echo "Nurav AI Health Check Script"
         echo ""
         echo "Usage: $0 [OPTIONS]"
         echo ""

@@ -1,15 +1,15 @@
-# ALEXIKA AI - Docker Compose Configuration
+# Nurav AI - Docker Compose Configuration
 # Provides both development and production environments
 
 version: '3.8'
 
 services:
-  # Main ALEXIKA AI application
-  alexika-ai:
+  # Main Nurav AI application
+  nurav-ai:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: alexika-ai-app
+    container_name: nurav-ai-app
     ports:
       - "3000:3000"
     environment:
@@ -23,17 +23,17 @@ services:
       - /app/.next
     restart: unless-stopped
     networks:
-      - alexika-network
+      - nurav-network
     labels:
-      - "com.alexika.service=frontend"
-      - "com.alexika.version=1.0.0"
+      - "com.nurav.service=frontend"
+      - "com.nurav.version=1.0.0"
 
   # Development server with hot reload
-  alexika-dev:
+  nurav-dev:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: alexika-ai-dev
+    container_name: nurav-ai-dev
     ports:
       - "3001:3000"
     environment:
@@ -46,7 +46,7 @@ services:
       - /app/.next
     restart: unless-stopped
     networks:
-      - alexika-network
+      - nurav-network
     profiles:
       - dev
     command: npm run dev
@@ -54,7 +54,7 @@ services:
   # Nginx reverse proxy for production
   nginx:
     image: nginx:alpine
-    container_name: alexika-nginx
+    container_name: nurav-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -62,17 +62,17 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
     depends_on:
-      - alexika-ai
+      - nurav-ai
     restart: unless-stopped
     networks:
-      - alexika-network
+      - nurav-network
     profiles:
       - production
 
   # Watchtower for automatic updates
   watchtower:
     image: containrrr/watchtower
-    container_name: alexika-watchtower
+    container_name: nurav-watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -84,6 +84,6 @@ services:
       - auto-update
 
 networks:
-  alexika-network:
+  nurav-network:
     driver: bridge
-    name: alexika-network
+    name: nurav-network

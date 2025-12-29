@@ -1,4 +1,4 @@
-# ALEXIKA AI - Development Docker Container
+# Nurav AI - Development Docker Container
 # Optimized for development with hot reload and debugging
 
 FROM node:18-alpine

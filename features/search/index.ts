@@ -1,12 +1,12 @@
 /**
- * ALEXIKA AI Search System - Optimized for Competition
- * 
+ * Nurav AI Search System - Optimized for Competition
+ *
  * Ultra-powerful search system designed to compete with Perplexity AI, ChatGPT, and Claude.
  * Features AI-powered suggestions, voice search, database queries, and advanced filtering.
- * 
+ *
  * Primary Usage:
  * import { AISearch } from '@/features/search';
- * 
+ *
  * Features:
  * - AI-powered search with intelligent suggestions
  * - Voice search and keyboard shortcuts

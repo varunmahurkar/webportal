@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * ALEXIKA AI Typography Showcase Page
+ * Nurav AI Typography Showcase Page
  * 
  * This page demonstrates all capabilities of the Typography component system:
  * - All typography variants (display, heading, body, label, special)
@@ -36,7 +36,7 @@ import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard';
 import styles from './page.module.css';
 
 // Sample content for demonstrating typography variants
-const sampleHeading = 'ALEXIKA AI Typography System';
+const sampleHeading = 'Nurav AI Typography System';
 const sampleText = 'This is a comprehensive typography system designed for modern web applications with responsive scaling and theme integration.';
 const sampleLongText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.';
 const sampleCode = 'const typography = new TypographySystem();';
@@ -558,7 +558,7 @@ export default function TypographyShowcase() {
           gradient={true} 
           weight={800}
         >
-          ALEXIKA AI Typography
+          Nurav AI Typography
         </Typography>
         <Paragraph variant="body-xl" color="secondary" align="center">
           A comprehensive, responsive typography system with theme integration and advanced styling capabilities

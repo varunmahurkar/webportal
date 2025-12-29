@@ -1,4 +1,4 @@
-# ALEXIKA AI Routes
+# Nurav AI Routes
 
 ## Application Routes
 
@@ -9,7 +9,7 @@
 
 ## Search System
 
-The ALEXIKA project uses a simplified and optimized search system located in `features/search/`. 
+The Nurav project uses a simplified and optimized search system located in `features/search/`. 
 
 ### Current Search Implementation
 
@@ -21,7 +21,7 @@ The ALEXIKA project uses a simplified and optimized search system located in `fe
 - **Search Modes**: Instant, debounced, and manual search modes
 - **Clean Interface**: Minimal UI with clear search input and results display
 - **Performance**: Debounced search with configurable delay
-- **Theme Integration**: Full ALEXIKA design system support
+- **Theme Integration**: Full Nurav design system support
 
 ### Usage Pattern
 

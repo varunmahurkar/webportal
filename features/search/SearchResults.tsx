@@ -1,8 +1,8 @@
 'use client';
 
 /**
- * ALEXIKA Search Results - Clean & Consistent Component
- * Uses only ALEXIKA core components for complete consistency
+ * Nurav Search Results - Clean & Consistent Component
+ * Uses only Nurav core components for complete consistency
  * No Ant Design dependencies - pure HTML with proper TypeScript
  */
 

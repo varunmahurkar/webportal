@@ -1,6 +1,6 @@
-# 🐳 ALEXIKA AI - Docker Documentation
+# 🐳 Nurav AI - Docker Documentation
 
-Complete guide for containerizing and running the ALEXIKA AI platform with Docker.
+Complete guide for containerizing and running the Nurav AI platform with Docker.
 
 ## 📋 Table of Contents
 
@@ -22,7 +22,7 @@ Complete guide for containerizing and running the ALEXIKA AI platform with Docke
 ```bash
 # Clone and setup the project
 git clone <repository-url>
-cd alexika
+cd nurav
 
 # Start development environment
 docker-compose --profile dev up -d
@@ -73,7 +73,7 @@ docker run hello-world
 
 ### File Structure
 ```
-alexika/
+nurav/
 ├── Dockerfile              # Production container
 ├── Dockerfile.dev         # Development container
 ├── docker-compose.yml     # Multi-environment setup
@@ -107,7 +107,7 @@ alexika/
 docker-compose --profile dev up -d
 
 # View logs
-docker-compose logs -f alexika-dev
+docker-compose logs -f nurav-dev
 
 # Stop development environment
 docker-compose --profile dev down
@@ -125,11 +125,11 @@ docker-compose --profile dev down
 docker-compose --profile dev up --build -d
 
 # Execute commands in development container
-docker-compose exec alexika-dev npm run lint
-docker-compose exec alexika-dev npm run test
+docker-compose exec nurav-dev npm run lint
+docker-compose exec nurav-dev npm run test
 
 # Access container shell
-docker-compose exec alexika-dev sh
+docker-compose exec nurav-dev sh
 
 # View real-time logs
 docker-compose --profile dev logs -f
@@ -146,7 +146,7 @@ docker-compose up -d
 
 # Verify deployment
 docker-compose ps
-docker-compose logs alexika-ai
+docker-compose logs nurav-ai
 ```
 
 ### Production with Nginx (Recommended)
@@ -155,7 +155,7 @@ docker-compose logs alexika-ai
 docker-compose --profile production up -d
 
 # This starts:
-# - ALEXIKA AI app (port 3000)
+# - Nurav AI app (port 3000)
 # - Nginx reverse proxy (ports 80/443)
 ```
 
@@ -210,7 +210,7 @@ chmod +x scripts/docker-update.sh
 ./scripts/docker-update.sh
 
 # Schedule with cron (every 6 hours)
-echo "0 */6 * * * /path/to/alexika/scripts/docker-update.sh" | crontab -
+echo "0 */6 * * * /path/to/nurav/scripts/docker-update.sh" | crontab -
 ```
 
 ---
@@ -229,13 +229,13 @@ docker-compose up -d
 docker-compose down
 
 # Restart specific service
-docker-compose restart alexika-ai
+docker-compose restart nurav-ai
 
 # View service logs
-docker-compose logs -f alexika-ai
+docker-compose logs -f nurav-ai
 
 # Scale services (if needed)
-docker-compose up -d --scale alexika-ai=3
+docker-compose up -d --scale nurav-ai=3
 ```
 
 ### Image Management
@@ -259,28 +259,28 @@ docker image prune -f
 ### Debugging Commands
 ```bash
 # Execute shell in running container
-docker-compose exec alexika-ai sh
+docker-compose exec nurav-ai sh
 
 # Run one-off commands
-docker-compose run --rm alexika-ai npm run test
+docker-compose run --rm nurav-ai npm run test
 
 # Copy files from container
-docker cp alexika-ai-app:/app/logs ./local-logs
+docker cp nurav-ai-app:/app/logs ./local-logs
 
 # Inspect container configuration
-docker inspect alexika-ai-app
+docker inspect nurav-ai-app
 ```
 
 ### Health Check Commands
 ```bash
 # Check container health
-docker-compose exec alexika-ai curl -f http://localhost:3000/api/health
+docker-compose exec nurav-ai curl -f http://localhost:3000/api/health
 
 # View health status
-docker inspect --format='{{.State.Health.Status}}' alexika-ai-app
+docker inspect --format='{{.State.Health.Status}}' nurav-ai-app
 
 # Monitor resource usage
-docker stats alexika-ai-app
+docker stats nurav-ai-app
 ```
 
 ---
@@ -316,13 +316,13 @@ docker-compose build --progress=plain
 #### Container Won't Start
 ```bash
 # Check logs
-docker-compose logs alexika-ai
+docker-compose logs nurav-ai
 
 # Inspect container
-docker inspect alexika-ai-app
+docker inspect nurav-ai-app
 
 # Try interactive mode
-docker-compose run --rm alexika-ai sh
+docker-compose run --rm nurav-ai sh
 ```
 
 #### Performance Issues
@@ -331,7 +331,7 @@ docker-compose run --rm alexika-ai sh
 docker stats
 
 # Check container limits
-docker inspect alexika-ai-app | grep -i memory
+docker inspect nurav-ai-app | grep -i memory
 
 # Optimize with resource limits
 ```
@@ -364,7 +364,7 @@ export DOCKER_BUILDKIT=1
 ```yaml
 # Add to docker-compose.yml
 services:
-  alexika-ai:
+  nurav-ai:
     deploy:
       resources:
         limits:
@@ -429,16 +429,16 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 curl http://localhost:3000/api/health
 
 # Docker health status
-docker inspect --format='{{.State.Health.Status}}' alexika-ai-app
+docker inspect --format='{{.State.Health.Status}}' nurav-ai-app
 ```
 
 ### Log Management
 ```bash
 # View application logs
-docker-compose logs -f alexika-ai
+docker-compose logs -f nurav-ai
 
 # Export logs to file
-docker-compose logs alexika-ai > app.log
+docker-compose logs nurav-ai > app.log
 
 # Rotate logs automatically
 docker-compose config | grep -A 5 logging:
@@ -463,7 +463,7 @@ curl http://localhost:3000/api/metrics
 docker-compose -f docker-compose.green.yml up -d
 
 # Test green environment
-curl -H "Host: green.alexika.local" http://localhost
+curl -H "Host: green.nurav.local" http://localhost
 
 # Switch traffic (update nginx config)
 # Stop old version (blue)
@@ -473,10 +473,10 @@ docker-compose -f docker-compose.blue.yml down
 ### Rolling Updates
 ```bash
 # Update with zero downtime
-docker-compose up -d --scale alexika-ai=2
+docker-compose up -d --scale nurav-ai=2
 # Health check new instances
 # Remove old instances
-docker-compose up -d --scale alexika-ai=1
+docker-compose up -d --scale nurav-ai=1
 ```
 
 ---
@@ -488,14 +488,14 @@ docker-compose up -d --scale alexika-ai=1
 - [Docker Compose Reference](https://docs.docker.com/compose/compose-file/)
 - [Next.js Docker Deployment](https://nextjs.org/docs/deployment#docker-image)
 
-### ALEXIKA AI Specific
+### Nurav AI Specific
 - [Architecture Documentation](./docs/architecture.md)
 - [API Documentation](./docs/api.md)
 - [Contributing Guide](./docs/contributing.md)
 
 ### Support
-- **Issues**: [GitHub Issues](https://github.com/your-org/alexika-ai/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/alexika-ai/discussions)
+- **Issues**: [GitHub Issues](https://github.com/your-org/nurav-ai/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-org/nurav-ai/discussions)
 - **Documentation**: [Full Documentation](./docs/)
 
 ---
@@ -510,4 +510,4 @@ docker-compose up -d --scale alexika-ai=1
 
 ---
 
-**🎉 Congratulations!** You now have a fully containerized ALEXIKA AI platform with automatic updates and comprehensive monitoring. For additional help, please refer to the troubleshooting section or open an issue on GitHub.
+**🎉 Congratulations!** You now have a fully containerized Nurav AI platform with automatic updates and comprehensive monitoring. For additional help, please refer to the troubleshooting section or open an issue on GitHub.

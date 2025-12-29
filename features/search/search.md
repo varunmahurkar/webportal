@@ -1,4 +1,4 @@
-# ALEXIKA Search System
+# Nurav Search System
 
 Simple, powerful, and clean search components optimized for performance and ease of use. Designed to be flexible and lightweight while providing everything you need for modern web applications.
 
@@ -15,7 +15,7 @@ features/search/
 ## 🔥 Key Features
 
 - **⚡ Lightning Fast**: Optimized debounced search with instant results
-- **🎨 Clean UI**: Beautiful, responsive interface using ALEXIKA design system
+- **🎨 Clean UI**: Beautiful, responsive interface using Nurav design system
 - **🛠️ Flexible**: Easy to customize and extend for any use case
 - **📱 Mobile Ready**: Responsive design that works on all devices
 - **🔍 Smart Highlighting**: Query text highlighting in results
@@ -187,7 +187,7 @@ function ColorSearch() {
 
 ## 🎨 Styling
 
-The search components use CSS modules and integrate with the ALEXIKA design system. All components respond to CSS custom properties for theming.
+The search components use CSS modules and integrate with the Nurav design system. All components respond to CSS custom properties for theming.
 
 ## 🔧 Migration from Old AISearch
 

@@ -1,16 +1,16 @@
 /**
- * ALEXIKA AI Icon System - Centralized Lucide React Icons Management
- * 
- * This module provides a centralized system for managing all icons used in the ALEXIKA project.
+ * Nurav AI Icon System - Centralized Lucide React Icons Management
+ *
+ * This module provides a centralized system for managing all icons used in the Nurav project.
  * All icons are from Lucide React with rounded corners only (no sharp corner icons).
- * 
+ *
  * Features:
  * - Centralized icon exports for consistent usage across the application
- * - Rounded corner icons only (following ALEXIKA design guidelines)
+ * - Rounded corner icons only (following Nurav design guidelines)
  * - Tree-shakable imports for optimal bundle size
  * - Categorized icon groups for easy discovery and maintenance
  * - Type-safe icon components with consistent sizing and styling
- * - Integration with ALEXIKA theme system for color inheritance
+ * - Integration with Nurav theme system for color inheritance
  */
 
 // Navigation & UI Icons - rounded corner icons for interface elements

@@ -1,5 +1,5 @@
 {
-  "name": "alexika",
+  "name": "nurav",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "docker:build": "docker build -t alexika-ai .",
+    "docker:build": "docker build -t nurav-ai .",
     "docker:dev": "docker-compose --profile dev up -d",
     "docker:prod": "docker-compose up -d",
     "docker:stop": "docker-compose down",
@@ -26,7 +26,7 @@
     "clsx": "^2.1.1",
     "critters": "^0.0.23",
     "lucide-react": "^0.542.0",
-    "next": "15.5.2",
+    "next": "^15.5.9",
     "next-themes": "^0.4.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

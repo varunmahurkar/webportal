@@ -1,4 +1,4 @@
-# ALEXIKA AI Webportal
+# Nurav AI Webportal
 
 A modern, optimized web application built with Next.js 15, featuring advanced search capabilities, responsive design system, and comprehensive theming.
 
@@ -15,7 +15,7 @@ A modern, optimized web application built with Next.js 15, featuring advanced se
 ## 📁 Project Structure
 
 ```
-alexika/
+nurav/
 ├── app/                    # Next.js app directory
 │   ├── core/              # Core components and systems
 │   │   ├── Grid.tsx       # Layout components
@@ -187,4 +187,4 @@ This project is private and proprietary.
 
 ---
 
-**ALEXIKA AI** - Modern web application with advanced search and AI capabilities.
+**Nurav AI** - Modern web application with advanced search and AI capabilities.

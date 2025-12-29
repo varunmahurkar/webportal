@@ -1,7 +1,7 @@
 /**
- * ALEXIKA AI Theme System - Centralized theme management with shadcn/ui integration
+ * Nurav AI Theme System - Centralized theme management with shadcn/ui integration
  * Properly integrates with next-themes for shadcn/ui compatibility
- * 
+ *
  * Features:
  * - Automatic system theme preference detection
  * - Professional light theme with optimized contrast ratios
@@ -172,7 +172,7 @@ const defaultThemeConfig: ThemeConfig = {
 };
 
 /**
- * Internal Theme Provider that manages ALEXIKA theme state
+ * Internal Theme Provider that manages Nurav theme state
  */
 const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({ 
   children, 
@@ -327,7 +327,7 @@ const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({
       root.style.setProperty("--ring", `${primaryHsl[0]} ${primaryHsl[1]}% ${primaryHsl[2]}%`);
 
       // Add custom theme class
-      document.body.classList.add("alexika-custom-theme");
+      document.body.classList.add("nurav-custom-theme");
       document.body.classList.remove("dark");
     } else {
       // CRITICAL: Remove ALL inline style overrides to let CSS handle light/dark themes
@@ -336,7 +336,7 @@ const InternalThemeProvider: React.FC<ThemeWrapperProps> = ({
       });
 
       // Remove custom theme class
-      document.body.classList.remove("alexika-custom-theme");
+      document.body.classList.remove("nurav-custom-theme");
     }
   }, [config]);
 

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ALEXIKA AI Global Styles - Shadcn Integration */
+/* Nurav AI Global Styles - Shadcn Integration */
 
 /* Shadcn CSS Variables - Enhanced with Better Contrast */
 :root {
@@ -207,22 +207,22 @@ body {
 /* Shadcn Component Styles */
 @layer components {
   /* Responsive Grid/Flex Utilities */
-  .alexika-grid,
-  .alexika-flex,
-  .alexika-stack,
-  .alexika-columns {
+  .nurav-grid,
+  .nurav-flex,
+  .nurav-stack,
+  .nurav-columns {
     width: 100%;
     box-sizing: border-box;
   }
 
-  .alexika-grid-item,
-  .alexika-flex-item {
+  .nurav-grid-item,
+  .nurav-flex-item {
     min-width: 0; /* Prevent grid/flex blowout */
     box-sizing: border-box;
   }
 
   /* Fluid container with auto-responsive padding */
-  .alexika-container {
+  .nurav-container {
     width: 100%;
     box-sizing: border-box;
   }
@@ -328,8 +328,8 @@ body {
     width: 1px;
   }
 
-  /* ALEXIKA Custom Component Enhancements */
-  .alexika-hero {
+  /* Nurav Custom Component Enhancements */
+  .nurav-hero {
     background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
     border-radius: calc(var(--radius) * 2);
     padding: 3rem 2rem;
@@ -338,7 +338,7 @@ body {
     overflow: hidden;
   }
 
-  .alexika-card-enhanced {
+  .nurav-card-enhanced {
     background: hsl(var(--card) / 0.95);
     backdrop-filter: blur(20px);
     border: 1px solid hsl(var(--border) / 0.5);
@@ -348,14 +348,14 @@ body {
     transition: all 0.3s ease;
   }
 
-  .alexika-card-enhanced:hover {
+  .nurav-card-enhanced:hover {
     transform: translateY(-2px);
     box-shadow:
       0 10px 25px -3px hsl(var(--foreground) / 0.1),
       0 4px 6px -2px hsl(var(--foreground) / 0.05);
   }
 
-  .alexika-gradient-text {
+  .nurav-gradient-text {
     background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)) 60%, hsl(var(--accent-foreground)));
     background-clip: text;
     -webkit-background-clip: text;
@@ -369,7 +369,7 @@ body {
     50% { background-position: 100% 50%; }
   }
 
-  .alexika-theme-controls {
+  .nurav-theme-controls {
     background: hsl(var(--card) / 0.8);
     backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--border) / 0.3);
@@ -378,13 +378,13 @@ body {
     box-shadow: 0 8px 25px -5px hsl(var(--foreground) / 0.1);
   }
 
-  .alexika-status-card {
+  .nurav-status-card {
     background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--primary) / 0.05));
     border: 1px solid hsl(var(--primary) / 0.2);
     backdrop-filter: blur(8px);
   }
 
-  .alexika-feature-card {
+  .nurav-feature-card {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border) / 0.5);
     transition: all 0.3s ease;
@@ -392,7 +392,7 @@ body {
     overflow: hidden;
   }
 
-  .alexika-feature-card::before {
+  .nurav-feature-card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -403,11 +403,11 @@ body {
     transition: left 0.5s ease;
   }
 
-  .alexika-feature-card:hover::before {
+  .nurav-feature-card:hover::before {
     left: 100%;
   }
 
-  .alexika-feature-card:hover {
+  .nurav-feature-card:hover {
     transform: translateY(-4px);
     border-color: hsl(var(--primary) / 0.3);
     box-shadow:

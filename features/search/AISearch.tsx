@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * ALEXIKA Search - Simple Search Component
+ * Nurav Search - Simple Search Component
  * Clean and straightforward search functionality
- * Uses only ALEXIKA core components for complete consistency
+ * Uses only Nurav core components for complete consistency
  */
 
 import React, { useState, useCallback, useRef } from 'react';

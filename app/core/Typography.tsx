@@ -1,6 +1,6 @@
 /**
- * ALEXIKA AI Typography System - Comprehensive responsive typography component
- * 
+ * Nurav AI Typography System - Comprehensive responsive typography component
+ *
  * Features:
  * - Responsive scaling using CSS clamp() for all devices (320px to 8K displays)
  * - Semantic HTML tag support for accessibility and SEO optimization
@@ -8,7 +8,7 @@
  * - Font weight, alignment, and spacing customization options
  * - Special text effects: gradients, truncation, line height control
  * - Convenience components for common use cases (Heading, Text, Paragraph)
- * - Full compatibility with ALEXIKA AI Theme System
+ * - Full compatibility with Nurav AI Theme System
  */
 
 import React, { ReactNode, CSSProperties } from 'react';

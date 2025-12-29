@@ -1,5 +1,5 @@
 /**
- * ALEXIKA Grid System - Optimized & Scalable Layout Components
+ * Nurav Grid System - Optimized & Scalable Layout Components
  *
  * A comprehensive layout system that replaces manual div/flex/grid usage
  * with intelligent, responsive components for consistent, maintainable layouts.
@@ -430,7 +430,7 @@ const Container = memo<ContainerProps>(({
 
   return (
     <Box
-      className={`alexika-container ${className}`}
+      className={`nurav-container ${className}`}
       style={containerStyles}
       {...paddingProps}
       {...props}
@@ -510,7 +510,7 @@ const Grid = memo<GridProps>(({
 
   return (
     <Box
-      className={`alexika-grid ${className}`}
+      className={`nurav-grid ${className}`}
       style={gridStyles}
       {...props}
     >
@@ -557,7 +557,7 @@ const GridItem = memo<GridItemProps>(({
 
   return (
     <Box
-      className={`alexika-grid-item ${className}`}
+      className={`nurav-grid-item ${className}`}
       style={itemStyles}
       {...props}
     >
@@ -613,7 +613,7 @@ const Flex = memo<FlexProps>(({
 
   return (
     <Box
-      className={`alexika-flex ${className}`}
+      className={`nurav-flex ${className}`}
       style={flexStyles}
       {...props}
     >
@@ -657,7 +657,7 @@ const FlexItem = memo<FlexItemProps>(({
 
   return (
     <Box
-      className={`alexika-flex-item ${className}`}
+      className={`nurav-flex-item ${className}`}
       style={itemStyles}
       {...props}
     >
@@ -694,7 +694,7 @@ const Stack = memo<StackProps>(({
     <Flex
       direction={flexDirection}
       gap={space}
-      className={`alexika-stack ${className}`}
+      className={`nurav-stack ${className}`}
       {...props}
     >
       {stackChildren}
@@ -732,7 +732,7 @@ const Columns = memo<ColumnsProps>(({
 
   return (
     <Box
-      className={`alexika-columns ${className}`}
+      className={`nurav-columns ${className}`}
       style={columnsStyles}
       gap={gap}
       {...props}

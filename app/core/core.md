@@ -1,4 +1,4 @@
-# ALEXIKA AI Core Components
+# Nurav AI Core Components
 
 Quick reference for core components used throughout the project.
 
@@ -90,6 +90,21 @@ Vertical or horizontal stacking with consistent spacing.
   <div>Item 1</div>
   <div>Item 2</div>
 </Stack>
+```
+
+---
+
+## StickyBanner
+
+Fixed position banner for important announcements at the top of the page.
+
+```tsx
+import { StickyBanner } from "./core/StickyBanner";
+
+<StickyBanner
+  title="Announcement Title"
+  description="Your announcement description here."
+/>
 ```
 
 ---

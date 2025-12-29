@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * ALEXIKA AI Color Showcase Page
+ * Nurav AI Color Showcase Page
  * 
- * This page demonstrates all color variables and design tokens used in the ALEXIKA project.
+ * This page demonstrates all color variables and design tokens used in the Nurav project.
  * Features comprehensive color system with elegant UI using shadcn/ui components.
  * 
  * Features:
@@ -40,7 +40,7 @@ interface ColorVariableType {
   };
 }
 
-// Complete color categories with all CSS variables used in ALEXIKA project
+// Complete color categories with all CSS variables used in Nurav project
 const colorCategories = {
   'Brand Colors': [
     {
@@ -218,7 +218,7 @@ const ColorCard: React.FC<{ color: ColorVariableType }> = ({ color }) => {
   };
 
   return (
-    <Card className="group alexika-card-enhanced">
+    <Card className="group nurav-card-enhanced">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold text-foreground">
@@ -366,10 +366,10 @@ const ColorShowcasePage: React.FC = () => {
         <div className="text-center space-y-4">
           <Heading level={1} className="flex items-center justify-center gap-3">
             <Icons.Palette className="h-8 w-8 text-primary" />
-            ALEXIKA Color System
+            Nurav Color System
           </Heading>
           <Paragraph variant="body-lg" color="secondary" className="max-w-2xl mx-auto">
-            Comprehensive design tokens and color variables used throughout the ALEXIKA project.
+            Comprehensive design tokens and color variables used throughout the Nurav project.
             Click any color to copy its CSS variable, light mode value, or dark mode value.
           </Paragraph>
         </div>
