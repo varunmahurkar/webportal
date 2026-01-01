@@ -3,30 +3,352 @@
 /**
  * Nurav AI Icon Showcase Page
  *
- * This page demonstrates all Lucide React icons used in the Nurav project.
- * Features only rounded corner icons (no sharp corner icons) following design guidelines.
- *
- * Features:
- * - Categorized icon display for easy discovery
- * - Interactive size and color controls
- * - Copy-to-clipboard functionality for developers
- * - Search and filter capabilities
- * - Responsive grid layout
- * - Theme-aware icon preview
+ * Displays all Lucide React icons used in the Nurav project.
+ * Features rounded corner icons only following design guidelines.
  */
 
 import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Heading, Paragraph, Text } from "../Typography";
 import { GridContainer, GridRow, GridColumn } from "../Grid";
-import * as Icons from "../icons";
 
-// Icon categories with their corresponding icon names
+// Import all icons directly from lucide-react
+import {
+  Home,
+  Settings,
+  Menu,
+  Search,
+  Filter,
+  Grid3x3,
+  List,
+  MoreHorizontal,
+  MoreVertical,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  ChevronDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  ArrowDown,
+  X,
+  Plus,
+  Minus,
+  Maximize2,
+  Minimize2,
+  RefreshCw,
+  Loader2,
+  Check,
+  AlertCircle,
+  Info,
+  HelpCircle,
+  Image,
+  Video,
+  Music,
+  File,
+  FileText,
+  Download,
+  Upload,
+  Share,
+  Copy,
+  Trash2,
+  Edit,
+  Eye,
+  EyeOff,
+  Star,
+  Heart,
+  MessageCircle,
+  Calendar,
+  Clock,
+  MapPin,
+  Globe,
+  Link,
+  User,
+  Users,
+  UserPlus,
+  UserMinus,
+  UserCheck,
+  UserX,
+  Mail,
+  Phone,
+  Shield,
+  Lock,
+  Unlock,
+  Key,
+  LogIn,
+  LogOut,
+  UserCog,
+  DollarSign,
+  CreditCard,
+  ShoppingCart,
+  ShoppingBag,
+  Package,
+  Truck,
+  Building,
+  Briefcase,
+  TrendingUp,
+  TrendingDown,
+  PieChart,
+  BarChart3,
+  Target,
+  Award,
+  Trophy,
+  Zap,
+  Sparkles,
+  Code,
+  Terminal,
+  Database,
+  Server,
+  Cloud,
+  Wifi,
+  Bluetooth,
+  Usb,
+  HardDrive,
+  Cpu,
+  Smartphone,
+  Monitor,
+  Tablet,
+  Headphones,
+  Camera,
+  Printer,
+  Scan,
+  QrCode,
+  Rss,
+  Webhook,
+  MessageSquare,
+  Send,
+  Bell,
+  BellOff,
+  Volume2,
+  VolumeX,
+  Mic,
+  MicOff,
+  VideoOff,
+  ThumbsUp,
+  ThumbsDown,
+  Flag,
+  Bookmark,
+  Megaphone,
+  AtSign,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  PlayCircle,
+  PauseCircle,
+  StopCircle,
+  SkipForward,
+  SkipBack,
+  Repeat,
+  Shuffle,
+  WifiOff,
+  Battery,
+  BatteryLow,
+  Signal,
+  SignalZero,
+  Sun,
+  Moon,
+  Palette,
+  Paintbrush,
+  Pipette,
+  Contrast,
+  Sliders,
+  ToggleLeft,
+  ToggleRight,
+  CircleDot,
+  CheckSquare,
+  Square,
+  SlidersHorizontal,
+  Save,
+  Undo,
+  Redo,
+  RotateCcw,
+  RotateCw,
+  FlipHorizontal,
+  FlipVertical,
+  Move,
+  Crop,
+  Scissors,
+  Clipboard,
+  Archive,
+  Pin,
+  PinOff,
+  type LucideIcon,
+} from "lucide-react";
+
+// Icon map for dynamic rendering
+const IconMap: Record<string, LucideIcon> = {
+  Home,
+  Settings,
+  Menu,
+  Search,
+  Filter,
+  Grid3x3,
+  List,
+  MoreHorizontal,
+  MoreVertical,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  ChevronDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  ArrowDown,
+  X,
+  Plus,
+  Minus,
+  Maximize2,
+  Minimize2,
+  RefreshCw,
+  Loader2,
+  Check,
+  AlertCircle,
+  Info,
+  HelpCircle,
+  Image,
+  Video,
+  Music,
+  File,
+  FileText,
+  Download,
+  Upload,
+  Share,
+  Copy,
+  Trash2,
+  Edit,
+  Eye,
+  EyeOff,
+  Star,
+  Heart,
+  MessageCircle,
+  Calendar,
+  Clock,
+  MapPin,
+  Globe,
+  Link,
+  User,
+  Users,
+  UserPlus,
+  UserMinus,
+  UserCheck,
+  UserX,
+  Mail,
+  Phone,
+  Shield,
+  Lock,
+  Unlock,
+  Key,
+  LogIn,
+  LogOut,
+  UserCog,
+  DollarSign,
+  CreditCard,
+  ShoppingCart,
+  ShoppingBag,
+  Package,
+  Truck,
+  Building,
+  Briefcase,
+  TrendingUp,
+  TrendingDown,
+  PieChart,
+  BarChart3,
+  Target,
+  Award,
+  Trophy,
+  Zap,
+  Sparkles,
+  Code,
+  Terminal,
+  Database,
+  Server,
+  Cloud,
+  Wifi,
+  Bluetooth,
+  Usb,
+  HardDrive,
+  Cpu,
+  Smartphone,
+  Monitor,
+  Tablet,
+  Headphones,
+  Camera,
+  Printer,
+  Scan,
+  QrCode,
+  Rss,
+  Webhook,
+  MessageSquare,
+  Send,
+  Bell,
+  BellOff,
+  Volume2,
+  VolumeX,
+  Mic,
+  MicOff,
+  VideoOff,
+  ThumbsUp,
+  ThumbsDown,
+  Flag,
+  Bookmark,
+  Megaphone,
+  AtSign,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  PlayCircle,
+  PauseCircle,
+  StopCircle,
+  SkipForward,
+  SkipBack,
+  Repeat,
+  Shuffle,
+  WifiOff,
+  Battery,
+  BatteryLow,
+  Signal,
+  SignalZero,
+  Sun,
+  Moon,
+  Palette,
+  Paintbrush,
+  Pipette,
+  Contrast,
+  Sliders,
+  ToggleLeft,
+  ToggleRight,
+  CircleDot,
+  CheckSquare,
+  Square,
+  SlidersHorizontal,
+  Save,
+  Undo,
+  Redo,
+  RotateCcw,
+  RotateCw,
+  FlipHorizontal,
+  FlipVertical,
+  Move,
+  Crop,
+  Scissors,
+  Clipboard,
+  Archive,
+  Pin,
+  PinOff,
+};
+
+// Icon categories
 const iconCategories = {
   "Navigation & UI": [
     "Home",
@@ -115,6 +437,7 @@ const iconCategories = {
     "Award",
     "Trophy",
     "Zap",
+    "Sparkles",
   ],
   "Technology & Development": [
     "Code",
@@ -205,7 +528,10 @@ const iconCategories = {
   ],
 };
 
-// Size options for icon preview
+// Size options
+const ICON_SIZES = { xs: 12, sm: 16, md: 20, lg: 24, xl: 32, xxl: 48 };
+type IconSize = keyof typeof ICON_SIZES;
+
 const sizeOptions = [
   { label: "XS (12px)", value: "xs" },
   { label: "SM (16px)", value: "sm" },
@@ -215,34 +541,27 @@ const sizeOptions = [
   { label: "XXL (48px)", value: "xxl" },
 ];
 
-// Color options for icon preview
+// Color options using Tailwind classes
 const colorOptions = [
-  { label: "Primary", value: "var(--color-primary)" },
-  { label: "Secondary", value: "var(--color-secondary)" },
-  { label: "Success", value: "var(--color-success)" },
-  { label: "Warning", value: "var(--color-warning)" },
-  { label: "Error", value: "var(--color-error)" },
-  { label: "Info", value: "var(--color-info)" },
-  { label: "Text Primary", value: "var(--text-primary)" },
-  { label: "Text Secondary", value: "var(--text-secondary)" },
+  { label: "Default", value: "text-foreground" },
+  { label: "Primary", value: "text-primary" },
+  { label: "Muted", value: "text-muted-foreground" },
+  { label: "Success", value: "text-green-500" },
+  { label: "Warning", value: "text-yellow-500" },
+  { label: "Error", value: "text-red-500" },
+  { label: "Info", value: "text-blue-500" },
 ];
 
 export default function IconShowcase() {
-  const [selectedSize, setSelectedSize] = useState<Icons.IconSize>("md");
-  const [selectedColor, setSelectedColor] = useState("var(--text-primary)");
+  const [selectedSize, setSelectedSize] = useState<IconSize>("md");
+  const [selectedColor, setSelectedColor] = useState("text-foreground");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
-  // Filter icons based on search term and category
+  // Filter icons
   const filteredIcons = useMemo(() => {
-    const allIcons = Object.entries(iconCategories).reduce(
-      (acc, [category, icons]) => {
-        icons.forEach((iconName) => {
-          acc.push({ name: iconName, category });
-        });
-        return acc;
-      },
-      [] as { name: string; category: string }[]
+    const allIcons = Object.entries(iconCategories).flatMap(
+      ([category, icons]) => icons.map((name) => ({ name, category }))
     );
 
     return allIcons.filter(({ name, category }) => {
@@ -255,50 +574,38 @@ export default function IconShowcase() {
     });
   }, [searchTerm, selectedCategory]);
 
-  // Copy icon usage example to clipboard
+  // Copy icon usage
   const handleCopyIcon = async (iconName: string) => {
-    const usageExample = `<${iconName} size="md" strokeWidth={2} />`;
+    const usageExample = `<${iconName} size={20} strokeWidth={2} />`;
     try {
       await navigator.clipboard.writeText(usageExample);
-      toast.success("Icon usage copied to clipboard!", {
-        description: usageExample,
-      });
-    } catch (error) {
-      toast.error("Failed to copy icon usage");
-      console.error("Copy failed:", error);
+      toast.success("Copied!", { description: usageExample });
+    } catch {
+      toast.error("Failed to copy");
     }
   };
 
-  // Render individual icon card
+  // Render icon card
   const renderIconCard = (iconName: string) => {
-    const IconComponent = Icons[
-      iconName as keyof typeof Icons
-    ] as React.ComponentType<{
-      size?: number | Icons.IconSize;
-      color?: string;
-      strokeWidth?: number;
-    }>;
-
+    const IconComponent = IconMap[iconName];
     if (!IconComponent) return null;
 
     return (
       <Card
         key={iconName}
-        className="w-full h-[120px] cursor-pointer nurav-feature-card flex flex-col justify-center items-center text-center"
+        className="h-[120px] cursor-pointer hover:border-primary/50 transition-colors"
         onClick={() => handleCopyIcon(iconName)}
       >
         <CardContent className="p-3 flex flex-col items-center justify-center h-full">
-          <div className="flex justify-center items-center mb-2 h-[60px]">
-            <IconComponent
-              size={Icons.getIconSize(selectedSize)}
-              color={selectedColor}
-              strokeWidth={2}
-            />
+          <div
+            className={`flex justify-center items-center mb-2 h-[50px] ${selectedColor}`}
+          >
+            <IconComponent size={ICON_SIZES[selectedSize]} strokeWidth={2} />
           </div>
           <Text
             variant="body-sm"
             color="primary"
-            className="text-xs leading-tight"
+            className="text-xs font-mono text-center"
           >
             {iconName}
           </Text>
@@ -309,10 +616,9 @@ export default function IconShowcase() {
 
   // Render category section
   const renderCategorySection = (categoryName: string, iconNames: string[]) => {
-    const visibleIcons = iconNames.filter((iconName) =>
-      filteredIcons.some((filtered) => filtered.name === iconName)
+    const visibleIcons = iconNames.filter((name) =>
+      filteredIcons.some((f) => f.name === name)
     );
-
     if (visibleIcons.length === 0) return null;
 
     return (
@@ -321,127 +627,16 @@ export default function IconShowcase() {
           {categoryName}
         </Heading>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-          {visibleIcons.map((iconName) => renderIconCard(iconName))}
+          {visibleIcons.map(renderIconCard)}
         </div>
       </div>
     );
   };
 
-  const renderControls = () => (
-    <Card className="mb-8">
-      <CardHeader>
-        <CardTitle>
-          <Heading level={4} color="primary">
-            Icon Controls
-          </Heading>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
-          <div className="space-y-2">
-            <Label>Search Icons</Label>
-            <Input
-              placeholder="Search icon names..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Category</Label>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {Object.keys(iconCategories).map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Size</Label>
-            <Select value={selectedSize} onValueChange={(value) => setSelectedSize(value as Icons.IconSize)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {sizeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Color</Label>
-            <Select value={selectedColor} onValueChange={setSelectedColor}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {colorOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="lg:col-span-2">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                setSearchTerm("");
-                setSelectedCategory("all");
-                setSelectedSize("md");
-                setSelectedColor("var(--text-primary)");
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  const renderStatistics = () => (
-    <Card className="mb-8">
-      <CardContent className="pt-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="space-y-1">
-            <Text variant="body-lg" weight={600} color="primary">
-              Nurav Icon Library Statistics
-            </Text>
-            <Text variant="body-sm" color="secondary">
-              Total Icons: {Object.values(iconCategories).flat().length} |
-              Categories: {Object.keys(iconCategories).length} | Showing:{" "}
-              {filteredIcons.length} icons
-            </Text>
-          </div>
-          <Text variant="body-xs" color="tertiary">
-            Click any icon to copy its usage example
-          </Text>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   return (
     <GridContainer maxWidth="large" padding={true}>
       <div className="space-y-8 py-8">
-        {/* Page Header */}
+        {/* Header */}
         <div className="text-center space-y-4">
           <Heading
             level={1}
@@ -449,25 +644,125 @@ export default function IconShowcase() {
             weight={800}
             className="flex items-center justify-center gap-3"
           >
-            <Icons.Palette className="h-8 w-8 text-primary" />
+            <Palette className="h-8 w-8 text-primary" />
             Nurav Icon Library
           </Heading>
           <Paragraph variant="body-xl" color="secondary" align="center">
-            Comprehensive Lucide React icons with rounded corners only. Click
-            any icon to copy its usage example.
+            Lucide React icons with rounded corners. Click any icon to copy.
           </Paragraph>
         </div>
 
         {/* Statistics */}
-        {renderStatistics()}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <Text variant="body-lg" weight={600} color="primary">
+                  Icon Library Statistics
+                </Text>
+                <Text variant="body-sm" color="secondary">
+                  Total: {Object.values(iconCategories).flat().length} |
+                  Categories: {Object.keys(iconCategories).length} | Showing:{" "}
+                  {filteredIcons.length}
+                </Text>
+              </div>
+              <Text variant="body-xs" color="tertiary">
+                Click any icon to copy usage
+              </Text>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Controls */}
-        {renderControls()}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Heading level={4} color="primary">
+                Icon Controls
+              </Heading>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+              <div className="space-y-2">
+                <Label>Search</Label>
+                <Input
+                  placeholder="Search icons..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {Object.keys(iconCategories).map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Size</Label>
+                <Select
+                  value={selectedSize}
+                  onValueChange={(v) => setSelectedSize(v as IconSize)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sizeOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Color</Label>
+                <Select value={selectedColor} onValueChange={setSelectedColor}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {colorOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("all");
+                  setSelectedSize("md");
+                  setSelectedColor("text-foreground");
+                }}
+              >
+                Reset
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Icon Categories */}
+        {/* Icons Grid */}
         {selectedCategory === "all"
-          ? Object.entries(iconCategories).map(([categoryName, iconNames]) =>
-              renderCategorySection(categoryName, iconNames)
+          ? Object.entries(iconCategories).map(([cat, icons]) =>
+              renderCategorySection(cat, icons)
             )
           : renderCategorySection(
               selectedCategory,
@@ -478,16 +773,15 @@ export default function IconShowcase() {
         {filteredIcons.length === 0 && (
           <Card className="py-12">
             <CardContent className="text-center">
-              <Icons.Search
+              <Search
                 size={48}
-                color="var(--text-tertiary)"
-                className="mx-auto mb-4"
+                className="mx-auto mb-4 text-muted-foreground"
               />
               <Heading level={4} color="secondary">
                 No icons found
               </Heading>
               <Paragraph color="tertiary">
-                Try adjusting your search terms or category filter
+                Try adjusting your search or filter
               </Paragraph>
             </CardContent>
           </Card>
@@ -505,27 +799,29 @@ export default function IconShowcase() {
           <CardContent className="space-y-6">
             <GridRow columns={12} gap={1.5} autoLayout={true}>
               <GridColumn>
-                <Label className="text-sm font-medium mb-2 block">1. Import from centralized icon system:</Label>
+                <Label className="text-sm font-medium mb-2 block">
+                  1. Import icons:
+                </Label>
                 <div className="bg-muted p-3 rounded-md">
                   <code className="text-sm">
-                    import &#123; Home, Settings, User &#125; from
-                    &apos;@/app/core/icons&apos;;
+                    {"import { Home, Settings } from '@/app/core/icons';"}
                   </code>
                 </div>
               </GridColumn>
-
               <GridColumn>
-                <Label className="text-sm font-medium mb-2 block">2. Use with consistent sizing:</Label>
+                <Label className="text-sm font-medium mb-2 block">
+                  2. Use in components:
+                </Label>
                 <div className="bg-muted p-3 rounded-md">
                   <code className="text-sm">
-                    &lt;Home size=&#123;ICON_SIZES.md&#125;
-                    color=&quot;var(--color-primary)&quot; /&gt;
+                    {'<Home size={20} className="text-primary" />'}
                   </code>
                 </div>
               </GridColumn>
-
               <GridColumn>
-                <Label className="text-sm font-medium mb-2 block">3. Available size constants:</Label>
+                <Label className="text-sm font-medium mb-2 block">
+                  3. Available sizes:
+                </Label>
                 <Text variant="body-sm" color="secondary">
                   xs (12px), sm (16px), md (20px), lg (24px), xl (32px), xxl
                   (48px)

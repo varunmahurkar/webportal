@@ -4,6 +4,7 @@ import "./globals.css";
 import ThemeWrapper from "./core/ThemeWrapper";
 import { Toaster } from "@/components/ui/sonner";
 import { StickyBanner } from "./core/StickyBanner";
+import { Header } from "@/components/layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,14 +29,35 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
+      <head>
+        {/* Prevent FOUC (Flash of Unstyled Content) for theme */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme') ||
+                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                  if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
         <StickyBanner
           title="I WILL BECOME SUCCESSFUL FOR 'MINATOZAKI SANA'"
           description="VARUN YOU MUST BECOME SUCCESSFUL FOR MINATOZAKI SANA BECAUSE SHE IS THE ONE."
         />
-        <ThemeWrapper>{children}</ThemeWrapper>
+        <ThemeWrapper>
+          <Header />
+          <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
+        </ThemeWrapper>
         <Toaster />
       </body>
     </html>
