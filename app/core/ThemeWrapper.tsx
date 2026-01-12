@@ -96,27 +96,75 @@ const darken = (hex: string, percent: number): string => {
 
 /**
  * Generate custom theme colors from primary color
+ * Creates a light tinted background based on the primary color
  */
 const generateCustomTheme = (primaryColor: string) => {
-  const isLight = getLuminance(primaryColor) > 0.5;
+  const luminance = getLuminance(primaryColor);
+  const isLightPrimary = luminance > 0.5;
+
+  // Primary foreground should contrast with primary color
+  const primaryForeground = isLightPrimary ? '#0a0a0a' : '#ffffff';
+
+  const [r, g, b] = hexToRgb(primaryColor);
+
+  // Background: Very light tint of primary (92-95% white mixed with primary)
+  const background = rgbToHex(
+    Math.round(255 * 0.92 + r * 0.08),
+    Math.round(255 * 0.92 + g * 0.08),
+    Math.round(255 * 0.92 + b * 0.08)
+  );
+
+  // Card: Slightly lighter than background so it stands out
+  const card = rgbToHex(
+    Math.round(255 * 0.96 + r * 0.04),
+    Math.round(255 * 0.96 + g * 0.04),
+    Math.round(255 * 0.96 + b * 0.04)
+  );
+
+  // Secondary/Muted: Light tint for subtle areas
+  const secondary = rgbToHex(
+    Math.round(255 * 0.88 + r * 0.12),
+    Math.round(255 * 0.88 + g * 0.12),
+    Math.round(255 * 0.88 + b * 0.12)
+  );
+
+  const muted = rgbToHex(
+    Math.round(255 * 0.90 + r * 0.10),
+    Math.round(255 * 0.90 + g * 0.10),
+    Math.round(255 * 0.90 + b * 0.10)
+  );
+
+  // Accent: Slightly more saturated tint
+  const accent = rgbToHex(
+    Math.round(255 * 0.85 + r * 0.15),
+    Math.round(255 * 0.85 + g * 0.15),
+    Math.round(255 * 0.85 + b * 0.15)
+  );
+
+  // Border: Visible but not harsh
+  const border = rgbToHex(
+    Math.round(255 * 0.80 + r * 0.20),
+    Math.round(255 * 0.80 + g * 0.20),
+    Math.round(255 * 0.80 + b * 0.20)
+  );
 
   return {
     primary: primaryColor,
-    primaryForeground: isLight ? '#1a1a1a' : '#fafafa',
-    background: isLight ? lighten(primaryColor, 45) : '#0a0a0a',
-    foreground: isLight ? '#0a0a0a' : '#fafafa',
-    card: isLight ? lighten(primaryColor, 42) : '#141414',
-    cardForeground: isLight ? '#0a0a0a' : '#fafafa',
-    popover: isLight ? lighten(primaryColor, 42) : '#141414',
-    popoverForeground: isLight ? '#0a0a0a' : '#fafafa',
-    secondary: isLight ? lighten(primaryColor, 35) : '#262626',
-    secondaryForeground: isLight ? '#1a1a1a' : '#fafafa',
-    muted: isLight ? lighten(primaryColor, 38) : '#262626',
-    mutedForeground: isLight ? '#525252' : '#a3a3a3',
-    accent: isLight ? lighten(primaryColor, 30) : '#2a2a2a',
-    accentForeground: isLight ? '#1a1a1a' : '#fafafa',
-    border: isLight ? lighten(primaryColor, 25) : '#2a2a2a',
-    input: isLight ? lighten(primaryColor, 25) : '#2a2a2a',
+    primaryForeground: primaryForeground,
+    background: background,
+    foreground: '#0a0a0a',
+    card: card,
+    cardForeground: '#0a0a0a',
+    popover: card,
+    popoverForeground: '#0a0a0a',
+    secondary: secondary,
+    secondaryForeground: '#171717',
+    muted: muted,
+    mutedForeground: '#525252',
+    accent: accent,
+    accentForeground: '#171717',
+    border: border,
+    input: border,
     ring: primaryColor,
   };
 };

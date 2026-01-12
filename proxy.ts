@@ -1,38 +1,38 @@
 /**
- * Nurav AI Next.js Middleware
+ * Nurav AI Next.js Proxy (Middleware file)
  * Handles authentication and role-based route protection
  */
 
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 /**
  * Route configuration for authentication protection
  */
 const AUTH_CONFIG = {
   /** Routes that require authentication */
-  protectedRoutes: ['/dashboard', '/profile', '/settings', '/admin'],
+  protectedRoutes: ["/dashboard", "/profile", "/settings", "/admin"],
   /** Routes only accessible to unauthenticated users */
-  authOnlyRoutes: ['/auth/signin', '/auth/signup', '/auth/forgot-password'],
+  authOnlyRoutes: ["/auth/signin", "/auth/signup", "/auth/forgot-password"],
   /** Routes that require admin role */
-  adminRoutes: ['/admin'],
+  adminRoutes: ["/admin"],
   /** Default redirect for authenticated users accessing auth pages */
-  defaultAuthenticatedRedirect: '/',
+  defaultAuthenticatedRedirect: "/",
   /** Default redirect for unauthenticated users accessing protected pages */
-  defaultUnauthenticatedRedirect: '/auth/signin',
+  defaultUnauthenticatedRedirect: "/auth/signin",
 } as const;
 
 /**
  * Storage key for access token
  */
-const ACCESS_TOKEN_KEY = 'nurav_access_token';
+const ACCESS_TOKEN_KEY = "nurav_access_token";
 
 /**
  * Check if a path matches any route pattern
  */
 function matchesRoute(path: string, routes: readonly string[]): boolean {
   return routes.some((route) => {
-    if (route.endsWith('*')) {
+    if (route.endsWith("*")) {
       return path.startsWith(route.slice(0, -1));
     }
     return path === route || path.startsWith(`${route}/`);
@@ -45,7 +45,7 @@ function matchesRoute(path: string, routes: readonly string[]): boolean {
  */
 function decodeToken(token: string): { exp?: number; role?: string } | null {
   try {
-    const parts = token.split('.');
+    const parts = token.split(".");
     if (parts.length !== 3) return null;
 
     const payload = JSON.parse(atob(parts[1]));
@@ -67,17 +67,17 @@ function isTokenExpired(token: string): boolean {
 }
 
 /**
- * Middleware function to handle route protection
+ * Proxy function to handle route protection
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  /** Skip middleware for static files and API routes */
+  /** Skip proxy for static files and API routes */
   if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
-    pathname.includes('.') ||
-    pathname.startsWith('/favicon')
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.includes(".") ||
+    pathname.startsWith("/favicon")
   ) {
     return NextResponse.next();
   }
@@ -89,18 +89,21 @@ export function middleware(request: NextRequest) {
   /** Check if accessing protected route without authentication */
   if (matchesRoute(pathname, AUTH_CONFIG.protectedRoutes)) {
     if (!isAuthenticated) {
-      const signinUrl = new URL(AUTH_CONFIG.defaultUnauthenticatedRedirect, request.url);
-      signinUrl.searchParams.set('redirect', pathname);
+      const signinUrl = new URL(
+        AUTH_CONFIG.defaultUnauthenticatedRedirect,
+        request.url
+      );
+      signinUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(signinUrl);
     }
 
     /** Check admin routes */
     if (matchesRoute(pathname, AUTH_CONFIG.adminRoutes)) {
       const payload = accessToken ? decodeToken(accessToken) : null;
-      const userRole = payload?.role || 'user';
+      const userRole = payload?.role || "user";
 
-      if (userRole !== 'admin') {
-        return NextResponse.redirect(new URL('/', request.url));
+      if (userRole !== "admin") {
+        return NextResponse.redirect(new URL("/", request.url));
       }
     }
   }
@@ -118,8 +121,8 @@ export function middleware(request: NextRequest) {
 }
 
 /**
- * Middleware matcher configuration
- * Applies middleware to all routes except static files
+ * Proxy matcher configuration
+ * Applies proxy to all routes except static files
  */
 export const config = {
   matcher: [
@@ -130,6 +133,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder files
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
