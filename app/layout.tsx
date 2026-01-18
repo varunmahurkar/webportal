@@ -1,10 +1,17 @@
+/**
+ * Nurav AI Root Layout
+ *
+ * The main layout wrapper for the entire application.
+ * Provides theme management, fonts, and global styles.
+ * Note: Header is removed from root layout for ChatGPT-style interface.
+ * Individual route groups can add their own headers if needed.
+ */
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeWrapper from "./core/ThemeWrapper";
 import { Toaster } from "@/components/ui/sonner";
-import { StickyBanner } from "./core/StickyBanner";
-import { Header } from "@/components/layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,7 +26,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Nurav AI",
   description:
-    "Nurav AI webportal - Modern web application with advanced search and AI capabilities",
+    "Nurav AI - The most powerful AI assistant for search, code generation, and intelligent conversations.",
 };
 
 export default function RootLayout({
@@ -50,13 +57,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        <StickyBanner
-          title="I WILL BECOME SUCCESSFUL FOR 'MINATOZAKI SANA'"
-          description="VARUN YOU MUST BECOME SUCCESSFUL FOR MINATOZAKI SANA BECAUSE SHE IS THE ONE."
-        />
         <ThemeWrapper>
-          <Header />
-          <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
+          {children}
         </ThemeWrapper>
         <Toaster />
       </body>

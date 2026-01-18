@@ -1,0 +1,429 @@
+/**
+ * Nurav AI Sidebar Styles
+ *
+ * ChatGPT-inspired sidebar styling with smooth transitions,
+ * responsive collapse behavior, and theme-aware colors.
+ */
+
+/* Main Sidebar Container */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 260px;
+  height: 100vh;
+  background-color: var(--secondary);
+  border-right: 1px solid var(--border);
+  transition: width 0.2s ease-in-out;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sidebar.collapsed {
+  width: 68px;
+}
+
+/* Sidebar Header */
+.sidebarHeader {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+}
+
+.logoIcon {
+  color: var(--primary);
+}
+
+.collapseButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 0.5rem;
+}
+
+.collapsed .collapseButton {
+  margin: 0 auto;
+}
+
+/* New Chat Section */
+.newChatSection {
+  padding: 0.5rem 0.75rem;
+}
+
+.newChatButton {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  height: 40px;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  border: 1px dashed var(--border);
+  background-color: transparent;
+  transition: all 0.15s ease;
+}
+
+.newChatButton:hover {
+  background-color: var(--accent);
+  border-style: solid;
+}
+
+.newChatButton.iconOnly {
+  justify-content: center;
+  padding: 0;
+  width: 40px;
+  margin: 0 auto;
+}
+
+/* Search Section */
+.searchSection {
+  padding: 0 0.75rem 0.5rem;
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+.searchInput {
+  padding-left: 2.25rem;
+  height: 36px;
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.searchInput:focus {
+  border-color: var(--ring);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+/* Conversations List */
+.conversationsList {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.25rem 0;
+}
+
+.conversationsStack {
+  padding: 0 0.5rem;
+}
+
+.collapsedConversations {
+  padding: 0.5rem;
+  align-items: center;
+}
+
+.collapsedConversationButton {
+  width: 40px;
+  height: 40px;
+}
+
+/* Conversation Groups */
+.conversationGroup {
+  margin-bottom: 0.5rem;
+}
+
+.groupLabel {
+  padding: 0.5rem 0.75rem 0.25rem;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+}
+
+/* Conversation Item */
+.conversationItem {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.25rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.15s ease;
+  position: relative;
+}
+
+.conversationItem.active,
+.conversationItem.hovered {
+  background-color: var(--accent);
+}
+
+.conversationButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  min-width: 0;
+  border-radius: 0.5rem;
+  color: var(--foreground);
+  font-size: 0.875rem;
+}
+
+.conversationIcon {
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+}
+
+.conversationTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.conversationActions {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.conversationItem.hovered .conversationActions,
+.conversationItem.active .conversationActions {
+  opacity: 1;
+}
+
+.editInput {
+  flex: 1;
+  height: 32px;
+  font-size: 0.875rem;
+  margin: 0.25rem;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+}
+
+/* Footer Section */
+.sidebarFooter {
+  margin-top: auto;
+  padding: 0.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.footerButton {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  height: 40px;
+  border-radius: 0.5rem;
+  font-weight: 400;
+  padding: 0 0.75rem;
+}
+
+.footerButton.iconOnly {
+  justify-content: center;
+  padding: 0;
+  width: 40px;
+  margin: 0 auto;
+}
+
+/* Theme Section */
+.themeSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.themePanel {
+  padding: 0.75rem;
+  margin: 0.25rem 0;
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+
+.themeModes {
+  margin-bottom: 0.75rem;
+}
+
+.themePanelLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.themeButtons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.themeButton {
+  flex: 1;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  padding: 0.375rem 0.5rem;
+  height: auto;
+}
+
+/* Color Picker */
+.colorPicker {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.colorPresets {
+  margin-bottom: 0.5rem;
+}
+
+.colorPreset {
+  width: 24px;
+  height: 24px;
+  border-radius: 0.375rem;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.colorPreset:hover {
+  transform: scale(1.1);
+}
+
+.colorPresetActive {
+  border-color: var(--foreground);
+}
+
+.colorPresetCheck {
+  color: white;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+}
+
+.customColorInput {
+  margin-top: 0.5rem;
+}
+
+.colorInput {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  background: transparent;
+  padding: 2px;
+}
+
+.colorInput::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.colorInput::-webkit-color-swatch {
+  border: none;
+  border-radius: 0.25rem;
+}
+
+.colorValue {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.6875rem;
+}
+
+/* User Button */
+.userButton {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  height: auto;
+  min-height: 48px;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.userButton.iconOnly {
+  justify-content: center;
+  padding: 0.5rem;
+  width: 48px;
+  margin: 0 auto;
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 0.5rem;
+  background-color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  flex: 1;
+}
+
+/* User Dropdown */
+.userDropdown {
+  min-width: 200px;
+}
+
+.logoutItem {
+  color: var(--destructive);
+}
+
+.deleteItem {
+  color: var(--destructive);
+}
+
+/* Scrollbar Styling */
+.conversationsList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.conversationsList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.conversationsList::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 3px;
+}
+
+.conversationsList::-webkit-scrollbar-thumb:hover {
+  background-color: var(--muted-foreground);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 50;
+    transform: translateX(0);
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+    width: 260px;
+  }
+}

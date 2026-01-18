@@ -1,0 +1,177 @@
+/**
+ * Nurav AI Welcome Screen Styles
+ *
+ * Clean, modern welcome screen with animated elements
+ * and suggestion cards.
+ */
+
+/* Welcome Screen Container */
+.welcomeScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 2rem 1.5rem;
+  min-height: 100%;
+}
+
+/* Welcome Content */
+.welcomeContent {
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Hero Section */
+.heroSection {
+  margin-bottom: 1rem;
+}
+
+/* Logo Container */
+.logoContainer {
+  width: 80px;
+  height: 80px;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.logoIcon {
+  color: var(--primary-foreground);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(var(--primary), 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Title Section */
+.titleSection {
+  text-align: center;
+}
+
+.title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.subtitle {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Suggestions Section */
+.suggestionsSection {
+  width: 100%;
+}
+
+.suggestionsGrid {
+  width: 100%;
+}
+
+/* Suggestion Card */
+.suggestionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  background-color: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  width: 100%;
+  min-height: 100px;
+}
+
+.suggestionCard:hover {
+  background-color: var(--accent);
+  border-color: var(--ring);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.1);
+}
+
+.suggestionContent {
+  width: 100%;
+}
+
+.suggestionIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 0.5rem;
+  background-color: var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--foreground);
+  margin-bottom: 0.25rem;
+}
+
+.suggestionTitle {
+  color: var(--foreground);
+}
+
+.suggestionDescription {
+  line-height: 1.4;
+}
+
+/* Feature Pills */
+.featurePills {
+  margin-top: 1rem;
+}
+
+.featurePill {
+  padding: 0.375rem 0.75rem;
+  background-color: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  color: var(--muted-foreground);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .welcomeScreen {
+    padding: 1.5rem 1rem;
+  }
+
+  .logoContainer {
+    width: 64px;
+    height: 64px;
+    border-radius: 1rem;
+  }
+
+  .logoIcon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .suggestionsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .suggestionCard {
+    min-height: auto;
+    padding: 0.875rem 1rem;
+  }
+
+  .suggestionIcon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .featurePills {
+    display: none;
+  }
+}

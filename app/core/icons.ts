@@ -68,6 +68,8 @@ export {
   MapPin,                // Location/address
   Globe,                 // Web/internet
   Link,                  // External links
+  Paperclip,             // Attachment/file attachment
+  Lightbulb,             // Ideas/suggestions
 } from 'lucide-react';
 
 // User & Account Icons - for user management and profiles
