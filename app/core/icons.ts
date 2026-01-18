@@ -108,6 +108,7 @@ export {
   Target,                // Goals/objectives
   Award,                 // Achievement/recognition
   Trophy,                // Success/winner
+  Crown,                 // Premium/pro badge
   Zap,                   // Power/energy/fast
   Sparkles,              // AI/magic/intelligent features
 } from 'lucide-react';

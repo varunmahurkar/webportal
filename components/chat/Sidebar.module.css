@@ -1,19 +1,17 @@
 /**
- * Nurav AI Sidebar Styles
- *
- * ChatGPT-inspired sidebar styling with smooth transitions,
- * responsive collapse behavior, and theme-aware colors.
+ * Sidebar Styles
+ * Modern sidebar with profile, conversations, and theme controls
  */
 
-/* Main Sidebar Container */
+/* Main Sidebar */
 .sidebar {
   display: flex;
   flex-direction: column;
-  width: 260px;
+  width: 280px;
   height: 100vh;
-  background-color: var(--secondary);
+  background: var(--secondary);
   border-right: 1px solid var(--border);
-  transition: width 0.2s ease-in-out;
+  transition: width 0.2s ease;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -22,13 +20,10 @@
   width: 68px;
 }
 
-/* Sidebar Header */
+/* Header */
 .sidebarHeader {
-  padding: 0.75rem 1rem;
+  padding: 1rem;
   border-bottom: 1px solid var(--border);
-  min-height: 56px;
-  display: flex;
-  align-items: center;
 }
 
 .logoIcon {
@@ -47,64 +42,40 @@
 
 /* New Chat Section */
 .newChatSection {
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem;
 }
 
 .newChatButton {
   width: 100%;
   justify-content: flex-start;
   gap: 0.5rem;
-  height: 40px;
-  border-radius: 0.5rem;
+  height: 42px;
+  border-radius: 0.75rem;
   font-weight: 500;
   border: 1px dashed var(--border);
-  background-color: transparent;
+  background: transparent;
   transition: all 0.15s ease;
 }
 
 .newChatButton:hover {
-  background-color: var(--accent);
+  background: var(--accent);
   border-style: solid;
 }
 
 .newChatButton.iconOnly {
   justify-content: center;
   padding: 0;
-  width: 40px;
+  width: 42px;
   margin: 0 auto;
 }
 
-/* Search Section */
-.searchSection {
-  padding: 0 0.75rem 0.5rem;
-}
-
-.searchWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.searchIcon {
-  position: absolute;
-  left: 0.75rem;
-  color: var(--muted-foreground);
-  pointer-events: none;
-}
-
-.searchInput {
-  padding-left: 2.25rem;
-  height: 36px;
-  background-color: var(--background);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-}
-
-.searchInput:focus {
-  border-color: var(--ring);
-  outline: none;
-  box-shadow: 0 0 0 2px var(--ring);
+/* Section Label */
+.sectionLabel {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Conversations List */
@@ -112,7 +83,6 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0.25rem 0;
 }
 
 .conversationsStack {
@@ -121,25 +91,31 @@
 
 .collapsedConversations {
   padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 0.25rem;
 }
 
 .collapsedConversationButton {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
 }
 
-/* Conversation Groups */
-.conversationGroup {
-  margin-bottom: 0.5rem;
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  gap: 0.5rem;
 }
 
-.groupLabel {
-  padding: 0.5rem 0.75rem 0.25rem;
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.emptyIcon {
   color: var(--muted-foreground);
+  opacity: 0.5;
+  margin-bottom: 0.5rem;
 }
 
 /* Conversation Item */
@@ -147,15 +123,17 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0 0.25rem;
+  padding: 0.25rem;
   border-radius: 0.5rem;
-  transition: background-color 0.15s ease;
-  position: relative;
+  transition: background 0.15s ease;
 }
 
-.conversationItem.active,
-.conversationItem.hovered {
-  background-color: var(--accent);
+.conversationItem:hover {
+  background: var(--accent);
+}
+
+.conversationItem.active {
+  background: var(--accent);
 }
 
 .conversationButton {
@@ -163,13 +141,13 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.625rem 0.5rem;
+  padding: 0.5rem;
   background: none;
   border: none;
   cursor: pointer;
   text-align: left;
   min-width: 0;
-  border-radius: 0.5rem;
+  border-radius: 0.375rem;
   color: var(--foreground);
   font-size: 0.875rem;
 }
@@ -183,7 +161,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
 }
 
 .conversationActions {
@@ -194,8 +171,7 @@
   transition: opacity 0.15s ease;
 }
 
-.conversationItem.hovered .conversationActions,
-.conversationItem.active .conversationActions {
+.conversationItem:hover .conversationActions {
   opacity: 1;
 }
 
@@ -203,18 +179,9 @@
   flex: 1;
   height: 32px;
   font-size: 0.875rem;
-  margin: 0.25rem;
 }
 
-/* Empty State */
-.emptyState {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100px;
-}
-
-/* Footer Section */
+/* Footer */
 .sidebarFooter {
   margin-top: auto;
   padding: 0.5rem;
@@ -228,7 +195,7 @@
   width: 100%;
   justify-content: flex-start;
   gap: 0.75rem;
-  height: 40px;
+  height: 42px;
   border-radius: 0.5rem;
   font-weight: 400;
   padding: 0 0.75rem;
@@ -237,7 +204,7 @@
 .footerButton.iconOnly {
   justify-content: center;
   padding: 0;
-  width: 40px;
+  width: 42px;
   margin: 0 auto;
 }
 
@@ -250,9 +217,9 @@
 .themePanel {
   padding: 0.75rem;
   margin: 0.25rem 0;
-  background-color: var(--background);
+  background: var(--background);
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
 }
 
 .themeModes {
@@ -299,7 +266,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.15s ease;
 }
 
 .colorPreset:hover {
@@ -343,57 +310,172 @@
   font-size: 0.6875rem;
 }
 
-/* User Button */
-.userButton {
+/* Profile Section */
+.profileSection {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.25rem;
+}
+
+.profileButton {
   width: 100%;
   justify-content: flex-start;
   gap: 0.75rem;
   height: auto;
-  min-height: 48px;
-  border-radius: 0.5rem;
+  min-height: 56px;
+  border-radius: 0.75rem;
   padding: 0.5rem 0.75rem;
 }
 
-.userButton.iconOnly {
+.profileButton.iconOnly {
   justify-content: center;
   padding: 0.5rem;
-  width: 48px;
+  width: 56px;
+  min-height: 56px;
   margin: 0 auto;
 }
 
-.userAvatar {
-  width: 32px;
-  height: 32px;
+.profileAvatar {
+  width: 36px;
+  height: 36px;
   border-radius: 0.5rem;
-  background-color: var(--accent);
+  background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
 }
 
-.userInfo {
+.profileInfo {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   min-width: 0;
   flex: 1;
+  gap: 0.125rem;
 }
 
-/* User Dropdown */
-.userDropdown {
-  min-width: 200px;
+.proBadge {
+  color: #eab308;
+  flex-shrink: 0;
 }
 
-.logoutItem {
+/* Profile Panel */
+.profilePanel {
+  padding: 1rem;
+  margin-top: 0.5rem;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.profileAvatarLarge {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.profileDetails {
+  min-width: 0;
+  flex: 1;
+}
+
+.planBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+  color: #000;
+  font-size: 0.625rem;
+  font-weight: 600;
+  border-radius: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Usage Section */
+.usageSection {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.usageBar {
+  height: 6px;
+  background: var(--muted);
+  border-radius: 3px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.usageProgress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, #8b5cf6 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Profile Meta */
+.profileMeta {
+  padding: 0.75rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.metaItem {
+  color: var(--muted-foreground);
+}
+
+/* Profile Actions */
+.profileActions {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profileActionBtn {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.logoutBtn {
   color: var(--destructive);
 }
 
+.logoutBtn:hover {
+  color: var(--destructive);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Delete Item */
 .deleteItem {
   color: var(--destructive);
 }
 
-/* Scrollbar Styling */
+/* Scrollbar */
 .conversationsList::-webkit-scrollbar {
   width: 6px;
 }
@@ -403,15 +485,15 @@
 }
 
 .conversationsList::-webkit-scrollbar-thumb {
-  background-color: var(--border);
+  background: var(--border);
   border-radius: 3px;
 }
 
 .conversationsList::-webkit-scrollbar-thumb:hover {
-  background-color: var(--muted-foreground);
+  background: var(--muted-foreground);
 }
 
-/* Mobile Responsiveness */
+/* Mobile */
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
@@ -419,11 +501,11 @@
     top: 0;
     z-index: 50;
     transform: translateX(0);
-    transition: transform 0.2s ease-in-out;
+    transition: transform 0.2s ease;
   }
 
   .sidebar.collapsed {
     transform: translateX(-100%);
-    width: 260px;
+    width: 280px;
   }
 }

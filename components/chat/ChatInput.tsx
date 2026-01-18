@@ -1,29 +1,28 @@
 /**
  * Chat Input Component
- * Beautiful input design like Perplexity, ChatGPT, Claude
- * Icons only - no logic implementation
+ * Modern design like Perplexity, ChatGPT, Claude
  */
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Box, Flex } from '@/app/core/Grid';
 import {
-  Send,
+  ArrowUp,
   Plus,
   Paperclip,
   Image,
   Mic,
   Globe,
-  Sparkles,
-  ArrowUp,
-  AtSign,
   Code,
+  Sparkles,
+  X,
+  Focus,
+  Lightbulb,
   FileText,
-  Camera,
-  Search,
+  Video,
 } from '@/app/core/icons';
 import styles from './ChatInput.module.css';
 
@@ -38,82 +37,113 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+    }
+  }, [message]);
 
   return (
     <Box className={cn(styles.wrapper, className)}>
       <Box className={cn(styles.container, isFocused && styles.focused)}>
-        {/* Top Row - Main Input */}
-        <Flex className={styles.inputRow} alignItems="flex-end" gap={2}>
+        {/* Main Input Area */}
+        <Flex className={styles.inputArea}>
+          {/* Textarea */}
+          <textarea
+            ref={textareaRef}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            placeholder={placeholder}
+            rows={1}
+            className={styles.textarea}
+          />
+        </Flex>
+
+        {/* Actions Bar */}
+        <Flex className={styles.actionsBar} alignItems="center" justifyContent="between">
           {/* Left Actions */}
           <Flex className={styles.leftActions} alignItems="center" gap={1}>
-            <Button variant="ghost" size="icon" className={styles.actionBtn} title="Add attachment">
-              <Plus size={20} />
+            {/* Attach Menu */}
+            <Box className={styles.attachMenuWrapper}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(styles.actionBtn, showAttachMenu && styles.actionBtnActive)}
+                onClick={() => setShowAttachMenu(!showAttachMenu)}
+                title="Attach"
+              >
+                <Plus size={20} />
+              </Button>
+
+              {/* Attach Dropdown */}
+              {showAttachMenu && (
+                <Box className={styles.attachMenu}>
+                  <Button variant="ghost" className={styles.attachMenuItem}>
+                    <Paperclip size={18} />
+                    <span>Upload File</span>
+                  </Button>
+                  <Button variant="ghost" className={styles.attachMenuItem}>
+                    <Image size={18} />
+                    <span>Upload Image</span>
+                  </Button>
+                  <Button variant="ghost" className={styles.attachMenuItem}>
+                    <FileText size={18} />
+                    <span>Upload Document</span>
+                  </Button>
+                  <Button variant="ghost" className={styles.attachMenuItem}>
+                    <Video size={18} />
+                    <span>Upload Video</span>
+                  </Button>
+                </Box>
+              )}
+            </Box>
+
+            <div className={styles.divider} />
+
+            {/* Feature Buttons */}
+            <Button variant="ghost" size="sm" className={styles.featureBtn} title="Search the web">
+              <Globe size={16} />
+              <span>Search</span>
+            </Button>
+            <Button variant="ghost" size="sm" className={styles.featureBtn} title="Deep research">
+              <Lightbulb size={16} />
+              <span>Research</span>
+            </Button>
+            <Button variant="ghost" size="sm" className={styles.featureBtn} title="Code mode">
+              <Code size={16} />
+              <span>Code</span>
             </Button>
           </Flex>
 
-          {/* Textarea */}
-          <Box className={styles.textareaWrapper}>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              placeholder={placeholder}
-              rows={1}
-              className={styles.textarea}
-            />
-          </Box>
-
           {/* Right Actions */}
           <Flex className={styles.rightActions} alignItems="center" gap={1}>
+            <Button variant="ghost" size="icon" className={styles.actionBtn} title="Voice input">
+              <Mic size={18} />
+            </Button>
+
             <Button
-              variant={message.trim() ? 'default' : 'ghost'}
               size="icon"
               className={cn(styles.sendBtn, message.trim() && styles.sendBtnActive)}
+              disabled={!message.trim()}
               title="Send message"
             >
               <ArrowUp size={18} />
             </Button>
           </Flex>
         </Flex>
-
-        {/* Bottom Row - Action Buttons */}
-        <Flex className={styles.bottomRow} alignItems="center" justifyContent="between">
-          {/* Left Side - Attachment Options */}
-          <Flex className={styles.attachOptions} alignItems="center" gap={1}>
-            <Button variant="ghost" size="sm" className={styles.optionBtn} title="Attach file">
-              <Paperclip size={16} />
-              <span>Attach</span>
-            </Button>
-            <Button variant="ghost" size="sm" className={styles.optionBtn} title="Upload image">
-              <Image size={16} />
-              <span>Image</span>
-            </Button>
-            <Button variant="ghost" size="sm" className={styles.optionBtn} title="Search web">
-              <Globe size={16} />
-              <span>Search</span>
-            </Button>
-            <Button variant="ghost" size="sm" className={styles.optionBtn} title="Code mode">
-              <Code size={16} />
-              <span>Code</span>
-            </Button>
-          </Flex>
-
-          {/* Right Side - Voice & More */}
-          <Flex className={styles.moreOptions} alignItems="center" gap={1}>
-            <Button variant="ghost" size="icon" className={styles.iconBtn} title="Voice input">
-              <Mic size={18} />
-            </Button>
-          </Flex>
-        </Flex>
       </Box>
 
-      {/* Helper Text */}
-      <Flex className={styles.helperRow} justifyContent="center">
-        <span className={styles.helperText}>
-          Nurav AI can make mistakes. Check important info.
-        </span>
-      </Flex>
+      {/* Footer Text */}
+      <p className={styles.footerText}>
+        Nurav AI may produce inaccurate information. Verify important details.
+      </p>
     </Box>
   );
 };

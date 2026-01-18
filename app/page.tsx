@@ -14,23 +14,43 @@ import styles from './page.module.css';
 
 export default function HomePage() {
   // Sample conversations for sidebar
-  const [conversations] = useState<Conversation[]>([
-    { id: '1', title: 'Welcome to Nurav AI', timestamp: new Date() },
-    { id: '2', title: 'Previous conversation', timestamp: new Date(Date.now() - 86400000) },
+  const [conversations, setConversations] = useState<Conversation[]>([
+    { id: '1', title: 'How to build a REST API', timestamp: new Date() },
+    { id: '2', title: 'React best practices', timestamp: new Date(Date.now() - 86400000) },
+    { id: '3', title: 'TypeScript generics explained', timestamp: new Date(Date.now() - 172800000) },
   ]);
-  const [activeConversationId, setActiveConversationId] = useState('1');
+  const [activeConversationId, setActiveConversationId] = useState<string | undefined>(undefined);
+
+  // Handle new chat
+  const handleNewChat = () => {
+    setActiveConversationId(undefined);
+  };
+
+  // Handle delete conversation
+  const handleDeleteConversation = (id: string) => {
+    setConversations(prev => prev.filter(c => c.id !== id));
+    if (activeConversationId === id) {
+      setActiveConversationId(undefined);
+    }
+  };
+
+  // Handle rename conversation
+  const handleRenameConversation = (id: string, newTitle: string) => {
+    setConversations(prev =>
+      prev.map(c => (c.id === id ? { ...c, title: newTitle } : c))
+    );
+  };
 
   return (
     <ChatLayout
       conversations={conversations}
       activeConversationId={activeConversationId}
       onSelectConversation={setActiveConversationId}
-      onNewChat={() => {}}
-      onDeleteConversation={() => {}}
-      onRenameConversation={() => {}}
-      onSettingsClick={() => {}}
-      onLogout={() => {}}
-      userName="User"
+      onNewChat={handleNewChat}
+      onDeleteConversation={handleDeleteConversation}
+      onRenameConversation={handleRenameConversation}
+      onSettingsClick={() => console.log('Settings clicked')}
+      onLogout={() => console.log('Logout clicked')}
     >
       <Flex direction="column" className={styles.chatContainer}>
         {/* Welcome Section */}

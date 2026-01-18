@@ -13,7 +13,7 @@
 
 import React, { useState, useCallback, useEffect, memo, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { Sidebar, Conversation, SidebarProps } from './Sidebar';
+import { Sidebar, Conversation } from './Sidebar';
 import { Box } from '@/app/core/Grid';
 import { Button } from '@/components/ui/button';
 import { Menu } from '@/app/core/icons';
@@ -32,8 +32,6 @@ export interface ChatLayoutProps {
   onRenameConversation?: (id: string, newTitle: string) => void;
   onSettingsClick?: () => void;
   onLogout?: () => void;
-  userName?: string;
-  userEmail?: string;
   className?: string;
   sidebarDefaultCollapsed?: boolean;
 }
@@ -51,8 +49,6 @@ export const ChatLayout = memo<ChatLayoutProps>(({
   onRenameConversation,
   onSettingsClick,
   onLogout,
-  userName,
-  userEmail,
   className,
   sidebarDefaultCollapsed = false,
 }) => {
@@ -148,8 +144,6 @@ export const ChatLayout = memo<ChatLayoutProps>(({
         onRenameConversation={onRenameConversation}
         onSettingsClick={onSettingsClick}
         onLogout={onLogout}
-        userName={userName}
-        userEmail={userEmail}
         className={cn(
           styles.sidebar,
           isMobile && isMobileMenuOpen && styles.mobileOpen
