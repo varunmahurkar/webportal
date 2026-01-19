@@ -5,34 +5,7 @@ export const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export async function signOut() {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
-}
-
-export async function signInWithEmail(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  if (error) throw error;
-  return data;
-}
-
-export async function signUpWithEmail(
-  email: string,
-  password: string,
-  fullName?: string
-) {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { full_name: fullName } },
-  });
-  if (error) throw error;
-  return data;
-}
-
+// Only for OAuth and Phone - signup/signin use backend API
 export async function signInWithOAuth(
   provider: "google" | "github" | "discord"
 ) {
@@ -56,4 +29,8 @@ export async function verifyPhoneOtp(phone: string, token: string) {
   });
   if (error) throw error;
   return data;
+}
+
+export async function signOut() {
+  await supabase.auth.signOut();
 }
