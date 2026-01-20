@@ -11,6 +11,10 @@
 
 - **/auth/callback** - OAuth callback handler for Supabase authentication
 
+## Protected Routes (Authenticated)
+
+- **/profile** - User profile page displaying data from auth_users_table (username, email, name, subscription status, role, verification status, timestamps)
+
 ## Chat Interface Components
 
 The main page (`/`) uses a modern chat interface with:

@@ -1,10 +1,10 @@
 /**
- * Nurav AI Next.js Proxy (Middleware file)
- * Handles authentication and role-based route protection
+ * Nurav AI Next.js Proxy
+ * Handles Supabase session refresh and role-based route protection
  */
 
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 /**
  * Route configuration for authentication protection
@@ -16,16 +16,9 @@ const AUTH_CONFIG = {
   authOnlyRoutes: ["/auth/signin", "/auth/signup", "/auth/forgot-password"],
   /** Routes that require admin role */
   adminRoutes: ["/admin"],
-  /** Default redirect for authenticated users accessing auth pages */
-  defaultAuthenticatedRedirect: "/",
   /** Default redirect for unauthenticated users accessing protected pages */
-  defaultUnauthenticatedRedirect: "/auth/signin",
+  defaultUnauthenticatedRedirect: "/",
 } as const;
-
-/**
- * Storage key for access token
- */
-const ACCESS_TOKEN_KEY = "nurav_access_token";
 
 /**
  * Check if a path matches any route pattern
@@ -40,36 +33,9 @@ function matchesRoute(path: string, routes: readonly string[]): boolean {
 }
 
 /**
- * Decode JWT token to extract payload (without verification)
- * Note: Actual verification should happen on the backend
+ * Proxy function to handle Supabase session and route protection
  */
-function decodeToken(token: string): { exp?: number; role?: string } | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-
-    const payload = JSON.parse(atob(parts[1]));
-    return payload;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Check if token is expired
- */
-function isTokenExpired(token: string): boolean {
-  const payload = decodeToken(token);
-  if (!payload?.exp) return true;
-
-  const currentTime = Math.floor(Date.now() / 1000);
-  return payload.exp < currentTime;
-}
-
-/**
- * Proxy function to handle route protection
- */
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   /** Skip proxy for static files and API routes */
@@ -82,42 +48,50 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  /** Get access token from cookies */
-  const accessToken = request.cookies.get(ACCESS_TOKEN_KEY)?.value;
-  const isAuthenticated = accessToken && !isTokenExpired(accessToken);
+  /** Initialize Supabase response for session handling */
+  let supabaseResponse = NextResponse.next({ request });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  /** Get current user session */
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const isAuthenticated = !!user;
 
   /** Check if accessing protected route without authentication */
   if (matchesRoute(pathname, AUTH_CONFIG.protectedRoutes)) {
     if (!isAuthenticated) {
-      const signinUrl = new URL(
+      const redirectUrl = new URL(
         AUTH_CONFIG.defaultUnauthenticatedRedirect,
         request.url
       );
-      signinUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(signinUrl);
-    }
-
-    /** Check admin routes */
-    if (matchesRoute(pathname, AUTH_CONFIG.adminRoutes)) {
-      const payload = accessToken ? decodeToken(accessToken) : null;
-      const userRole = payload?.role || "user";
-
-      if (userRole !== "admin") {
-        return NextResponse.redirect(new URL("/", request.url));
-      }
+      redirectUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(redirectUrl);
     }
   }
 
-  /** Redirect authenticated users away from auth pages */
-  if (matchesRoute(pathname, AUTH_CONFIG.authOnlyRoutes)) {
-    if (isAuthenticated) {
-      return NextResponse.redirect(
-        new URL(AUTH_CONFIG.defaultAuthenticatedRedirect, request.url)
-      );
-    }
-  }
-
-  return NextResponse.next();
+  return supabaseResponse;
 }
 
 /**
@@ -126,13 +100,6 @@ export function proxy(request: NextRequest) {
  */
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder files
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

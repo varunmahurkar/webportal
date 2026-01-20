@@ -112,8 +112,44 @@ export const api = {
    * Get current user info
    */
   me: (token: string) =>
-    apiClient("/auth/me", {
+    apiClient<AuthResponse["user"]>("/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  /**
+   * Get full user profile from auth_users_table
+   */
+  getProfile: (token: string) =>
+    apiClient<{
+      success: boolean;
+      profile: {
+        user_uuid: string;
+        username: string;
+        email: string;
+        name: string | null;
+        profile_image_url: string | null;
+        subscription_status: string;
+        auth_user_role: string;
+        is_verified: boolean;
+        created_at: string;
+        updated_at: string;
+        last_login_at: string | null;
+      };
+    }>("/auth/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  /**
+   * Update user profile
+   */
+  updateProfile: (
+    token: string,
+    data: { name?: string; profile_image_url?: string }
+  ) =>
+    apiClient("/auth/profile", {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
     }),
 
   // ==========================================================================
