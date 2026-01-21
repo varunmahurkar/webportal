@@ -127,6 +127,16 @@
   opacity: 0.9;
 }
 
+/* Stop Button */
+.stopBtn {
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+}
+
+.stopBtn:hover {
+  opacity: 0.9;
+}
+
 /* Attach Menu Wrapper */
 .attachMenuWrapper {
   position: relative;

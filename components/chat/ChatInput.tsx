@@ -23,22 +23,50 @@ import {
   Lightbulb,
   FileText,
   Video,
+  Square,
 } from '@/app/core/icons';
 import styles from './ChatInput.module.css';
 
 export interface ChatInputProps {
   placeholder?: string;
   className?: string;
+  onSend?: (message: string) => void;
+  onStop?: () => void;
+  disabled?: boolean;
+  isGenerating?: boolean;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
   placeholder = 'Ask anything...',
   className,
+  onSend,
+  onStop,
+  disabled = false,
+  isGenerating = false,
 }) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  /** Handle send message */
+  const handleSend = () => {
+    if (!message.trim() || disabled) return;
+    onSend?.(message.trim());
+    setMessage('');
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+  };
+
+  /** Handle keyboard submit */
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
   // Auto-resize textarea
   useEffect(() => {
@@ -58,9 +86,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
+            disabled={disabled}
             rows={1}
             className={styles.textarea}
           />
@@ -128,14 +158,26 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <Mic size={18} />
             </Button>
 
-            <Button
-              size="icon"
-              className={cn(styles.sendBtn, message.trim() && styles.sendBtnActive)}
-              disabled={!message.trim()}
-              title="Send message"
-            >
-              <ArrowUp size={18} />
-            </Button>
+            {isGenerating ? (
+              <Button
+                size="icon"
+                className={cn(styles.sendBtn, styles.stopBtn)}
+                onClick={onStop}
+                title="Stop generating"
+              >
+                <Square size={14} fill="currentColor" />
+              </Button>
+            ) : (
+              <Button
+                size="icon"
+                className={cn(styles.sendBtn, message.trim() && !disabled && styles.sendBtnActive)}
+                disabled={!message.trim() || disabled}
+                onClick={handleSend}
+                title="Send message"
+              >
+                <ArrowUp size={18} />
+              </Button>
+            )}
           </Flex>
         </Flex>
       </Box>

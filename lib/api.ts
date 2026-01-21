@@ -46,6 +46,24 @@ export interface AuthResponse {
   refresh_token?: string;
 }
 
+export interface ChatResponse {
+  success: boolean;
+  message: string;
+  provider: string;
+  model?: string;
+}
+
+export interface LLMProvider {
+  id: string;
+  name: string;
+  model: string;
+  available: boolean;
+}
+
+export interface ProvidersResponse {
+  providers: LLMProvider[];
+}
+
 /**
  * Generic fetch wrapper with CORS and error handling
  */
@@ -195,4 +213,33 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ password }),
     }),
+
+  // ==========================================================================
+  // Chat / LLM Endpoints
+  // ==========================================================================
+
+  /**
+   * Send a chat message and get a response
+   */
+  chat: (data: {
+    message: string;
+    provider?: "google" | "openai" | "anthropic";
+    chat_history?: Array<{ role: "user" | "assistant"; content: string }>;
+    system_prompt?: string;
+  }): Promise<ChatResponse> =>
+    apiClient("/chat/completions", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  /**
+   * Stream a chat response (returns EventSource URL)
+   */
+  chatStreamUrl: () => `${API_URL}/chat/stream`,
+
+  /**
+   * Get available LLM providers
+   */
+  getProviders: (): Promise<ProvidersResponse> =>
+    apiClient("/chat/providers"),
 };
