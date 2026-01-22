@@ -10,7 +10,10 @@ export { ChatLayout } from './ChatLayout';
 export type { ChatLayoutProps } from './ChatLayout';
 
 export { ChatMessage, ChatMessages } from './ChatMessage';
-export type { ChatMessageProps, ChatMessagesProps, Message, MessageRole } from './ChatMessage';
+export type { ChatMessageProps, ChatMessagesProps, Message, MessageRole, Citation } from './ChatMessage';
+
+export { CitationsPanel } from './CitationsPanel';
+export type { CitationsPanelProps } from './CitationsPanel';
 
 export { ChatInput } from './ChatInput';
 export type { ChatInputProps } from './ChatInput';

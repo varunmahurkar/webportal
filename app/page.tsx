@@ -1,33 +1,50 @@
 /**
  * Nurav AI Home Page
  * Main chat interface with LLM integration
+ * Supports web search with inline citations
  */
 
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ChatLayout, ChatInput, ChatMessages, Conversation } from '@/components/chat';
+import { ChatLayout, ChatInput, ChatMessages, Conversation, CitationsPanel, Citation } from '@/components/chat';
 import { Box, Flex } from './core/Grid';
 import { Text } from './core/Typography';
-import { Sparkles, AlertCircle } from './core/icons';
+import { Sparkles, AlertCircle, Globe } from './core/icons';
+import { Button } from '@/components/ui/button';
 import { useChat } from '@/hooks/useChat';
 import styles from './page.module.css';
 
 export default function HomePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Chat state
+  // Chat state with web search enabled
   const { messages, isLoading, error, sendMessage, clearChat, stopGeneration } = useChat({
     provider: 'openai',
+    webSearchEnabled: true,
   });
 
   // Conversations for sidebar
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>(undefined);
 
+  // Citations panel state
+  const [showCitations, setShowCitations] = useState(false);
+  const [activeCitations, setActiveCitations] = useState<Citation[]>([]);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Extract citations from the latest assistant message
+  useEffect(() => {
+    const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
+    if (lastAssistant?.citations?.length) {
+      setActiveCitations(lastAssistant.citations as Citation[]);
+    } else {
+      setActiveCitations([]);
+    }
   }, [messages]);
 
   // Handle new chat
@@ -67,13 +84,14 @@ export default function HomePage() {
     );
   };
 
-  // Convert useChat messages to ChatMessage format
+  // Convert useChat messages to ChatMessage format with citations
   const chatMessages = messages.map((msg) => ({
     id: msg.id,
     role: msg.role,
     content: msg.content,
     timestamp: msg.timestamp,
     isLoading: msg.isLoading,
+    citations: msg.citations as Citation[] | undefined,
   }));
 
   const hasMessages = messages.length > 0;
@@ -123,17 +141,39 @@ export default function HomePage() {
           </Flex>
         )}
 
-        {/* Chat Input */}
+        {/* Chat Input with Sources Button */}
         <Box className={styles.inputSection}>
-          <ChatInput
-            placeholder="Ask anything..."
-            onSend={handleSend}
-            onStop={stopGeneration}
-            disabled={isLoading}
-            isGenerating={isLoading}
-          />
+          <Flex alignItems="center" gap={2} className={styles.inputWrapper}>
+            <Box className={styles.inputContainer}>
+              <ChatInput
+                placeholder="Ask anything..."
+                onSend={handleSend}
+                onStop={stopGeneration}
+                disabled={isLoading}
+                isGenerating={isLoading}
+              />
+            </Box>
+            {activeCitations.length > 0 && (
+              <Button
+                variant={showCitations ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setShowCitations(!showCitations)}
+                className={styles.sourcesButton}
+              >
+                <Globe size={16} />
+                <span>Sources ({activeCitations.length})</span>
+              </Button>
+            )}
+          </Flex>
         </Box>
       </Flex>
+
+      {/* Citations Panel */}
+      <CitationsPanel
+        citations={activeCitations}
+        isOpen={showCitations}
+        onClose={() => setShowCitations(false)}
+      />
     </ChatLayout>
   );
 }

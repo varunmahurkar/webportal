@@ -1,6 +1,7 @@
 /**
  * Chat Message Component
  * Displays individual messages in the conversation
+ * Supports inline citation links for web search results
  */
 
 'use client';
@@ -15,6 +16,18 @@ import styles from './ChatMessage.module.css';
 
 export type MessageRole = 'user' | 'assistant' | 'system';
 
+/**
+ * Citation data from web search results
+ */
+export interface Citation {
+  id: number;
+  url: string;
+  root_url: string;
+  title: string;
+  snippet?: string;
+  favicon_url?: string;
+}
+
 export interface Message {
   id: string;
   role: MessageRole;
@@ -22,6 +35,59 @@ export interface Message {
   timestamp?: Date;
   isLoading?: boolean;
   isError?: boolean;
+  citations?: Citation[];
+}
+
+/**
+ * Parsed content segment - either plain text or a citation link
+ */
+interface ParsedContent {
+  text: string;
+  domain?: string;
+  url?: string;
+}
+
+/**
+ * Parses message content to extract citation markers 【domain.com】
+ * and maps them to clickable links
+ */
+function parseCitationContent(
+  content: string,
+  citations: Citation[]
+): ParsedContent[] {
+  // Match 【domain.com】 pattern
+  const citationRegex = /【([^】]+)】/g;
+  const parts: ParsedContent[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = citationRegex.exec(content)) !== null) {
+    // Add text before citation
+    if (match.index > lastIndex) {
+      parts.push({ text: content.slice(lastIndex, match.index) });
+    }
+
+    // Find matching citation by domain
+    const domain = match[1];
+    const citation = citations.find(
+      (c) => c.root_url.includes(domain) || c.url.includes(domain)
+    );
+
+    parts.push({
+      text: domain,
+      domain,
+      url: citation?.url || `https://${domain}`,
+    });
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text
+  if (lastIndex < content.length) {
+    parts.push({ text: content.slice(lastIndex) });
+  }
+
+  return parts;
 }
 
 export interface ChatMessageProps {
@@ -73,11 +139,29 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, className }) 
               <LoadingDots />
             ) : (
               <div className={styles.textContent}>
-                {message.content.split('\n').map((line, i) => (
-                  <p key={i} className={styles.paragraph}>
-                    {line || '\u00A0'}
-                  </p>
-                ))}
+                {message.content.split('\n').map((line, i) => {
+                  const parts = parseCitationContent(line, message.citations || []);
+                  return (
+                    <p key={i} className={styles.paragraph}>
+                      {parts.map((part, j) =>
+                        part.url ? (
+                          <a
+                            key={j}
+                            href={part.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.citationLink}
+                            title={part.url}
+                          >
+                            {part.domain}
+                          </a>
+                        ) : (
+                          <span key={j}>{part.text || '\u00A0'}</span>
+                        )
+                      )}
+                    </p>
+                  );
+                })}
               </div>
             )}
           </Box>

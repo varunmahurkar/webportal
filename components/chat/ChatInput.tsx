@@ -19,7 +19,6 @@ import {
   Code,
   Sparkles,
   X,
-  Focus,
   Lightbulb,
   FileText,
   Video,

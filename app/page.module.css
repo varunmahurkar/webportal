@@ -60,6 +60,23 @@
   flex-shrink: 0;
 }
 
+.inputWrapper {
+  padding: 0 1rem 1rem;
+}
+
+.inputContainer {
+  flex: 1;
+}
+
+/* Sources Button */
+.sourcesButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .welcomeSection {
@@ -75,5 +92,15 @@
   .logo {
     width: 32px;
     height: 32px;
+  }
+
+  .inputWrapper {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sourcesButton {
+    width: 100%;
+    justify-content: center;
   }
 }

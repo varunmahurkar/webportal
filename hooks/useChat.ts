@@ -1,18 +1,35 @@
 /**
  * Chat Hook
  * Manages chat state and LLM interactions with streaming support
+ * Includes citation handling for web search results
  */
 
 import { useState, useCallback, useRef } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+/**
+ * Citation data from web search results
+ */
+export interface Citation {
+  id: number;
+  url: string;
+  root_url: string;
+  title: string;
+  snippet?: string;
+  favicon_url?: string;
+}
+
+/**
+ * Chat message with optional citations
+ */
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
   isLoading?: boolean;
+  citations?: Citation[];
 }
 
 export type LLMProvider = "google" | "openai" | "anthropic";
@@ -20,6 +37,7 @@ export type LLMProvider = "google" | "openai" | "anthropic";
 interface UseChatOptions {
   provider?: LLMProvider;
   systemPrompt?: string;
+  webSearchEnabled?: boolean;
 }
 
 export function useChat(options: UseChatOptions = {}) {
@@ -86,6 +104,7 @@ export function useChat(options: UseChatOptions = {}) {
           provider,
           chat_history: chatHistory,
           system_prompt: options.systemPrompt,
+          web_search_enabled: options.webSearchEnabled || false,
         }),
         signal: abortControllerRef.current.signal,
       });
@@ -103,6 +122,9 @@ export function useChat(options: UseChatOptions = {}) {
       }
 
       let fullContent = "";
+      let citations: Citation[] = [];
+      let isJsonFormat = false;
+      let buffer = ""; // Buffer for incomplete SSE lines
 
       // Mark as no longer loading (but still streaming)
       setMessages((prev) =>
@@ -117,29 +139,57 @@ export function useChat(options: UseChatOptions = {}) {
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
+        buffer += chunk;
+
+        // Process complete lines from buffer
+        const lines = buffer.split("\n");
+        // Keep the last potentially incomplete line in buffer
+        buffer = lines.pop() || "";
 
         for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6);
+          if (!line.startsWith("data: ")) continue;
 
-            if (data === "[DONE]") {
-              break;
-            }
+          const data = line.slice(6).trim();
+          if (!data) continue;
 
-            if (data.startsWith("[ERROR]")) {
-              throw new Error(data.slice(8));
-            }
-
-            fullContent += data;
-
-            // Update message content progressively
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === assistantId ? { ...msg, content: fullContent } : msg
-              )
-            );
+          // Handle old format markers
+          if (data === "[DONE]") {
+            break;
           }
+
+          if (data.startsWith("[ERROR]")) {
+            throw new Error(data.slice(8));
+          }
+
+          // Try to parse as JSON (new format with citations)
+          try {
+            const parsed = JSON.parse(data);
+            isJsonFormat = true;
+
+            if (parsed.type === "citation") {
+              citations.push(parsed.citation);
+            } else if (parsed.type === "content") {
+              fullContent += parsed.content;
+            } else if (parsed.type === "done") {
+              break;
+            } else if (parsed.type === "error") {
+              throw new Error(parsed.error);
+            }
+          } catch {
+            // Old plain text format - only use if we haven't seen JSON
+            if (!isJsonFormat) {
+              fullContent += data;
+            }
+          }
+
+          // Update message content and citations progressively
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantId
+                ? { ...msg, content: fullContent, citations: [...citations] }
+                : msg
+            )
+          );
         }
       }
     } catch (err: any) {
@@ -155,7 +205,7 @@ export function useChat(options: UseChatOptions = {}) {
       setIsLoading(false);
       abortControllerRef.current = null;
     }
-  }, [messages, isLoading, provider, options.systemPrompt]);
+  }, [messages, isLoading, provider, options.systemPrompt, options.webSearchEnabled]);
 
   /**
    * Clear chat history
