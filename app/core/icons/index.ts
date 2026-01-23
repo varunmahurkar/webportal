@@ -167,6 +167,9 @@ export {
   Square,
   SlidersHorizontal,
 
+  // External
+  ExternalLink,
+
   // Action & Control
   Save,
   Undo,

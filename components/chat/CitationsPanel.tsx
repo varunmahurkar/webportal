@@ -60,7 +60,7 @@ export const CitationsPanel: React.FC<CitationsPanelProps> = ({
       {/* Header */}
       <Flex
         className={styles.header}
-        justifyContent="space-between"
+        justifyContent="between"
         alignItems="center"
       >
         <Flex alignItems="center" gap={2}>
@@ -90,7 +90,7 @@ export const CitationsPanel: React.FC<CitationsPanelProps> = ({
             rel="noopener noreferrer"
             className={styles.citationCard}
           >
-            <Flex alignItems="flex-start" gap={3}>
+            <Flex alignItems="start" gap={3}>
               {/* Favicon */}
               <Box className={styles.faviconWrapper}>
                 <img

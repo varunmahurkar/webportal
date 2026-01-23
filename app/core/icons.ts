@@ -208,6 +208,7 @@ export {
   Archive,               // Archive content
   Pin,                   // Pin/attach
   PinOff,                // Unpinned state
+  ExternalLink,          // External link indicator
 } from 'lucide-react';
 
 /**
