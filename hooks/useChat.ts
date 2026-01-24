@@ -166,16 +166,18 @@ export function useChat(options: UseChatOptions = {}) {
             const parsed = JSON.parse(data);
             isJsonFormat = true;
 
-            if (parsed.type === "citation") {
+            if (parsed.type === "citation" && parsed.citation) {
+              console.log("[useChat] Received citation:", parsed.citation);
               citations.push(parsed.citation);
             } else if (parsed.type === "content") {
-              fullContent += parsed.content;
+              fullContent += parsed.content || "";
             } else if (parsed.type === "done") {
+              console.log("[useChat] Stream done. Total citations:", citations.length);
               break;
             } else if (parsed.type === "error") {
               throw new Error(parsed.error);
             }
-          } catch {
+          } catch (parseError) {
             // Old plain text format - only use if we haven't seen JSON
             if (!isJsonFormat) {
               fullContent += data;

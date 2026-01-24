@@ -19,7 +19,7 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
-} from "./../../app/core/icons";
+} from "@/app/core/icons";
 import styles from "./ChatMessage.module.css";
 
 export type MessageRole = "user" | "assistant" | "system";
@@ -120,6 +120,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const hasCitations =
     !isUser && message.citations && message.citations.length > 0;
 
+  // Debug logging
+  if (!isUser && message.citations) {
+    console.log("[ChatMessage] Citations received:", message.citations.length, message.citations);
+  }
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(message.content);
@@ -199,7 +204,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
       {/* Answer Section */}
       <Box className={styles.answerSection}>
         {message.isLoading ? (
-          <LoadingIndicator />
+          <LoadingIndicator hasCitations={hasCitations} />
         ) : (
           <>
             <Box className={styles.answerContent}>
@@ -314,12 +319,22 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   );
 };
 
-// Loading indicator
-const LoadingIndicator: React.FC = () => (
-  <Flex className={styles.loadingIndicator} alignItems="center" gap={2}>
-    <div className={styles.loadingDot} style={{ animationDelay: "0ms" }} />
-    <div className={styles.loadingDot} style={{ animationDelay: "150ms" }} />
-    <div className={styles.loadingDot} style={{ animationDelay: "300ms" }} />
+// Loading indicator with search status
+const LoadingIndicator: React.FC<{ hasCitations?: boolean }> = ({ hasCitations }) => (
+  <Flex direction="column" gap={3}>
+    {!hasCitations && (
+      <Flex alignItems="center" gap={2} className={styles.searchingIndicator}>
+        <Globe size={16} className={styles.searchingIcon} />
+        <Text variant="body-sm" color="secondary">
+          Searching the web...
+        </Text>
+      </Flex>
+    )}
+    <Flex className={styles.loadingIndicator} alignItems="center" gap={2}>
+      <div className={styles.loadingDot} style={{ animationDelay: "0ms" }} />
+      <div className={styles.loadingDot} style={{ animationDelay: "150ms" }} />
+      <div className={styles.loadingDot} style={{ animationDelay: "300ms" }} />
+    </Flex>
   </Flex>
 );
 

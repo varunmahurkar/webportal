@@ -253,6 +253,16 @@
   background: var(--secondary);
 }
 
+/* Searching Indicator */
+.searchingIndicator {
+  padding: 0.5rem 0;
+}
+
+.searchingIcon {
+  color: var(--primary);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
 /* Loading Indicator */
 .loadingIndicator {
   padding: 1rem 0;
