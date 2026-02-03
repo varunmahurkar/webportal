@@ -253,7 +253,52 @@
   background: var(--secondary);
 }
 
-/* Searching Indicator */
+/* Status Indicator - Visual progress phases */
+.statusIndicator {
+  padding: 0.5rem 0;
+  transition: all 0.3s ease;
+}
+
+.statusIcon {
+  transition: all 0.3s ease;
+}
+
+.statusIconSearching {
+  color: var(--primary);
+  animation: spin 1.5s linear infinite;
+}
+
+.statusIconReading {
+  color: var(--primary);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.statusIconGenerating {
+  color: var(--primary);
+  animation: sparkle 1.2s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+/* Legacy searching indicator - kept for backward compatibility */
 .searchingIndicator {
   padding: 0.5rem 0;
 }

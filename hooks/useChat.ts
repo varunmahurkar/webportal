@@ -34,6 +34,11 @@ export interface ChatMessage {
 
 export type LLMProvider = "google" | "openai" | "anthropic";
 
+/**
+ * Stream status phases for visual progress indication
+ */
+export type StreamStatus = "idle" | "searching" | "reading" | "generating" | "done";
+
 interface UseChatOptions {
   provider?: LLMProvider;
   systemPrompt?: string;
@@ -45,6 +50,7 @@ export function useChat(options: UseChatOptions = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [provider, setProvider] = useState<LLMProvider>(options.provider || "google");
+  const [status, setStatus] = useState<StreamStatus>("idle");
   const abortControllerRef = useRef<AbortController | null>(null);
 
   /**
@@ -59,6 +65,7 @@ export function useChat(options: UseChatOptions = {}) {
     if (!content.trim() || isLoading) return;
 
     setError(null);
+    setStatus("idle");
 
     // Cancel any ongoing request
     if (abortControllerRef.current) {
@@ -126,13 +133,6 @@ export function useChat(options: UseChatOptions = {}) {
       let isJsonFormat = false;
       let buffer = ""; // Buffer for incomplete SSE lines
 
-      // Mark as no longer loading (but still streaming)
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === assistantId ? { ...msg, isLoading: false } : msg
-        )
-      );
-
       while (true) {
         const { done, value } = await reader.read();
 
@@ -166,13 +166,17 @@ export function useChat(options: UseChatOptions = {}) {
             const parsed = JSON.parse(data);
             isJsonFormat = true;
 
-            if (parsed.type === "citation" && parsed.citation) {
+            if (parsed.type === "status" && parsed.status) {
+              console.log("[useChat] Status update:", parsed.status);
+              setStatus(parsed.status as StreamStatus);
+            } else if (parsed.type === "citation" && parsed.citation) {
               console.log("[useChat] Received citation:", parsed.citation);
               citations.push(parsed.citation);
             } else if (parsed.type === "content") {
               fullContent += parsed.content || "";
             } else if (parsed.type === "done") {
               console.log("[useChat] Stream done. Total citations:", citations.length);
+              setStatus("done");
               break;
             } else if (parsed.type === "error") {
               throw new Error(parsed.error);
@@ -185,15 +189,30 @@ export function useChat(options: UseChatOptions = {}) {
           }
 
           // Update message content and citations progressively
+          // Keep isLoading true until we have content
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === assistantId
-                ? { ...msg, content: fullContent, citations: [...citations] }
+                ? {
+                    ...msg,
+                    content: fullContent,
+                    citations: [...citations],
+                    isLoading: fullContent.length === 0 // Only loading if no content yet
+                  }
                 : msg
             )
           );
         }
       }
+
+      // Ensure loading is set to false when stream completes
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantId
+            ? { ...msg, isLoading: false }
+            : msg
+        )
+      );
     } catch (err: any) {
       if (err.name === "AbortError") {
         return; // Request was cancelled
@@ -206,6 +225,8 @@ export function useChat(options: UseChatOptions = {}) {
     } finally {
       setIsLoading(false);
       abortControllerRef.current = null;
+      // Reset status to idle after a short delay to allow UI transition
+      setTimeout(() => setStatus("idle"), 500);
     }
   }, [messages, isLoading, provider, options.systemPrompt, options.webSearchEnabled]);
 
@@ -220,6 +241,7 @@ export function useChat(options: UseChatOptions = {}) {
     setMessages([]);
     setError(null);
     setIsLoading(false);
+    setStatus("idle");
   }, []);
 
   /**
@@ -229,6 +251,7 @@ export function useChat(options: UseChatOptions = {}) {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       setIsLoading(false);
+      setStatus("idle");
     }
   }, []);
 
@@ -256,6 +279,7 @@ export function useChat(options: UseChatOptions = {}) {
     isLoading,
     error,
     provider,
+    status,
     setProvider,
     sendMessage,
     clearChat,

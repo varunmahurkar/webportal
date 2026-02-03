@@ -19,8 +19,13 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
+  Search,
+  FileText,
+  Sparkles,
 } from "@/app/core/icons";
 import styles from "./ChatMessage.module.css";
+import { MarkdownRenderer } from "./MarkdownRenderer";
+import type { StreamStatus } from "@/hooks/useChat";
 
 export type MessageRole = "user" | "assistant" | "system";
 
@@ -47,54 +52,6 @@ export interface Message {
 }
 
 /**
- * Parsed content segment - either plain text or a citation link
- */
-interface ParsedContent {
-  text: string;
-  domain?: string;
-  url?: string;
-}
-
-/**
- * Parses message content to extract citation markers 【domain.com】
- * and maps them to clickable links
- */
-function parseCitationContent(
-  content: string,
-  citations: Citation[],
-): ParsedContent[] {
-  const citationRegex = /【([^】]+)】/g;
-  const parts: ParsedContent[] = [];
-  let lastIndex = 0;
-  let match;
-
-  while ((match = citationRegex.exec(content)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push({ text: content.slice(lastIndex, match.index) });
-    }
-
-    const domain = match[1];
-    const citation = citations.find(
-      (c) => c.root_url.includes(domain) || c.url.includes(domain),
-    );
-
-    parts.push({
-      text: domain,
-      domain,
-      url: citation?.url || `https://${domain}`,
-    });
-
-    lastIndex = match.index + match[0].length;
-  }
-
-  if (lastIndex < content.length) {
-    parts.push({ text: content.slice(lastIndex) });
-  }
-
-  return parts;
-}
-
-/**
  * Extracts hostname from URL for display
  */
 function getHostname(url: string): string {
@@ -108,11 +65,13 @@ function getHostname(url: string): string {
 export interface ChatMessageProps {
   message: Message;
   className?: string;
+  status?: StreamStatus;
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
   className,
+  status = "idle",
 }) => {
   const [copied, setCopied] = useState(false);
   const [sourcesExpanded, setSourcesExpanded] = useState(true);
@@ -203,37 +162,16 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
       {/* Answer Section */}
       <Box className={styles.answerSection}>
-        {message.isLoading ? (
-          <LoadingIndicator hasCitations={hasCitations} />
+        {/* Show loading indicator when loading OR when no content yet */}
+        {(message.isLoading || (!message.content && status !== "idle" && status !== "done")) ? (
+          <LoadingIndicator status={status} hasCitations={hasCitations} />
         ) : (
           <>
             <Box className={styles.answerContent}>
-              {message.content.split("\n").map((line, i) => {
-                const parts = parseCitationContent(
-                  line,
-                  message.citations || [],
-                );
-                return (
-                  <p key={i} className={styles.paragraph}>
-                    {parts.map((part, j) =>
-                      part.url ? (
-                        <a
-                          key={j}
-                          href={part.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.citationLink}
-                          title={part.url}
-                        >
-                          {part.domain}
-                        </a>
-                      ) : (
-                        <span key={j}>{part.text || "\u00A0"}</span>
-                      ),
-                    )}
-                  </p>
-                );
-              })}
+              <MarkdownRenderer
+                content={message.content}
+                citations={message.citations}
+              />
             </Box>
 
             {/* Detailed Sources - Expandable */}
@@ -319,39 +257,85 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   );
 };
 
-// Loading indicator with search status
-const LoadingIndicator: React.FC<{ hasCitations?: boolean }> = ({ hasCitations }) => (
-  <Flex direction="column" gap={3}>
-    {!hasCitations && (
-      <Flex alignItems="center" gap={2} className={styles.searchingIndicator}>
-        <Globe size={16} className={styles.searchingIcon} />
+/**
+ * Status indicator configuration for each phase
+ */
+const STATUS_CONFIG: Record<
+  StreamStatus,
+  { icon: React.ElementType; label: string; showDots: boolean }
+> = {
+  idle: { icon: Sparkles, label: "Thinking...", showDots: true },
+  searching: { icon: Search, label: "Searching the web...", showDots: false },
+  reading: { icon: FileText, label: "Reading sources...", showDots: false },
+  generating: { icon: Sparkles, label: "Generating response...", showDots: true },
+  done: { icon: Check, label: "Complete", showDots: false },
+};
+
+/**
+ * Loading indicator with visual progress phases
+ */
+const LoadingIndicator: React.FC<{
+  status?: StreamStatus;
+  hasCitations?: boolean;
+}> = ({ status = "idle", hasCitations }) => {
+  const config = STATUS_CONFIG[status] || STATUS_CONFIG.idle;
+  const Icon = config.icon;
+
+  return (
+    <Flex direction="column" gap={3}>
+      <Flex alignItems="center" gap={2} className={styles.statusIndicator}>
+        <Icon
+          size={16}
+          className={cn(styles.statusIcon, {
+            [styles.statusIconSearching]: status === "searching",
+            [styles.statusIconReading]: status === "reading",
+            [styles.statusIconGenerating]: status === "generating" || status === "idle",
+          })}
+        />
         <Text variant="body-sm" color="secondary">
-          Searching the web...
+          {config.label}
         </Text>
       </Flex>
-    )}
-    <Flex className={styles.loadingIndicator} alignItems="center" gap={2}>
-      <div className={styles.loadingDot} style={{ animationDelay: "0ms" }} />
-      <div className={styles.loadingDot} style={{ animationDelay: "150ms" }} />
-      <div className={styles.loadingDot} style={{ animationDelay: "300ms" }} />
+      {config.showDots && (
+        <Flex className={styles.loadingIndicator} alignItems="center" gap={2}>
+          <div className={styles.loadingDot} style={{ animationDelay: "0ms" }} />
+          <div className={styles.loadingDot} style={{ animationDelay: "150ms" }} />
+          <div className={styles.loadingDot} style={{ animationDelay: "300ms" }} />
+        </Flex>
+      )}
     </Flex>
-  </Flex>
-);
+  );
+};
 
-// Container for multiple messages
+/**
+ * Container for multiple messages with status support
+ */
 export interface ChatMessagesProps {
   messages: Message[];
   className?: string;
+  status?: StreamStatus;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
   messages,
   className,
+  status = "idle",
 }) => (
   <Box className={cn(styles.messagesContainer, className)}>
-    {messages.map((message) => (
-      <ChatMessage key={message.id} message={message} />
-    ))}
+    {messages.map((message, index) => {
+      // Pass status to last assistant message that's still loading or has no content
+      const isLastMessage = index === messages.length - 1;
+      const isActiveAssistant = isLastMessage && message.role === "assistant" &&
+        (message.isLoading || !message.content);
+
+      return (
+        <ChatMessage
+          key={message.id}
+          message={message}
+          status={isActiveAssistant ? status : "idle"}
+        />
+      );
+    })}
   </Box>
 );
 

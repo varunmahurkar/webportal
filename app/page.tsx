@@ -18,7 +18,7 @@ export default function HomePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Chat state with web search enabled
-  const { messages, isLoading, error, sendMessage, clearChat, stopGeneration } = useChat({
+  const { messages, isLoading, error, status, sendMessage, clearChat, stopGeneration } = useChat({
     provider: 'openai',
     webSearchEnabled: true,
   });
@@ -98,7 +98,7 @@ export default function HomePage() {
         {/* Messages Area or Welcome Screen */}
         {hasMessages ? (
           <Box className={styles.messagesArea}>
-            <ChatMessages messages={chatMessages} />
+            <ChatMessages messages={chatMessages} status={status} />
             <div ref={messagesEndRef} />
           </Box>
         ) : (
