@@ -174,11 +174,13 @@ export function useChat(options: UseChatOptions = {}) {
               citations.push(parsed.citation);
             } else if (parsed.type === "content") {
               fullContent += parsed.content || "";
+              console.log("[useChat] Content chunk received, total length:", fullContent.length);
             } else if (parsed.type === "done") {
-              console.log("[useChat] Stream done. Total citations:", citations.length);
+              console.log("[useChat] Stream done. Total citations:", citations.length, "Content length:", fullContent.length);
               setStatus("done");
               break;
             } else if (parsed.type === "error") {
+              console.error("[useChat] Error received:", parsed.error);
               throw new Error(parsed.error);
             }
           } catch (parseError) {

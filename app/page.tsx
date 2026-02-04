@@ -19,7 +19,7 @@ export default function HomePage() {
 
   // Chat state with web search enabled
   const { messages, isLoading, error, status, sendMessage, clearChat, stopGeneration } = useChat({
-    provider: 'openai',
+    provider: 'google',  // Using Google Gemini - change to 'openai' or 'anthropic' if preferred
     webSearchEnabled: true,
   });
 

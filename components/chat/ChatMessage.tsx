@@ -165,7 +165,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         {/* Show loading indicator when loading OR when no content yet */}
         {(message.isLoading || (!message.content && status !== "idle" && status !== "done")) ? (
           <LoadingIndicator status={status} hasCitations={hasCitations} />
-        ) : (
+        ) : message.content ? (
           <>
             <Box className={styles.answerContent}>
               <MarkdownRenderer
@@ -251,7 +251,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               </Button>
             </Flex>
           </>
-        )}
+        ) : null}
       </Box>
     </Box>
   );
