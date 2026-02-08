@@ -54,6 +54,14 @@
   font-size: 0.875rem;
 }
 
+/* Mode Selector Area */
+.modeSelectorArea {
+  padding: 0 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
 /* Input Section */
 .inputSection {
   padding: 0;

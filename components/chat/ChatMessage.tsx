@@ -26,6 +26,7 @@ import {
 import styles from "./ChatMessage.module.css";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import type { StreamStatus } from "@/hooks/useChat";
+import { Database } from "@/app/core/icons";
 
 export type MessageRole = "user" | "assistant" | "system";
 
@@ -39,6 +40,7 @@ export interface Citation {
   title: string;
   snippet?: string;
   favicon_url?: string;
+  source_type?: string; // "web", "arxiv", "youtube", "pubmed", "news"
 }
 
 export interface Message {
@@ -147,9 +149,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                   href={citation.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={styles.sourcePill}
+                  className={cn(
+                    styles.sourcePill,
+                    citation.source_type && styles[`sourcePill_${citation.source_type}`],
+                  )}
                 >
                   <span className={styles.sourceNumber}>{index + 1}</span>
+                  {citation.source_type && citation.source_type !== "web" && (
+                    <span className={cn(styles.sourceTypeBadge, styles[`badge_${citation.source_type}`])}>
+                      {SOURCE_TYPE_LABELS[citation.source_type] || citation.source_type}
+                    </span>
+                  )}
                   <span className={styles.sourceDomain}>
                     {getHostname(citation.url)}
                   </span>
@@ -258,6 +268,18 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 };
 
 /**
+ * Source type display labels for citation badges
+ */
+const SOURCE_TYPE_LABELS: Record<string, string> = {
+  arxiv: "Academic",
+  youtube: "Video",
+  pubmed: "Medical",
+  scholar: "Scholar",
+  news: "News",
+  web: "Web",
+};
+
+/**
  * Status indicator configuration for each phase
  */
 const STATUS_CONFIG: Record<
@@ -265,8 +287,11 @@ const STATUS_CONFIG: Record<
   { icon: React.ElementType; label: string; showDots: boolean }
 > = {
   idle: { icon: Sparkles, label: "Thinking...", showDots: true },
-  searching: { icon: Search, label: "Searching the web...", showDots: false },
+  analyzing: { icon: Database, label: "Analyzing query...", showDots: false },
+  searching: { icon: Search, label: "Searching sources...", showDots: false },
   reading: { icon: FileText, label: "Reading sources...", showDots: false },
+  retrieving: { icon: Database, label: "Retrieving context...", showDots: false },
+  synthesizing: { icon: Sparkles, label: "Synthesizing answer...", showDots: true },
   generating: { icon: Sparkles, label: "Generating response...", showDots: true },
   done: { icon: Check, label: "Complete", showDots: false },
 };
@@ -287,9 +312,9 @@ const LoadingIndicator: React.FC<{
         <Icon
           size={16}
           className={cn(styles.statusIcon, {
-            [styles.statusIconSearching]: status === "searching",
-            [styles.statusIconReading]: status === "reading",
-            [styles.statusIconGenerating]: status === "generating" || status === "idle",
+            [styles.statusIconSearching]: status === "searching" || status === "analyzing",
+            [styles.statusIconReading]: status === "reading" || status === "retrieving",
+            [styles.statusIconGenerating]: status === "generating" || status === "synthesizing" || status === "idle",
           })}
         />
         <Text variant="body-sm" color="secondary">

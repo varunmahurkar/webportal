@@ -1,48 +1,77 @@
 /**
  * Nurav AI Home Page
  * Main chat interface with LLM integration - Perplexity Style
- * Clean layout with prominent sources and streamed answers
+ * Supports agentic workflow with adaptive query processing
  */
 
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ChatLayout, ChatInput, ChatMessages, Conversation } from '@/components/chat';
+import { ChatLayout, ChatInput, ChatMessages, ModeSelector, Conversation } from '@/components/chat';
 import { Box, Flex } from './core/Grid';
 import { Text } from './core/Typography';
 import { Sparkles, AlertCircle } from './core/icons';
-import { useChat, Citation } from '@/hooks/useChat';
+import { useChat, Citation, QueryMode } from '@/hooks/useChat';
 import styles from './page.module.css';
 
 export default function HomePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
 
-  // Chat state with web search enabled
-  const { messages, isLoading, error, status, sendMessage, clearChat, stopGeneration } = useChat({
-    provider: 'google',  // Using Google Gemini - change to 'openai' or 'anthropic' if preferred
-    webSearchEnabled: true,
+  // Chat state with agentic mode enabled
+  const {
+    messages,
+    isLoading,
+    error,
+    status,
+    modeSuggestion,
+    activeMode,
+    sendMessage,
+    suggestMode,
+    dismissModeSuggestion,
+    clearChat,
+    stopGeneration,
+  } = useChat({
+    provider: 'google',
+    agenticMode: true,
   });
 
   // Conversations for sidebar
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>(undefined);
 
-
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-
   // Handle new chat
   const handleNewChat = () => {
     clearChat();
     setActiveConversationId(undefined);
+    setPendingMessage(null);
   };
 
-  // Handle send message
+  // Handle send message - gets mode suggestion first, then sends
   const handleSend = async (message: string) => {
-    await sendMessage(message);
+    // Request mode suggestion before sending
+    const suggestion = await suggestMode(message);
+
+    if (suggestion && suggestion.suggested_mode !== 'simple') {
+      // Store message and show mode selector for non-simple queries
+      setPendingMessage(message);
+      return;
+    }
+
+    // For simple queries or if suggestion fails, send immediately
+    await _executeSend(message, suggestion?.suggested_mode || 'simple');
+  };
+
+  // Execute the actual send after mode confirmation
+  const _executeSend = async (message: string, mode: QueryMode) => {
+    setPendingMessage(null);
+    dismissModeSuggestion();
+    await sendMessage(message, mode);
 
     // Create conversation if this is the first message
     if (messages.length === 0 && !activeConversationId) {
@@ -54,6 +83,22 @@ export default function HomePage() {
       setConversations((prev) => [newConversation, ...prev]);
       setActiveConversationId(newConversation.id);
     }
+  };
+
+  // Handle mode confirmation from ModeSelector
+  const handleModeConfirm = async (mode: QueryMode) => {
+    if (pendingMessage) {
+      await _executeSend(pendingMessage, mode);
+    }
+  };
+
+  // Handle mode selector dismiss - send with suggested mode
+  const handleModeDismiss = async () => {
+    if (pendingMessage && modeSuggestion) {
+      await _executeSend(pendingMessage, modeSuggestion.suggested_mode);
+    }
+    dismissModeSuggestion();
+    setPendingMessage(null);
   };
 
   // Handle delete conversation
@@ -126,6 +171,17 @@ export default function HomePage() {
             <AlertCircle size={18} />
             <Text variant="body-sm" color="inherit">{error}</Text>
           </Flex>
+        )}
+
+        {/* Mode Suggestion - shown when AI suggests non-simple mode */}
+        {modeSuggestion && pendingMessage && (
+          <Box className={styles.modeSelectorArea}>
+            <ModeSelector
+              suggestion={modeSuggestion}
+              onConfirm={handleModeConfirm}
+              onDismiss={handleModeDismiss}
+            />
+          </Box>
         )}
 
         {/* Chat Input */}
