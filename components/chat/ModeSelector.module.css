@@ -1,0 +1,111 @@
+/**
+ * Mode Selector Styles
+ * Compact inline card for mode suggestion and confirmation
+ */
+
+.container {
+  padding: 0.75rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.header {
+  margin-bottom: 0.375rem;
+}
+
+.headerIcon {
+  color: var(--primary);
+}
+
+.dismissBtn {
+  padding: 0.125rem;
+  color: var(--muted-foreground);
+  min-height: unset;
+  height: auto;
+}
+
+.dismissBtn:hover {
+  color: var(--foreground);
+}
+
+.reasoning {
+  margin-bottom: 0.375rem;
+  line-height: 1.4;
+}
+
+.timeEstimate {
+  margin-bottom: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+/* Mode option buttons */
+.modeOptions {
+  flex-wrap: wrap;
+}
+
+.modeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: 2rem;
+  transition: all 0.15s ease;
+}
+
+.modeBtn:hover {
+  border-color: var(--primary);
+}
+
+.modeBtnSuggested {
+  border-color: var(--primary);
+  background: rgba(var(--primary-rgb, 59, 130, 246), 0.08);
+  font-weight: 600;
+}
+
+/* Mode color variants */
+.mode_green {
+  color: #16a34a;
+}
+
+.mode_green:hover,
+.mode_green.modeBtnSuggested {
+  border-color: #16a34a;
+  background: rgba(22, 163, 74, 0.08);
+}
+
+.mode_blue {
+  color: var(--primary);
+}
+
+.mode_blue:hover,
+.mode_blue.modeBtnSuggested {
+  border-color: var(--primary);
+  background: rgba(var(--primary-rgb, 59, 130, 246), 0.08);
+}
+
+.mode_purple {
+  color: #9333ea;
+}
+
+.mode_purple:hover,
+.mode_purple.modeBtnSuggested {
+  border-color: #9333ea;
+  background: rgba(147, 51, 234, 0.08);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .modeBtn {
+    padding: 0.3rem 0.625rem;
+    font-size: 0.75rem;
+  }
+}

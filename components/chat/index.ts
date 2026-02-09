@@ -18,5 +18,8 @@ export type { CitationsPanelProps } from './CitationsPanel';
 export { ChatInput } from './ChatInput';
 export type { ChatInputProps } from './ChatInput';
 
+export { ModeSelector } from './ModeSelector';
+export type { ModeSelectorProps } from './ModeSelector';
+
 export { WelcomeScreen } from './WelcomeScreen';
 export type { WelcomeScreenProps, Suggestion } from './WelcomeScreen';
