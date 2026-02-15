@@ -6,17 +6,20 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ChatLayout, ChatInput, ChatMessages, ModeSelector, Conversation } from '@/components/chat';
 import { Box, Flex } from './core/Grid';
 import { Text } from './core/Typography';
 import { Sparkles, AlertCircle } from './core/icons';
 import { useChat, Citation, QueryMode } from '@/hooks/useChat';
+import { useAuth } from '@/hooks/useAuth';
+import * as conversationsApi from '@/lib/api/conversations';
 import styles from './page.module.css';
 
 export default function HomePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  const { accessToken, isAuthenticated } = useAuth();
 
   // Chat state with agentic mode enabled
   const {
@@ -26,19 +29,41 @@ export default function HomePage() {
     status,
     modeSuggestion,
     activeMode,
+    followupQuestions,
+    conversationId,
+    setConversationId,
     sendMessage,
     suggestMode,
     dismissModeSuggestion,
     clearChat,
     stopGeneration,
+    loadConversation,
   } = useChat({
-    provider: 'google',
+    provider: 'openai',
     agenticMode: true,
+    authToken: accessToken,
   });
 
   // Conversations for sidebar
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>(undefined);
+
+  // Load conversations from API on mount when authenticated
+  useEffect(() => {
+    if (!isAuthenticated || !accessToken) return;
+
+    conversationsApi.listConversations(accessToken).then((convs) => {
+      setConversations(
+        convs.map((c) => ({
+          id: c.id,
+          title: c.title,
+          timestamp: new Date(c.updated_at),
+        })),
+      );
+    }).catch((err) => {
+      console.error('Failed to load conversations:', err);
+    });
+  }, [isAuthenticated, accessToken]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -49,8 +74,15 @@ export default function HomePage() {
   const handleNewChat = () => {
     clearChat();
     setActiveConversationId(undefined);
+    setConversationId(null);
     setPendingMessage(null);
   };
+
+  // Handle selecting a conversation from sidebar
+  const handleSelectConversation = useCallback(async (convId: string) => {
+    setActiveConversationId(convId);
+    await loadConversation(convId);
+  }, [loadConversation]);
 
   // Handle send message - gets mode suggestion first, then sends
   const handleSend = async (message: string) => {
@@ -71,18 +103,35 @@ export default function HomePage() {
   const _executeSend = async (message: string, mode: QueryMode) => {
     setPendingMessage(null);
     dismissModeSuggestion();
-    await sendMessage(message, mode);
 
-    // Create conversation if this is the first message
+    // Create conversation via API if this is the first message
     if (messages.length === 0 && !activeConversationId) {
-      const newConversation: Conversation = {
-        id: `conv_${Date.now()}`,
-        title: message.slice(0, 50) + (message.length > 50 ? '...' : ''),
-        timestamp: new Date(),
-      };
-      setConversations((prev) => [newConversation, ...prev]);
-      setActiveConversationId(newConversation.id);
+      const title = message.slice(0, 50) + (message.length > 50 ? '...' : '');
+
+      if (isAuthenticated && accessToken) {
+        try {
+          const conv = await conversationsApi.createConversation(accessToken, title);
+          setConversationId(conv.id);
+          setActiveConversationId(conv.id);
+          setConversations((prev) => [
+            { id: conv.id, title: conv.title, timestamp: new Date(conv.created_at) },
+            ...prev,
+          ]);
+        } catch (err) {
+          console.error('Failed to create conversation:', err);
+        }
+      } else {
+        // Fallback for unauthenticated users: local-only conversation
+        const localId = `conv_${Date.now()}`;
+        setActiveConversationId(localId);
+        setConversations((prev) => [
+          { id: localId, title, timestamp: new Date() },
+          ...prev,
+        ]);
+      }
     }
+
+    await sendMessage(message, mode);
   };
 
   // Handle mode confirmation from ModeSelector
@@ -102,7 +151,14 @@ export default function HomePage() {
   };
 
   // Handle delete conversation
-  const handleDeleteConversation = (id: string) => {
+  const handleDeleteConversation = async (id: string) => {
+    if (isAuthenticated && accessToken) {
+      try {
+        await conversationsApi.deleteConversation(accessToken, id);
+      } catch (err) {
+        console.error('Failed to delete conversation:', err);
+      }
+    }
     setConversations((prev) => prev.filter((c) => c.id !== id));
     if (activeConversationId === id) {
       handleNewChat();
@@ -110,7 +166,14 @@ export default function HomePage() {
   };
 
   // Handle rename conversation
-  const handleRenameConversation = (id: string, newTitle: string) => {
+  const handleRenameConversation = async (id: string, newTitle: string) => {
+    if (isAuthenticated && accessToken) {
+      try {
+        await conversationsApi.updateConversationTitle(accessToken, id, newTitle);
+      } catch (err) {
+        console.error('Failed to rename conversation:', err);
+      }
+    }
     setConversations((prev) =>
       prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c))
     );
@@ -132,7 +195,7 @@ export default function HomePage() {
     <ChatLayout
       conversations={conversations}
       activeConversationId={activeConversationId}
-      onSelectConversation={setActiveConversationId}
+      onSelectConversation={handleSelectConversation}
       onNewChat={handleNewChat}
       onDeleteConversation={handleDeleteConversation}
       onRenameConversation={handleRenameConversation}
@@ -143,7 +206,12 @@ export default function HomePage() {
         {/* Messages Area or Welcome Screen */}
         {hasMessages ? (
           <Box className={styles.messagesArea}>
-            <ChatMessages messages={chatMessages} status={status} />
+            <ChatMessages
+              messages={chatMessages}
+              status={status}
+              followupQuestions={followupQuestions}
+              onFollowupClick={(q) => handleSend(q)}
+            />
             <div ref={messagesEndRef} />
           </Box>
         ) : (
