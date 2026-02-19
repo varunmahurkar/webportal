@@ -68,12 +68,18 @@ export interface ChatMessageProps {
   message: Message;
   className?: string;
   status?: StreamStatus;
+  /** Follow-up question suggestions (shown after response) */
+  followupQuestions?: string[];
+  /** Callback when user clicks a follow-up question */
+  onFollowupClick?: (question: string) => void;
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
   className,
   status = "idle",
+  followupQuestions = [],
+  onFollowupClick,
 }) => {
   const [copied, setCopied] = useState(false);
   const [sourcesExpanded, setSourcesExpanded] = useState(true);
@@ -260,6 +266,26 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 <span>{copied ? "Copied" : "Copy"}</span>
               </Button>
             </Flex>
+
+            {/* Follow-up Question Chips */}
+            {followupQuestions.length > 0 && (
+              <Box className={styles.followupSection}>
+                <Text variant="label-sm" weight={600} className={styles.followupTitle}>
+                  Related questions
+                </Text>
+                <Flex className={styles.followupChips} gap={2} wrap="wrap">
+                  {followupQuestions.map((question, idx) => (
+                    <button
+                      key={idx}
+                      className={styles.followupChip}
+                      onClick={() => onFollowupClick?.(question)}
+                    >
+                      {question}
+                    </button>
+                  ))}
+                </Flex>
+              </Box>
+            )}
           </>
         ) : null}
       </Box>
@@ -293,6 +319,7 @@ const STATUS_CONFIG: Record<
   retrieving: { icon: Database, label: "Retrieving context...", showDots: false },
   synthesizing: { icon: Sparkles, label: "Synthesizing answer...", showDots: true },
   generating: { icon: Sparkles, label: "Generating response...", showDots: true },
+  cached: { icon: Check, label: "Loading cached response...", showDots: false },
   done: { icon: Check, label: "Complete", showDots: false },
 };
 
@@ -339,25 +366,34 @@ export interface ChatMessagesProps {
   messages: Message[];
   className?: string;
   status?: StreamStatus;
+  /** Follow-up questions for the latest response */
+  followupQuestions?: string[];
+  /** Callback when user clicks a follow-up question */
+  onFollowupClick?: (question: string) => void;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
   messages,
   className,
   status = "idle",
+  followupQuestions = [],
+  onFollowupClick,
 }) => (
   <Box className={cn(styles.messagesContainer, className)}>
     {messages.map((message, index) => {
-      // Pass status to last assistant message that's still loading or has no content
       const isLastMessage = index === messages.length - 1;
       const isActiveAssistant = isLastMessage && message.role === "assistant" &&
         (message.isLoading || !message.content);
+      const isLastAssistantDone = isLastMessage && message.role === "assistant" &&
+        !message.isLoading && message.content;
 
       return (
         <ChatMessage
           key={message.id}
           message={message}
           status={isActiveAssistant ? status : "idle"}
+          followupQuestions={isLastAssistantDone ? followupQuestions : []}
+          onFollowupClick={onFollowupClick}
         />
       );
     })}

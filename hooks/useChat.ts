@@ -47,6 +47,7 @@ export type StreamStatus =
   | "retrieving"
   | "synthesizing"
   | "generating"
+  | "cached"
   | "done";
 
 /**
@@ -71,6 +72,8 @@ interface UseChatOptions {
   webSearchEnabled?: boolean;
   /** Enable agentic mode with adaptive query processing */
   agenticMode?: boolean;
+  /** Authentication token for conversation persistence */
+  authToken?: string | null;
 }
 
 export function useChat(options: UseChatOptions = {}) {
@@ -81,6 +84,8 @@ export function useChat(options: UseChatOptions = {}) {
   const [status, setStatus] = useState<StreamStatus>("idle");
   const [modeSuggestion, setModeSuggestion] = useState<ModeSuggestion | null>(null);
   const [activeMode, setActiveMode] = useState<QueryMode | null>(null);
+  const [followupQuestions, setFollowupQuestions] = useState<string[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   /**
@@ -126,13 +131,17 @@ export function useChat(options: UseChatOptions = {}) {
   ) => {
     const response = await fetch(`${API_URL}/chat/agentic-stream`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.authToken ? { Authorization: `Bearer ${options.authToken}` } : {}),
+      },
       body: JSON.stringify({
         message: content.trim(),
         provider,
         chat_history: chatHistory,
         system_prompt: options.systemPrompt,
         mode: confirmedMode || null,
+        conversation_id: conversationId,
       }),
       signal: abortControllerRef.current!.signal,
     });
@@ -177,6 +186,8 @@ export function useChat(options: UseChatOptions = {}) {
             citations.push(parsed.citation);
           } else if (parsed.type === "content") {
             fullContent += parsed.content || "";
+          } else if (parsed.type === "followup" && parsed.questions) {
+            setFollowupQuestions(parsed.questions);
           } else if (parsed.type === "done") {
             setStatus("done");
             break;
@@ -213,7 +224,7 @@ export function useChat(options: UseChatOptions = {}) {
         msg.id === assistantId ? { ...msg, isLoading: false } : msg
       )
     );
-  }, [provider, options.systemPrompt]);
+  }, [provider, options.systemPrompt, options.authToken, conversationId]);
 
   /**
    * Send a message using the legacy streaming endpoint (web search)
@@ -324,6 +335,7 @@ export function useChat(options: UseChatOptions = {}) {
     setStatus("idle");
     setModeSuggestion(null);
     setActiveMode(confirmedMode || null);
+    setFollowupQuestions([]);
 
     // Cancel any ongoing request
     if (abortControllerRef.current) {
@@ -388,6 +400,8 @@ export function useChat(options: UseChatOptions = {}) {
     setStatus("idle");
     setModeSuggestion(null);
     setActiveMode(null);
+    setFollowupQuestions([]);
+    setConversationId(null);
   }, []);
 
   /**
@@ -400,6 +414,41 @@ export function useChat(options: UseChatOptions = {}) {
       setStatus("idle");
     }
   }, []);
+
+  /**
+   * Load an existing conversation from the backend
+   */
+  const loadConversation = useCallback(async (convId: string) => {
+    if (!options.authToken) return;
+
+    try {
+      const response = await fetch(`${API_URL}/conversations/${convId}`, {
+        headers: {
+          Authorization: `Bearer ${options.authToken}`,
+        },
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      const conv = data.conversation;
+
+      if (conv && conv.messages) {
+        const loadedMessages: ChatMessage[] = conv.messages.map((msg: any) => ({
+          id: msg.id || generateId(),
+          role: msg.role,
+          content: msg.content,
+          timestamp: new Date(msg.created_at),
+          citations: msg.citations || [],
+        }));
+        setMessages(loadedMessages);
+        setConversationId(convId);
+        setFollowupQuestions([]);
+      }
+    } catch (err) {
+      console.error("Failed to load conversation:", err);
+    }
+  }, [options.authToken]);
 
   /**
    * Retry the last message
@@ -425,13 +474,17 @@ export function useChat(options: UseChatOptions = {}) {
     status,
     modeSuggestion,
     activeMode,
+    followupQuestions,
+    conversationId,
     setProvider,
+    setConversationId,
     sendMessage,
     suggestMode,
     dismissModeSuggestion,
     clearChat,
     stopGeneration,
     retryLast,
+    loadConversation,
   };
 }
 
