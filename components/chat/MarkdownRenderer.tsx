@@ -35,22 +35,29 @@ export interface MarkdownRendererProps {
 }
 
 /**
- * Parses citation markers 【domain.com】 and converts them to anchor placeholders
- * that will be rendered as clickable links
+ * Parses [N] and [N, M, ...] citation markers and converts them to
+ * special markdown links rendered as superscript numbered badges
+ * Negative lookbehind for ! (images) and [ (nested brackets)
+ * Negative lookahead for ( (markdown links)
  */
 function processCitationMarkers(
   content: string,
   citations: Citation[]
 ): string {
-  const citationRegex = /【([^】]+)】/g;
+  // Match [1], [2], [1, 2], [1, 2, 3] but not ![alt](...) or [[...]] or [text](...)
+  const citationRegex = /(?<![!\[])\[(\d{1,2}(?:,\s*\d{1,2})*)\](?!\()/g;
 
-  return content.replace(citationRegex, (match, domain) => {
-    const citation = citations.find(
-      (c) => c.root_url.includes(domain) || c.url.includes(domain)
-    );
-    const url = citation?.url || `https://${domain}`;
-    // Return a markdown link with a special data attribute marker
-    return `[${domain}](${url} "citation-link")`;
+  return content.replace(citationRegex, (match, numGroup: string) => {
+    const nums = numGroup.split(",").map((n: string) => n.trim());
+    // Convert each number to a citation-ref link
+    return nums
+      .map((num: string) => {
+        const id = parseInt(num, 10);
+        const citation = citations.find((c) => c.id === id);
+        const url = citation?.url || "#";
+        return `[${num}](${url} "citation-ref-${num}")`;
+      })
+      .join("");
   });
 }
 
@@ -88,16 +95,39 @@ const createComponents = (citations: Citation[]): Components => ({
     </p>
   ),
 
-  // Links - special handling for citation links
+  // Links - special handling for citation badges with tooltip on hover
   a: ({ href, title, children, ...props }) => {
-    const isCitation = title === "citation-link";
+    const isCitationRef = title?.startsWith("citation-ref-");
+
+    if (isCitationRef) {
+      const num = title!.replace("citation-ref-", "");
+      const id = parseInt(num, 10);
+      const citation = citations.find((c) => c.id === id);
+      const tooltipText = citation
+        ? `${citation.title || "Source"}\n${citation.snippet?.slice(0, 120) || ""}`
+        : `Source ${num}`;
+
+      return (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.citationBadge}
+          data-tooltip={tooltipText}
+          {...props}
+        >
+          {num}
+        </a>
+      );
+    }
+
     return (
       <a
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className={isCitation ? styles.citationLink : styles.link}
-        title={isCitation ? href : title}
+        className={styles.link}
+        title={title}
         {...props}
       >
         {children}

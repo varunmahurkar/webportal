@@ -64,6 +64,44 @@ function getHostname(url: string): string {
   }
 }
 
+/**
+ * Returns favicon URL using Google's favicon service with fallback
+ */
+function getFaviconUrl(citation: Citation): string {
+  if (citation.favicon_url) return citation.favicon_url;
+  const domain = getHostname(citation.url);
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+}
+
+/**
+ * Groups citations by source_type for organized display
+ * Returns groups in display order: Web, Academic, Video, then others
+ */
+function groupCitationsByType(citations: Citation[]): { type: string; label: string; citations: Citation[] }[] {
+  const groups: Record<string, Citation[]> = {};
+  for (const c of citations) {
+    const type = c.source_type || "web";
+    if (!groups[type]) groups[type] = [];
+    groups[type].push(c);
+  }
+
+  const displayOrder = ["web", "arxiv", "youtube", "pubmed", "scholar", "news"];
+  const result: { type: string; label: string; citations: Citation[] }[] = [];
+
+  for (const type of displayOrder) {
+    if (groups[type]) {
+      result.push({ type, label: SOURCE_TYPE_LABELS[type] || type, citations: groups[type] });
+      delete groups[type];
+    }
+  }
+  // Any remaining types not in the display order
+  for (const [type, cits] of Object.entries(groups)) {
+    result.push({ type, label: SOURCE_TYPE_LABELS[type] || type, citations: cits });
+  }
+
+  return result;
+}
+
 export interface ChatMessageProps {
   message: Message;
   className?: string;
@@ -148,30 +186,51 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           </Flex>
 
           {sourcesExpanded && (
-            <Flex className={styles.sourcesPills} gap={2} wrap="wrap">
-              {message.citations!.map((citation, index) => (
-                <a
-                  key={citation.id}
-                  href={citation.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(
-                    styles.sourcePill,
-                    citation.source_type && styles[`sourcePill_${citation.source_type}`],
+            <Box className={styles.sourceGroups}>
+              {groupCitationsByType(message.citations!).map((group) => (
+                <Box key={group.type} className={styles.sourceGroup}>
+                  {/* Show group header only when multiple types exist */}
+                  {groupCitationsByType(message.citations!).length > 1 && (
+                    <Text variant="caption" weight={600} className={styles.sourceGroupHeader}>
+                      {group.label}
+                    </Text>
                   )}
-                >
-                  <span className={styles.sourceNumber}>{index + 1}</span>
-                  {citation.source_type && citation.source_type !== "web" && (
-                    <span className={cn(styles.sourceTypeBadge, styles[`badge_${citation.source_type}`])}>
-                      {SOURCE_TYPE_LABELS[citation.source_type] || citation.source_type}
-                    </span>
-                  )}
-                  <span className={styles.sourceDomain}>
-                    {getHostname(citation.url)}
-                  </span>
-                </a>
+                  <Flex className={styles.sourcesPills} gap={2} wrap="wrap">
+                    {group.citations.map((citation) => (
+                      <a
+                        key={citation.id}
+                        href={citation.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(
+                          styles.sourcePill,
+                          citation.source_type && styles[`sourcePill_${citation.source_type}`],
+                        )}
+                      >
+                        <span className={styles.sourceNumber}>{citation.id}</span>
+                        <img
+                          src={getFaviconUrl(citation)}
+                          alt=""
+                          width={16}
+                          height={16}
+                          className={styles.sourceFavicon}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none";
+                          }}
+                        />
+                        <span className={styles.sourceDomain}>
+                          {citation.title
+                            ? citation.title.length > 30
+                              ? `${citation.title.slice(0, 30)}...`
+                              : citation.title
+                            : getHostname(citation.url)}
+                        </span>
+                      </a>
+                    ))}
+                  </Flex>
+                </Box>
               ))}
-            </Flex>
+            </Box>
           )}
         </Box>
       )}
@@ -211,8 +270,18 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                     >
                       <Flex alignItems="start" gap={3}>
                         <span className={styles.sourceCardNumber}>
-                          {index + 1}
+                          {citation.id}
                         </span>
+                        <img
+                          src={getFaviconUrl(citation)}
+                          alt=""
+                          width={16}
+                          height={16}
+                          className={styles.sourceFavicon}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none";
+                          }}
+                        />
                         <Box className={styles.sourceCardContent}>
                           <Text
                             variant="body-sm"
