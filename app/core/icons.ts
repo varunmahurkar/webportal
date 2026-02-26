@@ -137,6 +137,17 @@ export {
   Webhook,               // API/webhooks
 } from 'lucide-react';
 
+// Tools & Niche Icons - for the tools showcase and AI capabilities
+export {
+  Wrench,                // Generic tool/settings
+  GraduationCap,         // Academic/research tools
+  Calculator,            // Math/calculation tools
+  Languages,             // Language/translation tools
+  ScanSearch,            // Query analysis/search intelligence
+  ShieldCheck,           // Quality validation/verification
+  MessageCircleQuestion, // Follow-up question generation
+} from 'lucide-react';
+
 // Communication & Social Icons - for messaging and social features
 export {
   MessageSquare,         // Chat/messaging

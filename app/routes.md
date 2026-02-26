@@ -6,6 +6,7 @@
 - **/core/typography** - Typography system showcase
 - **/core/icons** - Icon library showcase with all Lucide React icons
 - **/core/color** - Color system showcase with theme switching
+- **/tools** - Interactive tools showcase and playground with all available AI tools grouped by niche
 
 ## Authentication Routes
 

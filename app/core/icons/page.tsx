@@ -185,6 +185,13 @@ import {
   Archive,
   Pin,
   PinOff,
+  Wrench,
+  GraduationCap,
+  Calculator,
+  Languages,
+  ScanSearch,
+  ShieldCheck,
+  MessageCircleQuestion,
   type LucideIcon,
 } from "lucide-react";
 
@@ -350,6 +357,13 @@ const IconMap: Record<string, LucideIcon> = {
   Archive,
   Pin,
   PinOff,
+  Wrench,
+  GraduationCap,
+  Calculator,
+  Languages,
+  ScanSearch,
+  ShieldCheck,
+  MessageCircleQuestion,
 };
 
 // Icon categories
@@ -531,6 +545,15 @@ const iconCategories = {
     "Archive",
     "Pin",
     "PinOff",
+  ],
+  "Tools & Niche": [
+    "Wrench",
+    "GraduationCap",
+    "Calculator",
+    "Languages",
+    "ScanSearch",
+    "ShieldCheck",
+    "MessageCircleQuestion",
   ],
 };
 

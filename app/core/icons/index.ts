@@ -170,6 +170,15 @@ export {
   // External
   ExternalLink,
 
+  // Tools & Niche
+  Wrench,
+  GraduationCap,
+  Calculator,
+  Languages,
+  ScanSearch,
+  ShieldCheck,
+  MessageCircleQuestion,
+
   // Action & Control
   Save,
   Undo,
