@@ -1,5 +1,6 @@
 /**
- * Validation utilities for username and password
+ * Validation utilities — client-side username/password validation (mirrors backend rules).
+ * Called by: AuthModal (real-time form validation before API call).
  */
 
 const USERNAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_.\-]{5,17}$/;

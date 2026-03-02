@@ -1,6 +1,7 @@
 /**
- * Sidebar Component
- * Collapsible sidebar with profile, conversations, and theme controls
+ * Sidebar — collapsible panel with user profile, conversation list, and theme toggle.
+ * Calls: lib/api/conversations.ts (list/rename/delete), useAuth (user session).
+ * Connected to: ChatLayout (parent layout), page.tsx (conversation selection callback).
  */
 
 "use client";

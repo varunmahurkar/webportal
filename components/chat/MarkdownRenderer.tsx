@@ -1,7 +1,7 @@
 /**
- * Markdown Renderer Component
- * Renders markdown content with syntax highlighting and citation support
- * Uses react-markdown with GitHub-flavored markdown and code highlighting
+ * Markdown Renderer — renders LLM response content with syntax highlighting and citation links.
+ * Uses react-markdown + rehype-highlight + remark-gfm for GitHub-flavored markdown.
+ * Connected to: ChatMessage (renders assistant message content), CitationsPanel (citation [N] links).
  */
 
 "use client";

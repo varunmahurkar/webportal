@@ -1,7 +1,7 @@
 /**
- * Citations Panel Component
- * Displays all web search citations in a collapsible panel
- * Shows source URLs, titles, and snippets
+ * Citations Panel — collapsible panel showing web search source citations.
+ * Connected to: ChatMessage (inline citation links open this panel),
+ * useChat (receives Citation[] from /chat/agentic-stream SSE events).
  */
 
 'use client';

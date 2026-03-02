@@ -1,7 +1,7 @@
 /**
- * Mode Selector Component
- * Displays AI-suggested query mode with confirmation/override options.
- * Part of the hybrid triggering system (AI suggests, user confirms).
+ * Mode Selector — displays AI-suggested query mode (fast/balanced/deep) with confirm/override.
+ * Calls: useChat types (QueryMode, ModeSuggestion).
+ * Connected to: ChatInput (shown above input), useChat (receives mode suggestion from /chat/suggest-mode).
  */
 
 'use client';

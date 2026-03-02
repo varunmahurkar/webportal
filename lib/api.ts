@@ -1,5 +1,7 @@
 /**
- * API client for Nurav AI backend services
+ * Unified API client — centralized fetch wrapper for all backend endpoints.
+ * Calls: backend /auth/*, /chat/*, /auth/check-username/*, /auth/bloom-filter, /auth/validate-password.
+ * Called by: AuthModal (signup/signin), useChat (chat), useAuth (profile), tools page (providers).
  */
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -93,9 +95,7 @@ export async function apiClient<T = any>(
 }
 
 export const api = {
-  // ==========================================================================
-  // Authentication Endpoints
-  // ==========================================================================
+  // Auth endpoints — called by AuthModal, useAuth
 
   /**
    * Sign up a new user with email, password, and username
@@ -170,9 +170,7 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
-  // ==========================================================================
-  // Username Validation & Bloom Filter Endpoints
-  // ==========================================================================
+  // Username & Bloom filter endpoints — called by AuthModal signup form
 
   /**
    * Check username availability using Bloom filter + database
@@ -201,9 +199,7 @@ export const api = {
   getBloomFilter: (): Promise<BloomFilterResponse> =>
     apiClient("/auth/bloom-filter"),
 
-  // ==========================================================================
-  // Password Validation Endpoints
-  // ==========================================================================
+  // Password validation — called by AuthModal password strength meter
 
   /**
    * Validate password strength and complexity
@@ -214,9 +210,7 @@ export const api = {
       body: JSON.stringify({ password }),
     }),
 
-  // ==========================================================================
-  // Chat / LLM Endpoints
-  // ==========================================================================
+  // Chat / LLM endpoints — called by useChat hook
 
   /**
    * Send a chat message and get a response

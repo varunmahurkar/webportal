@@ -1,12 +1,8 @@
 /**
- * Nurav AI Welcome Screen Component
- *
- * The initial screen shown when starting a new conversation.
- * Features:
- * - Animated logo
- * - Suggested prompts/queries
- * - Quick action buttons
- * - Feature highlights
+ * Welcome Screen — shown when no conversation is active.
+ * Displays animated logo, suggested prompts, and quick action buttons.
+ * Connected to: page.tsx (rendered when messages array is empty),
+ * ChatInput (suggested prompt click triggers a new message).
  */
 
 'use client';

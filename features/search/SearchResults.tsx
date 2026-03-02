@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * Nurav Search Results - Clean & Consistent Component
- * Uses only Nurav core components for complete consistency
- * No Ant Design dependencies - pure HTML with proper TypeScript
+ * Search Results — displays search result cards with titles, snippets, and source links.
+ * Connected to: AISearch (receives search results), features/search/index.ts (exported).
+ * Uses Nurav core components (Typography, Grid) for UI consistency.
  */
 
 import React, { useState, useCallback } from 'react';
