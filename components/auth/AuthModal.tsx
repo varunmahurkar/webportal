@@ -1,13 +1,10 @@
 "use client";
 
 /**
- * Authentication Modal Component
- * Features:
- * - Email/password sign in and sign up
- * - Username validation with Bloom filter availability check
- * - Password strength indicator with validation
- * - Random username generator
- * - OAuth providers (Google, GitHub, Discord)
+ * Auth Modal — sign in/sign up dialog with username and password validation.
+ * Calls: lib/api.ts (signup/signin/checkUsername/validatePassword/generateUsername),
+ * useAuth (session update on success), Supabase client (OAuth providers).
+ * Connected to: Header (open modal button), page.tsx (auth gate).
  * - Phone OTP authentication
  */
 
@@ -155,8 +152,7 @@ export function AuthModal({
           setUsernameError(null);
         }
       } catch (err) {
-        // If API fails, assume username is available (backend will validate on signup)
-        console.log("Username check failed, assuming available:", err);
+        // API fail fallback — backend validates on signup
         setUsernameAvailable(true);
         setUsernameError(null);
         setUsernameSuggestions([]);

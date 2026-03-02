@@ -1,6 +1,8 @@
 /**
- * Nurav AI Authentication Hook and Context
- * Provides authentication state management across the application
+ * Auth Hook & Context — manages authentication state, tokens, and user session.
+ * Calls: lib/api/auth.ts (signIn/signUp/signOut/refreshToken), Supabase client.
+ * Connected to: AuthModal (login/signup UI), ProtectedRoute (gate), Header (user menu),
+ * Sidebar (profile display), all authenticated API calls via token provider.
  */
 
 'use client';

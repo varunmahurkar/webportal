@@ -1,6 +1,6 @@
 /**
- * Nurav AI Chat Message Styles - Perplexity Style
- * Clean, minimal design with prominent sources
+ * Nurav AI Chat Message Styles
+ * Clean layout: user question -> source pills -> answer content -> follow-ups.
  */
 
 /* Messages Container */
@@ -28,7 +28,7 @@
   padding: 1.5rem 0 2rem;
 }
 
-/* Sources Section - Perplexity style */
+/* Sources Section — citation pills with favicons */
 .sourcesSection {
   margin-bottom: 1.5rem;
   padding: 1rem;

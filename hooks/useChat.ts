@@ -1,8 +1,8 @@
 /**
- * Chat Hook
- * Manages chat state and LLM interactions with streaming support
- * Includes citation handling for web search results
- * Supports agentic workflow with mode suggestion and multi-source research
+ * Chat Hook — manages chat state, LLM streaming, citations, and agentic mode.
+ * Calls: backend /chat/stream, /chat/agentic-stream, /chat/suggest-mode, /chat/completions.
+ * Connected to: ChatInput (sends messages), ChatMessage (displays responses),
+ * ModeSelector (query mode), CitationsPanel (web sources), Sidebar (conversation persistence).
  */
 
 import { useState, useCallback, useRef } from "react";

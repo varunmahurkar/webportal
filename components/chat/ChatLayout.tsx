@@ -1,12 +1,7 @@
 /**
- * Nurav AI Chat Layout Component
- *
- * The main layout structure for the ChatGPT-style interface.
- * Features:
- * - Collapsible sidebar integration
- * - Main content area with flexible sizing
- * - Mobile-responsive overlay for sidebar
- * - Keyboard shortcuts support
+ * Chat Layout — main layout wrapper with collapsible sidebar and content area.
+ * Connected to: page.tsx (renders inside), Sidebar (left panel), ChatInput + ChatMessage (content area).
+ * Handles sidebar toggle state, mobile overlay, and keyboard shortcuts (Ctrl+B).
  */
 
 'use client';

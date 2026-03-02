@@ -1,6 +1,7 @@
 /**
- * Chat Input Component
- * Modern design like Perplexity, ChatGPT, Claude
+ * Chat Input Component — Nurav AI
+ * Multi-line input with send/stop controls and keyboard shortcuts.
+ * Connected to: page.tsx (handleSend), useChat (sendMessage, stopGeneration).
  */
 
 'use client';

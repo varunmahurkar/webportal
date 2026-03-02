@@ -1,7 +1,8 @@
 /**
- * Chat Message Component - Perplexity Style
- * Clean, minimal design with prominent sources
- * Question at top, sources, then streamed answer
+ * Chat Message Component — Nurav AI
+ * Renders user questions and assistant responses with citation sources.
+ * Layout: question at top -> source pills -> streamed markdown answer -> follow-ups.
+ * Connected to: ChatMessages (parent list), MarkdownRenderer (content), useChat (data).
  */
 
 "use client";
@@ -125,11 +126,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const hasCitations =
     !isUser && message.citations && message.citations.length > 0;
 
-  // Debug logging
-  if (!isUser && message.citations) {
-    console.log("[ChatMessage] Citations received:", message.citations.length, message.citations);
-  }
-
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(message.content);
@@ -151,10 +147,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   }
 
-  // Assistant message - Perplexity style with sources
+  // Assistant message — sources first, then streamed answer
   return (
     <Box className={cn(styles.answerContainer, className)}>
-      {/* Sources Section - Shown first like Perplexity */}
+      {/* Sources Section — displayed before the answer */}
       {hasCitations && (
         <Box className={styles.sourcesSection}>
           <Flex

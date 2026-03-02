@@ -1,6 +1,7 @@
 /**
- * Nurav AI Protected Route Component
- * Client-side route protection wrapper for authenticated content
+ * Protected Route — client-side auth gate that redirects unauthenticated users.
+ * Calls: useAuth (checks session state).
+ * Connected to: (protected)/layout.tsx (wraps protected pages like /profile).
  */
 
 'use client';
