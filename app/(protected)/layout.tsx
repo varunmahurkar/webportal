@@ -1,3 +1,7 @@
+/**
+ * Protected Layout — server-side auth gate for /profile and other protected routes.
+ * Calls: lib/supabase/server.ts (check session). Redirects to / if unauthenticated.
+ */
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 

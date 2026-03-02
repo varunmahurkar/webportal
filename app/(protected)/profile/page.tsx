@@ -1,8 +1,9 @@
 "use client";
 
 /**
- * Profile Page
- * Displays user profile data from auth_users_table
+ * Profile Page — displays and edits user profile from auth_users_table.
+ * Calls: lib/api.ts (getProfile/updateProfile), useAuth (session token).
+ * Connected to: (protected)/layout.tsx (auth gate), Header (profile nav link).
  */
 
 import { useEffect, useState } from "react";

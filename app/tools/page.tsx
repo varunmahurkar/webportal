@@ -1,9 +1,7 @@
 /**
- * Tools Showcase Page — Interactive catalog of all Nurav AI tools
- *
- * Displays tools grouped by niche with search, filtering, status badges,
- * and a playground modal for testing each tool interactively.
- * Fetches tool manifest from GET /tools API endpoint.
+ * Tools Page — interactive catalog of all registered Nurav AI tools.
+ * Calls: backend GET /tools (tool manifest), ToolPlayground (test modal).
+ * Connected to: app layout (route /tools), Header nav link.
  */
 
 "use client";

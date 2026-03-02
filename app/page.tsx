@@ -1,7 +1,8 @@
 /**
  * Nurav AI Home Page
- * Main chat interface with LLM integration - Perplexity Style
- * Supports agentic workflow with adaptive query processing
+ * Main chat interface with multi-provider LLM integration.
+ * Supports agentic workflow: query analysis -> mode suggestion -> search -> synthesis.
+ * Connected to: useChat hook (streaming), ChatLayout (sidebar), conversationsApi (persistence).
  */
 
 'use client';
@@ -199,8 +200,8 @@ export default function HomePage() {
       onNewChat={handleNewChat}
       onDeleteConversation={handleDeleteConversation}
       onRenameConversation={handleRenameConversation}
-      onSettingsClick={() => console.log('Settings clicked')}
-      onLogout={() => console.log('Logout clicked')}
+      onSettingsClick={() => {}}
+      onLogout={() => {}}
     >
       <Flex direction="column" className={styles.chatContainer}>
         {/* Messages Area or Welcome Screen */}

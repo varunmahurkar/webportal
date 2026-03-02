@@ -1,6 +1,7 @@
 /**
- * Nurav AI OAuth Callback Route
- * Handles OAuth redirect from Supabase authentication providers
+ * OAuth Callback Route — handles Supabase OAuth provider redirects.
+ * Calls: lib/supabase/server.ts (exchange code for session).
+ * Connected to: AuthModal (OAuth buttons redirect here), Supabase Auth (provider callback URL).
  */
 
 import { createClient } from "@/lib/supabase/server";

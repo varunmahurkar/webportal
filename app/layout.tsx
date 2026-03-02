@@ -1,10 +1,7 @@
 /**
- * Nurav AI Root Layout
- *
- * The main layout wrapper for the entire application.
- * Provides theme management, fonts, and global styles.
- * Note: Header is removed from root layout for ChatGPT-style interface.
- * Individual route groups can add their own headers if needed.
+ * Root Layout — top-level wrapper providing theme, fonts, and global styles.
+ * Connected to: all pages (page.tsx, tools/page.tsx, profile/page.tsx) render inside this.
+ * Note: Header is not included here; route groups add their own headers as needed.
  */
 
 import type { Metadata } from "next";
