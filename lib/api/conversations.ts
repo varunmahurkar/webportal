@@ -1,7 +1,7 @@
 /**
- * Conversations API Client
- * Handles CRUD operations for conversation persistence with the backend.
- * Requires authentication token for all operations.
+ * Conversations API client — CRUD for conversation persistence.
+ * Calls: backend /conversations (POST/GET/PATCH/DELETE), /conversations/:id/messages.
+ * Called by: useChat hook (auto-save messages), Sidebar (list/rename/delete conversations).
  */
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";

@@ -1,3 +1,7 @@
+/**
+ * Supabase browser client — client-side Supabase instance for OAuth and session.
+ * Called by: useAuth (session management), AuthModal (OAuth sign-in).
+ */
 import { createBrowserClient } from "@supabase/ssr";
 
 export const supabase = createBrowserClient(

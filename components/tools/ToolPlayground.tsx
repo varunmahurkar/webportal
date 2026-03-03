@@ -1,8 +1,7 @@
 /**
- * Tool Playground Modal — Interactive tool testing interface
- *
- * Allows users to test any registered tool with custom inputs
- * and see the raw JSON output. Supports both active and coming_soon tools.
+ * Tool Playground Modal — interactive tool testing with custom inputs and JSON output.
+ * Calls: backend POST /tools/execute (runs tool), tool registry types.
+ * Connected to: tools/page.tsx (opens when user clicks "Try" on a tool card).
  */
 
 "use client";

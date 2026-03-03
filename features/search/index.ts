@@ -1,7 +1,7 @@
 /**
  * Nurav AI Search System - Optimized for Competition
  *
- * Ultra-powerful search system designed to compete with Perplexity AI, ChatGPT, and Claude.
+ * Nurav AI search system — AI-powered suggestions, voice search, and advanced filtering.
  * Features AI-powered suggestions, voice search, database queries, and advanced filtering.
  *
  * Primary Usage:

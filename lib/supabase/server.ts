@@ -1,3 +1,7 @@
+/**
+ * Supabase server client — server-side Supabase instance using cookies.
+ * Called by: auth/callback/route.ts (OAuth code exchange), (protected)/layout.tsx (session check).
+ */
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 

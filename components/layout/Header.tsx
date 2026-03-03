@@ -1,6 +1,7 @@
 /**
- * Nurav AI Header Component
- * Top navigation bar with logo, navigation, and authentication button
+ * Header — top navigation bar with logo, nav links, and auth button.
+ * Calls: useAuth (session state, signOut), AuthModal (opens on login click).
+ * Connected to: app/layout.tsx or route-specific layouts (conditionally rendered).
  */
 
 'use client';

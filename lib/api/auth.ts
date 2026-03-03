@@ -1,6 +1,7 @@
 /**
- * Nurav AI Authentication API Service
- * Handles all authentication-related API calls to the backend
+ * Auth API service — fetch wrappers for backend auth endpoints.
+ * Calls: backend /auth/signup, /auth/signin, /auth/signout, /auth/refresh-token.
+ * Called by: useAuth hook (session management), AuthModal (form submissions).
  */
 
 import type {

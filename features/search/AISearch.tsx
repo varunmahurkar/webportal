@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * Nurav Search - Simple Search Component
- * Clean and straightforward search functionality
- * Uses only Nurav core components for complete consistency
+ * AI Search — search input with AI-powered suggestions and voice support.
+ * Connected to: features/search/index.ts (exported), SearchResults (displays results).
+ * Uses Nurav core components (Typography, Grid) for UI consistency.
  */
 
 import React, { useState, useCallback, useRef } from 'react';
