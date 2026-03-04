@@ -6,7 +6,7 @@
 
 ## Project Summary
 
-Next.js 16 frontend for Nurav AI - an AI-powered chat application similar to Perplexity AI, ChatGPT, and Claude. Uses React 19, TypeScript, Tailwind CSS, and Supabase for authentication.
+Next.js 16 frontend for Nurav AI — an adaptive AI research assistant with agentic search, multi-source citations, and conversation persistence. Uses React 19, TypeScript, Tailwind CSS, and Supabase for authentication.
 
 **Backend API:** `http://localhost:8000` (see `backend-architect/backend-overview.md`)
 

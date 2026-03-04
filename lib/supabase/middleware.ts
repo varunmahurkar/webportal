@@ -1,3 +1,7 @@
+/**
+ * Supabase middleware — refreshes auth session on every request.
+ * Called by: middleware.ts (Next.js middleware entry point).
+ */
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 

@@ -91,5 +91,8 @@ storybook-static/
 # Turbo
 .turbo
 
+# Windows device file artifacts
+nul
+
 # Docker
 .docker/
