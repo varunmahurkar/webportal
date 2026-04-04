@@ -23,10 +23,11 @@ import {
   Search,
   FileText,
   Sparkles,
+  ShieldCheck,
 } from "@/app/core/icons";
 import styles from "./ChatMessage.module.css";
 import { MarkdownRenderer } from "./MarkdownRenderer";
-import type { StreamStatus } from "@/hooks/useChat";
+import type { StreamStatus, ConfidenceScore } from "@/hooks/useChat";
 import { Database } from "@/app/core/icons";
 
 export type MessageRole = "user" | "assistant" | "system";
@@ -52,6 +53,8 @@ export interface Message {
   isLoading?: boolean;
   isError?: boolean;
   citations?: Citation[];
+  /** Confidence assessment emitted after synthesis (from backend confidence event) */
+  confidence?: ConfidenceScore;
 }
 
 /**
@@ -319,6 +322,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               </Box>
             )}
 
+            {/* Confidence Badge — shown after response completes */}
+            {message.confidence && !message.isLoading && (
+              <ConfidenceBadge confidence={message.confidence} />
+            )}
+
             {/* Actions */}
             <Flex className={styles.actions} gap={2}>
               <Button
@@ -368,6 +376,32 @@ const SOURCE_TYPE_LABELS: Record<string, string> = {
   scholar: "Scholar",
   news: "News",
   web: "Web",
+};
+
+/**
+ * Confidence badge — colour-coded trust indicator below the response.
+ * Green (≥85%), Yellow (65-84%), Orange (<65%).
+ */
+const ConfidenceBadge: React.FC<{ confidence: ConfidenceScore }> = ({ confidence }) => {
+  const colorClass =
+    confidence.score >= 85 ? styles.confidenceHigh :
+    confidence.score >= 65 ? styles.confidenceMedium :
+    styles.confidenceLow;
+
+  return (
+    <Flex
+      alignItems="center"
+      gap={2}
+      className={cn(styles.confidenceBadge, colorClass)}
+      title={`Source coverage: ${Math.round(confidence.coverage_ratio! * 100)}% | Avg quality: ${confidence.avg_source_quality?.toFixed(0)}/100`}
+    >
+      <ShieldCheck size={13} />
+      <span className={styles.confidenceScore}>{confidence.score}% grounded</span>
+      <span className={styles.confidenceDetail}>
+        from {confidence.cited_sources} of {confidence.total_sources} sources · {confidence.label}
+      </span>
+    </Flex>
+  );
 };
 
 /**
