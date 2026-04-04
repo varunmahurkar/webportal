@@ -1,7 +1,10 @@
 /**
  * Chat Input Component — Nurav AI
- * Multi-line input with send/stop controls and keyboard shortcuts.
- * Connected to: page.tsx (handleSend), useChat (sendMessage, stopGeneration).
+ * Multi-line input with send/stop controls, keyboard shortcuts, and
+ * pre-send mode selector (Fast / Research / Deep).
+ * Mode selector lives in the toolbar — user picks mode BEFORE sending.
+ * Personalization toggle (Sparkles icon) enables KG + memory context injection.
+ * Connected to: page.tsx (handleSend), useChat (sendMessage, stopGeneration, selectedMode, usePersonalization).
  */
 
 'use client';
@@ -19,13 +22,22 @@ import {
   Globe,
   Code,
   Sparkles,
-  X,
-  Lightbulb,
+  Zap,
+  BookOpen,
+  Microscope,
   FileText,
   Video,
   Square,
 } from '@/app/core/icons';
 import styles from './ChatInput.module.css';
+import type { QueryMode } from '@/hooks/useChat';
+
+/** Labels and icons for each query mode chip */
+const MODE_CONFIG: Record<QueryMode, { label: string; icon: React.ElementType; title: string }> = {
+  simple: { label: 'Fast', icon: Zap, title: 'Fast mode — < 5s, web only' },
+  research: { label: 'Research', icon: BookOpen, title: 'Research mode — 5-15s, multi-source' },
+  deep: { label: 'Deep', icon: Microscope, title: 'Deep mode — 15-30s, academic + full synthesis' },
+};
 
 export interface ChatInputProps {
   placeholder?: string;
@@ -34,6 +46,14 @@ export interface ChatInputProps {
   onStop?: () => void;
   disabled?: boolean;
   isGenerating?: boolean;
+  /** Currently selected mode (controlled by parent / useChat) */
+  selectedMode?: QueryMode;
+  /** Called when user switches mode in the toolbar */
+  onModeChange?: (mode: QueryMode) => void;
+  /** Whether KG + memory personalisation is enabled (opt-in toggle) */
+  usePersonalization?: boolean;
+  /** Called when user toggles personalisation on/off */
+  onPersonalizationToggle?: (enabled: boolean) => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -43,6 +63,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onStop,
   disabled = false,
   isGenerating = false,
+  selectedMode = 'research',
+  onModeChange,
+  usePersonalization = false,
+  onPersonalizationToggle,
 }) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -54,10 +78,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     if (!message.trim() || disabled) return;
     onSend?.(message.trim());
     setMessage('');
-    // Reset textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
   };
 
   /** Handle keyboard submit */
@@ -81,7 +102,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       <Box className={cn(styles.container, isFocused && styles.focused)}>
         {/* Main Input Area */}
         <Flex className={styles.inputArea}>
-          {/* Textarea */}
           <textarea
             ref={textareaRef}
             value={message}
@@ -112,7 +132,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <Plus size={20} />
               </Button>
 
-              {/* Attach Dropdown */}
               {showAttachMenu && (
                 <Box className={styles.attachMenu}>
                   <Button variant="ghost" className={styles.attachMenuItem}>
@@ -137,19 +156,42 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
             <div className={styles.divider} />
 
-            {/* Feature Buttons */}
-            <Button variant="ghost" size="sm" className={styles.featureBtn} title="Search the web">
-              <Globe size={16} />
-              <span>Search</span>
-            </Button>
-            <Button variant="ghost" size="sm" className={styles.featureBtn} title="Deep research">
-              <Lightbulb size={16} />
-              <span>Research</span>
-            </Button>
-            <Button variant="ghost" size="sm" className={styles.featureBtn} title="Code mode">
-              <Code size={16} />
-              <span>Code</span>
-            </Button>
+            {/* Pre-Send Mode Chips — user picks mode BEFORE sending */}
+            <Flex className={styles.modeChips} alignItems="center" gap={1}>
+              {(Object.entries(MODE_CONFIG) as [QueryMode, typeof MODE_CONFIG[QueryMode]][]).map(
+                ([mode, config]) => {
+                  const Icon = config.icon;
+                  const isActive = selectedMode === mode;
+                  return (
+                    <button
+                      key={mode}
+                      type="button"
+                      className={cn(styles.modeChip, isActive && styles.modeChipActive)}
+                      onClick={() => onModeChange?.(mode)}
+                      title={config.title}
+                      disabled={disabled}
+                    >
+                      <Icon size={13} />
+                      <span>{config.label}</span>
+                    </button>
+                  );
+                }
+              )}
+            </Flex>
+
+            <div className={styles.divider} />
+
+            {/* Personalisation Toggle — opt-in KG + memory context injection */}
+            <button
+              type="button"
+              className={cn(styles.modeChip, usePersonalization && styles.modeChipActive)}
+              onClick={() => onPersonalizationToggle?.(!usePersonalization)}
+              title={usePersonalization ? 'Personalisation ON — click to disable' : 'Enable personalisation (uses your knowledge graph & interests)'}
+              disabled={disabled}
+            >
+              <Sparkles size={13} />
+              <span>Personal</span>
+            </button>
           </Flex>
 
           {/* Right Actions */}
@@ -173,7 +215,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 className={cn(styles.sendBtn, message.trim() && !disabled && styles.sendBtnActive)}
                 disabled={!message.trim() || disabled}
                 onClick={handleSend}
-                title="Send message"
+                title={`Send (${MODE_CONFIG[selectedMode].label} mode)`}
               >
                 <ArrowUp size={18} />
               </Button>
