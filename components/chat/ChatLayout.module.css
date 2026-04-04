@@ -1,11 +1,10 @@
 /**
  * Nurav AI Chat Layout Styles
- *
- * Main layout structure with sidebar and content area.
- * Supports responsive behavior and smooth transitions.
+ * 3-column grid: [Sidebar 256px] | [Chat Main flex-1] | [Sources Panel 280px, optional].
+ * Sources panel slides in via CSS animation when showRightPanel=true.
  */
 
-/* Main Layout Container */
+/* ===== Main Layout Container ===== */
 .chatLayout {
   display: flex;
   height: 100vh;
@@ -14,24 +13,31 @@
   overflow: hidden;
 }
 
-/* Sidebar Positioning */
+/* ===== Sidebar ===== */
 .sidebar {
   position: relative;
   z-index: 40;
+  flex-shrink: 0;
 }
 
-/* Main Content Area */
+/* ===== Main Content Area ===== */
 .mainContent {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  min-width: 0;   /* allow flex shrink below content size */
   height: 100vh;
   overflow: hidden;
   position: relative;
+  transition: none;
 }
 
-/* Chat Content Container */
+/* Chat shrinks horizontally when right panel is visible */
+.hasRightPanel .mainContent {
+  /* flex: 1 naturally gives space to siblings */
+}
+
+/* ===== Chat Content Container ===== */
 .chatContent {
   flex: 1;
   display: flex;
@@ -39,7 +45,20 @@
   overflow: hidden;
 }
 
-/* Mobile Header */
+/* ===== Right Panel Slot — Sources ===== */
+.rightPanel {
+  flex-shrink: 0;
+  height: 100vh;
+  overflow: hidden;
+  animation: slideInRight 0.25s ease;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ===== Mobile Header ===== */
 .mobileHeader {
   display: flex;
   align-items: center;
@@ -56,7 +75,7 @@
   height: 40px;
 }
 
-/* Mobile Overlay */
+/* ===== Mobile Overlay ===== */
 .mobileOverlay {
   position: fixed;
   inset: 0;
@@ -66,15 +85,11 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-/* Mobile Sidebar Open State */
+/* ===== Mobile Sidebar Open ===== */
 .sidebar.mobileOpen {
   position: fixed;
   left: 0;
@@ -85,24 +100,13 @@
 }
 
 @keyframes slideIn {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
 }
 
-/* Desktop Collapsed State Adjustments */
-.chatLayout.sidebarCollapsed .mainContent {
-  /* Main content expands when sidebar is collapsed */
-}
-
-/* Responsive Breakpoints */
+/* ===== Responsive Breakpoints ===== */
 @media (min-width: 768px) {
-  .mobileHeader {
-    display: none;
-  }
+  .mobileHeader { display: none; }
 }
 
 @media (max-width: 767px) {
@@ -117,4 +121,11 @@
   .sidebar.mobileOpen {
     transform: translateX(0);
   }
+
+  /* Hide right panel on mobile — sources shown inline */
+  .rightPanel { display: none; }
+}
+
+@media (max-width: 1024px) {
+  /* On small laptops, right panel is narrower (handled by CitationsPanel.module.css) */
 }

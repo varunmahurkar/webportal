@@ -1,7 +1,9 @@
 /**
- * Chat Layout — main layout wrapper with collapsible sidebar and content area.
- * Connected to: page.tsx (renders inside), Sidebar (left panel), ChatInput + ChatMessage (content area).
- * Handles sidebar toggle state, mobile overlay, and keyboard shortcuts (Ctrl+B).
+ * Chat Layout — 3-column layout: [Sidebar] | [Chat Main] | [Sources Panel].
+ * Sources panel slides in from the right when citations are available and hides on mobile.
+ * Connected to: page.tsx (renders inside), Sidebar (left panel),
+ * ChatInput + ChatMessage (content area), CitationsPanel (right panel).
+ * Keyboard shortcuts: Ctrl+B (sidebar), Ctrl+Shift+N (new chat).
  */
 
 'use client';
@@ -14,11 +16,12 @@ import { Button } from '@/components/ui/button';
 import { Menu } from '@/app/core/icons';
 import styles from './ChatLayout.module.css';
 
-/**
- * Chat layout props interface
- */
 export interface ChatLayoutProps {
   children: ReactNode;
+  /** Right panel — CitationsPanel passed from page.tsx */
+  rightPanel?: ReactNode;
+  /** True when sources panel should be visible (citations exist) */
+  showRightPanel?: boolean;
   conversations?: Conversation[];
   activeConversationId?: string;
   onNewChat?: () => void;
@@ -31,11 +34,10 @@ export interface ChatLayoutProps {
   sidebarDefaultCollapsed?: boolean;
 }
 
-/**
- * ChatLayout component - Main wrapper for the chat interface
- */
 export const ChatLayout = memo<ChatLayoutProps>(({
   children,
+  rightPanel,
+  showRightPanel = false,
   conversations = [],
   activeConversationId,
   onNewChat,
@@ -53,59 +55,40 @@ export const ChatLayout = memo<ChatLayoutProps>(({
 
   // Detect mobile screen size
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Handle sidebar toggle
   const handleToggleSidebar = useCallback(() => {
-    if (isMobile) {
-      setIsMobileMenuOpen(prev => !prev);
-    } else {
-      setIsSidebarCollapsed(prev => !prev);
-    }
+    if (isMobile) setIsMobileMenuOpen((prev) => !prev);
+    else setIsSidebarCollapsed((prev) => !prev);
   }, [isMobile]);
 
-  // Handle conversation selection (close mobile menu after selection)
   const handleSelectConversation = useCallback((id: string) => {
     onSelectConversation?.(id);
-    if (isMobile) {
-      setIsMobileMenuOpen(false);
-    }
+    if (isMobile) setIsMobileMenuOpen(false);
   }, [onSelectConversation, isMobile]);
 
-  // Handle new chat (close mobile menu after creation)
   const handleNewChat = useCallback(() => {
     onNewChat?.();
-    if (isMobile) {
-      setIsMobileMenuOpen(false);
-    }
+    if (isMobile) setIsMobileMenuOpen(false);
   }, [onNewChat, isMobile]);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl/Cmd + B to toggle sidebar
       if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
         e.preventDefault();
         handleToggleSidebar();
       }
-      // Ctrl/Cmd + Shift + N for new chat
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'N') {
         e.preventDefault();
         handleNewChat();
       }
-      // Escape to close mobile menu
-      if (e.key === 'Escape' && isMobileMenuOpen) {
-        setIsMobileMenuOpen(false);
-      }
+      if (e.key === 'Escape' && isMobileMenuOpen) setIsMobileMenuOpen(false);
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleToggleSidebar, handleNewChat, isMobileMenuOpen]);
@@ -115,6 +98,7 @@ export const ChatLayout = memo<ChatLayoutProps>(({
       className={cn(
         styles.chatLayout,
         isSidebarCollapsed && styles.sidebarCollapsed,
+        showRightPanel && styles.hasRightPanel,
         className
       )}
     >
@@ -127,7 +111,7 @@ export const ChatLayout = memo<ChatLayoutProps>(({
         />
       )}
 
-      {/* Sidebar */}
+      {/* Left Sidebar */}
       <Sidebar
         conversations={conversations}
         activeConversationId={activeConversationId}
@@ -147,7 +131,7 @@ export const ChatLayout = memo<ChatLayoutProps>(({
 
       {/* Main Content Area */}
       <main className={styles.mainContent}>
-        {/* Mobile Header with Menu Button */}
+        {/* Mobile Header */}
         {isMobile && (
           <Box className={styles.mobileHeader}>
             <Button
@@ -167,6 +151,13 @@ export const ChatLayout = memo<ChatLayoutProps>(({
           {children}
         </div>
       </main>
+
+      {/* Right Panel — Sources Panel (slides in when sources arrive) */}
+      {showRightPanel && rightPanel && (
+        <aside className={styles.rightPanel}>
+          {rightPanel}
+        </aside>
+      )}
     </div>
   );
 });
