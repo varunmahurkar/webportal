@@ -13,6 +13,58 @@
   overflow-wrap: break-word;
 }
 
+/* Table of Contents — auto-generated for responses > 400 words with 3+ headings */
+.toc {
+  margin-bottom: 1.5rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: 0.875rem;
+}
+
+.tocTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  margin: 0 0 0.5rem;
+}
+
+.tocList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tocItem {
+  line-height: 1.4;
+}
+
+.tocItem2 {
+  padding-left: 0;
+}
+
+.tocItem3 {
+  padding-left: 1rem;
+}
+
+.tocLink {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  opacity: 0.85;
+}
+
+.tocLink:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
 /* Headings */
 .heading1 {
   font-size: 1.75rem;

@@ -192,6 +192,12 @@ import {
   ScanSearch,
   ShieldCheck,
   MessageCircleQuestion,
+  BookOpen,
+  Microscope,
+  BookMarked,
+  Newspaper,
+  Bitcoin,
+  BarChart2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -364,6 +370,12 @@ const IconMap: Record<string, LucideIcon> = {
   ScanSearch,
   ShieldCheck,
   MessageCircleQuestion,
+  BookOpen,
+  Microscope,
+  BookMarked,
+  Newspaper,
+  Bitcoin,
+  BarChart2,
 };
 
 // Icon categories
@@ -554,6 +566,12 @@ const iconCategories = {
     "ScanSearch",
     "ShieldCheck",
     "MessageCircleQuestion",
+    "BookOpen",
+    "Microscope",
+    "BookMarked",
+    "Newspaper",
+    "Bitcoin",
+    "BarChart2",
   ],
 };
 
