@@ -1,8 +1,9 @@
 /**
- * Chat Hook — manages chat state, LLM streaming, citations, and agentic mode.
+ * Chat Hook — manages chat state, LLM streaming, citations, confidence, and agentic mode.
  * Calls: backend /chat/stream, /chat/agentic-stream, /chat/suggest-mode, /chat/completions.
- * Connected to: ChatInput (sends messages), ChatMessage (displays responses),
- * ModeSelector (query mode), CitationsPanel (web sources), Sidebar (conversation persistence).
+ * Connected to: ChatInput (sends messages + pre-selected mode), ChatMessage (displays responses +
+ * confidence badge), ModeSelector (post-send confirmation), CitationsPanel (right-side sources),
+ * Sidebar (conversation persistence).
  */
 
 import { useState, useCallback, useRef } from "react";
@@ -10,7 +11,7 @@ import { useState, useCallback, useRef } from "react";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 /**
- * Citation data from web search results
+ * Citation data from web search results — includes quality metadata
  */
 export interface Citation {
   id: number;
@@ -19,11 +20,26 @@ export interface Citation {
   title: string;
   snippet?: string;
   favicon_url?: string;
-  source_type?: string; // "web", "arxiv", "youtube"
+  source_type?: string;       // "web" | "arxiv" | "youtube" | "wikipedia" | "news" | "reddit"
+  quality_score?: number;     // 0-100 from source_quality.py
+  credibility_tier?: string;  // "authoritative" | "reputable" | "community" | "general"
+  published_at?: string;      // ISO 8601 publish date
 }
 
 /**
- * Chat message with optional citations
+ * Answer confidence assessment received from backend after synthesis
+ */
+export interface ConfidenceScore {
+  score: number;           // 0-100
+  label: string;           // "High" | "Medium" | "Low" | "Uncertain"
+  cited_sources: number;
+  total_sources: number;
+  coverage_ratio?: number;
+  avg_source_quality?: number;
+}
+
+/**
+ * Chat message with optional citations and confidence data
  */
 export interface ChatMessage {
   id: string;
@@ -32,6 +48,7 @@ export interface ChatMessage {
   timestamp: Date;
   isLoading?: boolean;
   citations?: Citation[];
+  confidence?: ConfidenceScore;  // set after "done" event with confidence payload
 }
 
 export type LLMProvider = "google" | "openai" | "anthropic";
@@ -74,6 +91,10 @@ interface UseChatOptions {
   agenticMode?: boolean;
   /** Authentication token for conversation persistence */
   authToken?: string | null;
+  /** Default mode for new chats — persisted across queries */
+  defaultMode?: QueryMode;
+  /** Enable KG + memory personalisation by default (user opt-in) */
+  defaultPersonalization?: boolean;
 }
 
 export function useChat(options: UseChatOptions = {}) {
@@ -86,15 +107,18 @@ export function useChat(options: UseChatOptions = {}) {
   const [activeMode, setActiveMode] = useState<QueryMode | null>(null);
   const [followupQuestions, setFollowupQuestions] = useState<string[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  /** Pre-selected mode chosen by user in ChatInput before sending */
+  const [selectedMode, setSelectedMode] = useState<QueryMode>(options.defaultMode || "research");
+  /** KG + memory personalisation toggle — off by default (privacy-respecting opt-in) */
+  const [usePersonalization, setUsePersonalization] = useState<boolean>(options.defaultPersonalization ?? false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  /**
-   * Generate unique ID for messages
-   */
+  /** Generate unique ID for messages */
   const generateId = () => `msg_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
   /**
-   * Request mode suggestion from backend without sending the full query
+   * Request mode suggestion from backend without sending the full query.
+   * Skipped when user has pre-selected a mode (selectedMode != null).
    */
   const suggestMode = useCallback(async (message: string): Promise<ModeSuggestion | null> => {
     try {
@@ -103,7 +127,6 @@ export function useChat(options: UseChatOptions = {}) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message }),
       });
-
       if (!response.ok) return null;
       const data = await response.json();
       setModeSuggestion(data);
@@ -113,15 +136,14 @@ export function useChat(options: UseChatOptions = {}) {
     }
   }, []);
 
-  /**
-   * Dismiss the current mode suggestion
-   */
+  /** Dismiss the current mode suggestion */
   const dismissModeSuggestion = useCallback(() => {
     setModeSuggestion(null);
   }, []);
 
   /**
-   * Send a message using the agentic streaming endpoint
+   * Send a message using the agentic streaming endpoint.
+   * Handles all SSE event types including the new "confidence" event.
    */
   const _sendAgentic = useCallback(async (
     content: string,
@@ -142,6 +164,7 @@ export function useChat(options: UseChatOptions = {}) {
         system_prompt: options.systemPrompt,
         mode: confirmedMode || null,
         conversation_id: conversationId,
+        use_personalization: usePersonalization,
       }),
       signal: abortControllerRef.current!.signal,
     });
@@ -153,11 +176,11 @@ export function useChat(options: UseChatOptions = {}) {
 
     const reader = response.body?.getReader();
     const decoder = new TextDecoder();
-
     if (!reader) throw new Error("No response body");
 
     let fullContent = "";
     let citations: Citation[] = [];
+    let confidenceData: ConfidenceScore | undefined;
     let buffer = "";
 
     while (true) {
@@ -183,9 +206,19 @@ export function useChat(options: UseChatOptions = {}) {
           } else if (parsed.type === "mode") {
             setActiveMode(parsed.mode as QueryMode);
           } else if (parsed.type === "citation" && parsed.citation) {
-            citations.push(parsed.citation);
+            citations.push(parsed.citation as Citation);
           } else if (parsed.type === "content") {
             fullContent += parsed.content || "";
+          } else if (parsed.type === "confidence") {
+            // Store confidence for badge display — emitted before "done"
+            confidenceData = {
+              score: parsed.score ?? 0,
+              label: parsed.label ?? "Uncertain",
+              cited_sources: parsed.cited_sources ?? 0,
+              total_sources: parsed.total_sources ?? 0,
+              coverage_ratio: parsed.coverage_ratio,
+              avg_source_quality: parsed.avg_source_quality,
+            };
           } else if (parsed.type === "followup" && parsed.questions) {
             setFollowupQuestions(parsed.questions);
           } else if (parsed.type === "done") {
@@ -195,14 +228,13 @@ export function useChat(options: UseChatOptions = {}) {
             throw new Error(parsed.error);
           }
         } catch (parseError) {
-          // Skip unparseable lines
           if ((parseError as Error).message?.includes("Failed") ||
               (parseError as Error).message?.includes("Error")) {
             throw parseError;
           }
         }
 
-        // Update message progressively
+        // Progressive UI update on every chunk
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === assistantId
@@ -210,6 +242,7 @@ export function useChat(options: UseChatOptions = {}) {
                   ...msg,
                   content: fullContent,
                   citations: [...citations],
+                  confidence: confidenceData,
                   isLoading: fullContent.length === 0,
                 }
               : msg
@@ -218,16 +251,18 @@ export function useChat(options: UseChatOptions = {}) {
       }
     }
 
-    // Final update
+    // Final update — ensure confidence is stored
     setMessages((prev) =>
       prev.map((msg) =>
-        msg.id === assistantId ? { ...msg, isLoading: false } : msg
+        msg.id === assistantId
+          ? { ...msg, isLoading: false, confidence: confidenceData }
+          : msg
       )
     );
-  }, [provider, options.systemPrompt, options.authToken, conversationId]);
+  }, [provider, options.systemPrompt, options.authToken, conversationId, usePersonalization]);
 
   /**
-   * Send a message using the legacy streaming endpoint (web search)
+   * Send a message using the legacy streaming endpoint (web search, no agentic)
    */
   const _sendLegacy = useCallback(async (
     content: string,
@@ -254,7 +289,6 @@ export function useChat(options: UseChatOptions = {}) {
 
     const reader = response.body?.getReader();
     const decoder = new TextDecoder();
-
     if (!reader) throw new Error("No response body");
 
     let fullContent = "";
@@ -276,41 +310,25 @@ export function useChat(options: UseChatOptions = {}) {
         if (!line.startsWith("data: ")) continue;
         const data = line.slice(6).trim();
         if (!data) continue;
-
         if (data === "[DONE]") break;
         if (data.startsWith("[ERROR]")) throw new Error(data.slice(8));
 
         try {
           const parsed = JSON.parse(data);
           isJsonFormat = true;
-
-          if (parsed.type === "status" && parsed.status) {
-            setStatus(parsed.status as StreamStatus);
-          } else if (parsed.type === "citation" && parsed.citation) {
-            citations.push(parsed.citation);
-          } else if (parsed.type === "content") {
-            fullContent += parsed.content || "";
-          } else if (parsed.type === "done") {
-            setStatus("done");
-            break;
-          } else if (parsed.type === "error") {
-            throw new Error(parsed.error);
-          }
-        } catch (parseError) {
-          if (!isJsonFormat) {
-            fullContent += data;
-          }
+          if (parsed.type === "status") setStatus(parsed.status as StreamStatus);
+          else if (parsed.type === "citation") citations.push(parsed.citation as Citation);
+          else if (parsed.type === "content") fullContent += parsed.content || "";
+          else if (parsed.type === "done") { setStatus("done"); break; }
+          else if (parsed.type === "error") throw new Error(parsed.error);
+        } catch {
+          if (!isJsonFormat) fullContent += data;
         }
 
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === assistantId
-              ? {
-                  ...msg,
-                  content: fullContent,
-                  citations: [...citations],
-                  isLoading: fullContent.length === 0,
-                }
+              ? { ...msg, content: fullContent, citations: [...citations], isLoading: fullContent.length === 0 }
               : msg
           )
         );
@@ -318,15 +336,13 @@ export function useChat(options: UseChatOptions = {}) {
     }
 
     setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === assistantId ? { ...msg, isLoading: false } : msg
-      )
+      prev.map((msg) => msg.id === assistantId ? { ...msg, isLoading: false } : msg)
     );
   }, [provider, options.systemPrompt, options.webSearchEnabled]);
 
   /**
-   * Send a message to the LLM with streaming response
-   * Uses agentic endpoint when agenticMode is enabled, otherwise uses legacy
+   * Send a message to the LLM with streaming response.
+   * If user pre-selected a mode in ChatInput, it is used directly (no suggest-mode roundtrip).
    */
   const sendMessage = useCallback(async (content: string, confirmedMode?: QueryMode) => {
     if (!content.trim() || isLoading) return;
@@ -334,24 +350,19 @@ export function useChat(options: UseChatOptions = {}) {
     setError(null);
     setStatus("idle");
     setModeSuggestion(null);
-    setActiveMode(confirmedMode || null);
+    const resolvedMode = confirmedMode || selectedMode;
+    setActiveMode(resolvedMode);
     setFollowupQuestions([]);
 
-    // Cancel any ongoing request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+    if (abortControllerRef.current) abortControllerRef.current.abort();
     abortControllerRef.current = new AbortController();
 
-    // Add user message
     const userMessage: ChatMessage = {
       id: generateId(),
       role: "user",
       content: content.trim(),
       timestamp: new Date(),
     };
-
-    // Add placeholder for assistant response
     const assistantId = generateId();
     const assistantPlaceholder: ChatMessage = {
       id: assistantId,
@@ -365,19 +376,15 @@ export function useChat(options: UseChatOptions = {}) {
     setIsLoading(true);
 
     try {
-      const chatHistory = messages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      }));
+      const chatHistory = messages.map((msg) => ({ role: msg.role, content: msg.content }));
 
       if (options.agenticMode) {
-        await _sendAgentic(content, assistantId, chatHistory, confirmedMode);
+        await _sendAgentic(content, assistantId, chatHistory, resolvedMode);
       } else {
         await _sendLegacy(content, assistantId, chatHistory);
       }
     } catch (err: any) {
       if (err.name === "AbortError") return;
-
       setError(err.message || "Failed to get response");
       setMessages((prev) => prev.filter((msg) => msg.id !== assistantId));
     } finally {
@@ -385,15 +392,11 @@ export function useChat(options: UseChatOptions = {}) {
       abortControllerRef.current = null;
       setTimeout(() => setStatus("idle"), 500);
     }
-  }, [messages, isLoading, options.agenticMode, _sendAgentic, _sendLegacy]);
+  }, [messages, isLoading, selectedMode, options.agenticMode, _sendAgentic, _sendLegacy]);
 
-  /**
-   * Clear chat history
-   */
+  /** Clear chat history */
   const clearChat = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+    if (abortControllerRef.current) abortControllerRef.current.abort();
     setMessages([]);
     setError(null);
     setIsLoading(false);
@@ -404,9 +407,7 @@ export function useChat(options: UseChatOptions = {}) {
     setConversationId(null);
   }, []);
 
-  /**
-   * Stop the current generation
-   */
+  /** Stop the current generation */
   const stopGeneration = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -415,25 +416,17 @@ export function useChat(options: UseChatOptions = {}) {
     }
   }, []);
 
-  /**
-   * Load an existing conversation from the backend
-   */
+  /** Load an existing conversation from the backend */
   const loadConversation = useCallback(async (convId: string) => {
     if (!options.authToken) return;
-
     try {
       const response = await fetch(`${API_URL}/conversations/${convId}`, {
-        headers: {
-          Authorization: `Bearer ${options.authToken}`,
-        },
+        headers: { Authorization: `Bearer ${options.authToken}` },
       });
-
       if (!response.ok) return;
-
       const data = await response.json();
       const conv = data.conversation;
-
-      if (conv && conv.messages) {
+      if (conv?.messages) {
         const loadedMessages: ChatMessage[] = conv.messages.map((msg: any) => ({
           id: msg.id || generateId(),
           role: msg.role,
@@ -450,19 +443,13 @@ export function useChat(options: UseChatOptions = {}) {
     }
   }, [options.authToken]);
 
-  /**
-   * Retry the last message
-   */
+  /** Retry the last message */
   const retryLast = useCallback(async () => {
     if (messages.length < 1) return;
-
-    const lastUserMessageIndex = messages.findLastIndex((m) => m.role === "user");
-    if (lastUserMessageIndex === -1) return;
-
-    const lastUserMessage = messages[lastUserMessageIndex];
-
-    setMessages((prev) => prev.slice(0, lastUserMessageIndex));
-
+    const lastUserIdx = messages.findLastIndex((m) => m.role === "user");
+    if (lastUserIdx === -1) return;
+    const lastUserMessage = messages[lastUserIdx];
+    setMessages((prev) => prev.slice(0, lastUserIdx));
     await sendMessage(lastUserMessage.content);
   }, [messages, sendMessage]);
 
@@ -474,10 +461,14 @@ export function useChat(options: UseChatOptions = {}) {
     status,
     modeSuggestion,
     activeMode,
+    selectedMode,
+    usePersonalization,
     followupQuestions,
     conversationId,
     setProvider,
     setConversationId,
+    setSelectedMode,
+    setUsePersonalization,
     sendMessage,
     suggestMode,
     dismissModeSuggestion,
