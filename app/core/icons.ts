@@ -146,6 +146,12 @@ export {
   ScanSearch,            // Query analysis/search intelligence
   ShieldCheck,           // Quality validation/verification
   MessageCircleQuestion, // Follow-up question generation
+  BookOpen,              // Research mode / academic sources
+  Microscope,            // Deep research mode
+  BookMarked,            // Wikipedia / reference sources
+  Newspaper,             // News sources
+  Bitcoin,               // Crypto live data widget
+  BarChart2,             // Stock live data widget
 } from 'lucide-react';
 
 // Communication & Social Icons - for messaging and social features

@@ -1,14 +1,19 @@
 /**
  * Nurav AI Home Page
- * Main chat interface with multi-provider LLM integration.
- * Supports agentic workflow: query analysis -> mode suggestion -> search -> synthesis.
- * Connected to: useChat hook (streaming), ChatLayout (sidebar), conversationsApi (persistence).
+ * Main chat interface with:
+ * - Pre-send mode selector (Fast/Research/Deep) in ChatInput toolbar
+ * - Right-side sources panel that slides in when citations arrive
+ * - Confidence badge on responses
+ * - Agentic workflow: query analysis → multi-source search → synthesis
+ * Connected to: useChat hook (streaming), ChatLayout (sidebar + sources panel),
+ * conversationsApi (persistence), CitationsPanel (right panel).
  */
 
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ChatLayout, ChatInput, ChatMessages, ModeSelector, Conversation } from '@/components/chat';
+import { CitationsPanel } from '@/components/chat/CitationsPanel';
 import { Box, Flex } from './core/Grid';
 import { Text } from './core/Typography';
 import { Sparkles, AlertCircle } from './core/icons';
@@ -20,9 +25,10 @@ import styles from './page.module.css';
 export default function HomePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   const { accessToken, isAuthenticated } = useAuth();
 
-  // Chat state with agentic mode enabled
+  // Chat state with agentic mode enabled, default mode = research
   const {
     messages,
     isLoading,
@@ -30,9 +36,13 @@ export default function HomePage() {
     status,
     modeSuggestion,
     activeMode,
+    selectedMode,
+    usePersonalization,
     followupQuestions,
     conversationId,
     setConversationId,
+    setSelectedMode,
+    setUsePersonalization,
     sendMessage,
     suggestMode,
     dismissModeSuggestion,
@@ -43,6 +53,8 @@ export default function HomePage() {
     provider: 'openai',
     agenticMode: true,
     authToken: accessToken,
+    defaultMode: 'research',
+    defaultPersonalization: false,
   });
 
   // Conversations for sidebar
@@ -52,7 +64,6 @@ export default function HomePage() {
   // Load conversations from API on mount when authenticated
   useEffect(() => {
     if (!isAuthenticated || !accessToken) return;
-
     conversationsApi.listConversations(accessToken).then((convs) => {
       setConversations(
         convs.map((c) => ({
@@ -61,15 +72,21 @@ export default function HomePage() {
           timestamp: new Date(c.updated_at),
         })),
       );
-    }).catch((err) => {
-      console.error('Failed to load conversations:', err);
-    });
+    }).catch((err) => console.error('Failed to load conversations:', err));
   }, [isAuthenticated, accessToken]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Derive citations from the latest assistant message for the right panel
+  const latestCitations = useMemo<Citation[]>(() => {
+    const latestAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
+    return latestAssistant?.citations ?? [];
+  }, [messages]);
+
+  const showSourcesPanel = latestCitations.length > 0;
 
   // Handle new chat
   const handleNewChat = () => {
@@ -85,19 +102,14 @@ export default function HomePage() {
     await loadConversation(convId);
   }, [loadConversation]);
 
-  // Handle send message - gets mode suggestion first, then sends
+  /**
+   * Handle send message.
+   * If user pre-selected a mode in ChatInput, send directly (no suggest-mode roundtrip).
+   * If mode is 'simple' AI auto-detect still fires — ModeSelector appears only for non-simple.
+   */
   const handleSend = async (message: string) => {
-    // Request mode suggestion before sending
-    const suggestion = await suggestMode(message);
-
-    if (suggestion && suggestion.suggested_mode !== 'simple') {
-      // Store message and show mode selector for non-simple queries
-      setPendingMessage(message);
-      return;
-    }
-
-    // For simple queries or if suggestion fails, send immediately
-    await _executeSend(message, suggestion?.suggested_mode || 'simple');
+    // User pre-selected mode → send immediately without suggest-mode call
+    await _executeSend(message, selectedMode);
   };
 
   // Execute the actual send after mode confirmation
@@ -108,7 +120,6 @@ export default function HomePage() {
     // Create conversation via API if this is the first message
     if (messages.length === 0 && !activeConversationId) {
       const title = message.slice(0, 50) + (message.length > 50 ? '...' : '');
-
       if (isAuthenticated && accessToken) {
         try {
           const conv = await conversationsApi.createConversation(accessToken, title);
@@ -122,27 +133,20 @@ export default function HomePage() {
           console.error('Failed to create conversation:', err);
         }
       } else {
-        // Fallback for unauthenticated users: local-only conversation
         const localId = `conv_${Date.now()}`;
         setActiveConversationId(localId);
-        setConversations((prev) => [
-          { id: localId, title, timestamp: new Date() },
-          ...prev,
-        ]);
+        setConversations((prev) => [{ id: localId, title, timestamp: new Date() }, ...prev]);
       }
     }
 
     await sendMessage(message, mode);
   };
 
-  // Handle mode confirmation from ModeSelector
+  // Handle mode confirmation from ModeSelector (post-send popup, only for deep/research)
   const handleModeConfirm = async (mode: QueryMode) => {
-    if (pendingMessage) {
-      await _executeSend(pendingMessage, mode);
-    }
+    if (pendingMessage) await _executeSend(pendingMessage, mode);
   };
 
-  // Handle mode selector dismiss - send with suggested mode
   const handleModeDismiss = async () => {
     if (pendingMessage && modeSuggestion) {
       await _executeSend(pendingMessage, modeSuggestion.suggested_mode);
@@ -161,9 +165,7 @@ export default function HomePage() {
       }
     }
     setConversations((prev) => prev.filter((c) => c.id !== id));
-    if (activeConversationId === id) {
-      handleNewChat();
-    }
+    if (activeConversationId === id) handleNewChat();
   };
 
   // Handle rename conversation
@@ -175,12 +177,10 @@ export default function HomePage() {
         console.error('Failed to rename conversation:', err);
       }
     }
-    setConversations((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c))
-    );
+    setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c)));
   };
 
-  // Convert useChat messages to ChatMessage format with citations
+  // Convert messages to ChatMessage format
   const chatMessages = messages.map((msg) => ({
     id: msg.id,
     role: msg.role,
@@ -188,9 +188,21 @@ export default function HomePage() {
     timestamp: msg.timestamp,
     isLoading: msg.isLoading,
     citations: msg.citations as Citation[] | undefined,
+    confidence: msg.confidence,
   }));
 
   const hasMessages = messages.length > 0;
+
+  // Right-side sources panel
+  const sourcesPanel = (
+    <CitationsPanel
+      citations={latestCitations}
+      isOpen={showSourcesPanel}
+      isCollapsed={isPanelCollapsed}
+      onClose={() => {}} // keep panel — only collapsible, not closeable via X in main panel
+      onToggleCollapse={() => setIsPanelCollapsed((prev) => !prev)}
+    />
+  );
 
   return (
     <ChatLayout
@@ -202,6 +214,8 @@ export default function HomePage() {
       onRenameConversation={handleRenameConversation}
       onSettingsClick={() => {}}
       onLogout={() => {}}
+      rightPanel={sourcesPanel}
+      showRightPanel={showSourcesPanel}
     >
       <Flex direction="column" className={styles.chatContainer}>
         {/* Messages Area or Welcome Screen */}
@@ -242,7 +256,7 @@ export default function HomePage() {
           </Flex>
         )}
 
-        {/* Mode Suggestion - shown when AI suggests non-simple mode */}
+        {/* Mode Suggestion — only shown for backend-suggested non-simple modes */}
         {modeSuggestion && pendingMessage && (
           <Box className={styles.modeSelectorArea}>
             <ModeSelector
@@ -253,7 +267,7 @@ export default function HomePage() {
           </Box>
         )}
 
-        {/* Chat Input */}
+        {/* Chat Input with pre-send mode selector */}
         <Box className={styles.inputSection}>
           <ChatInput
             placeholder="Ask anything..."
@@ -261,6 +275,10 @@ export default function HomePage() {
             onStop={stopGeneration}
             disabled={isLoading}
             isGenerating={isLoading}
+            selectedMode={selectedMode}
+            onModeChange={setSelectedMode}
+            usePersonalization={usePersonalization}
+            onPersonalizationToggle={setUsePersonalization}
           />
         </Box>
       </Flex>
