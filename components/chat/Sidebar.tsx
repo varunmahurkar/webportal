@@ -1,6 +1,7 @@
 /**
- * Sidebar — collapsible panel with user profile, conversation list, and theme toggle.
- * Calls: lib/api/conversations.ts (list/rename/delete), useAuth (user session).
+ * Sidebar — collapsible panel with user profile, conversation list, collections, and theme toggle.
+ * Features: conversation grouping into notebooks (Collections), rename/delete, theme switcher.
+ * Calls: lib/api/conversations.ts (list/rename/delete), useAuth (user session), useCollections.
  * Connected to: ChatLayout (parent layout), page.tsx (conversation selection callback).
  */
 
@@ -26,14 +27,16 @@ import {
   Moon,
   Palette,
   LogOut,
-  User,
   Sparkles,
   Check,
   Crown,
   Zap,
-  Mail,
   Calendar,
+  FolderOpen,
+  FolderPlus,
+  X,
 } from "@/app/core/icons";
+import { useCollections } from "@/hooks/useCollections";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,6 +66,8 @@ export interface SidebarProps {
   onSettingsClick?: () => void;
   onLogout?: () => void;
   className?: string;
+  /** Called when user assigns active conversation to a collection */
+  onAssignCollection?: (collectionId: string) => void;
 }
 
 // Preset colors for custom theme
@@ -102,10 +107,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSettingsClick,
   onLogout,
   className,
+  onAssignCollection,
 }) => {
   const { config, updateTheme } = useTheme();
+  const { collections, createCollection, renameCollection, deleteCollection, addConversation, getCollectionForConversation } = useCollections();
   const [isThemePanelOpen, setIsThemePanelOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
+  const [isCreatingCollection, setIsCreatingCollection] = useState(false);
+  const [newCollectionName, setNewCollectionName] = useState('');
 
   // Theme change handler
   const handleThemeChange = (mode: ThemeMode) => {
@@ -191,6 +201,88 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {!isCollapsed && <span>New Chat</span>}
         </Button>
       </Box>
+
+      {/* Collections / Notebooks Section */}
+      {!isCollapsed && (
+        <Box className={styles.collectionsSection}>
+          <Flex alignItems="center" justifyContent="between" className={styles.collectionsSectionHeader}>
+            <button
+              className={styles.collectionsToggle}
+              onClick={() => setIsCollectionsOpen(!isCollectionsOpen)}
+            >
+              <FolderOpen size={14} />
+              <Text variant="label-sm" color="secondary">Notebooks</Text>
+              {collections.length > 0 && (
+                <span className={styles.collectionCount}>{collections.length}</span>
+              )}
+              {isCollectionsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+            <button
+              className={styles.newCollectionBtn}
+              onClick={() => setIsCreatingCollection(true)}
+              title="New notebook"
+            >
+              <FolderPlus size={14} />
+            </button>
+          </Flex>
+
+          {isCreatingCollection && (
+            <Flex alignItems="center" gap={1} className={styles.newCollectionForm}>
+              <input
+                autoFocus
+                value={newCollectionName}
+                onChange={(e) => setNewCollectionName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newCollectionName.trim()) {
+                    createCollection(newCollectionName.trim());
+                    setNewCollectionName('');
+                    setIsCreatingCollection(false);
+                    setIsCollectionsOpen(true);
+                  }
+                  if (e.key === 'Escape') {
+                    setIsCreatingCollection(false);
+                    setNewCollectionName('');
+                  }
+                }}
+                placeholder="Notebook name..."
+                className={styles.newCollectionInput}
+              />
+              <button
+                className={styles.newCollectionCancel}
+                onClick={() => { setIsCreatingCollection(false); setNewCollectionName(''); }}
+              >
+                <X size={12} />
+              </button>
+            </Flex>
+          )}
+
+          {isCollectionsOpen && collections.length > 0 && (
+            <Box className={styles.collectionsList}>
+              {collections.map((col) => (
+                <Box key={col.id} className={styles.collectionItem}>
+                  <Flex alignItems="center" gap={2} className={styles.collectionItemInner}>
+                    <span className={styles.collectionEmoji}>{col.emoji}</span>
+                    <Text variant="body-sm" className={styles.collectionName} truncate>
+                      {col.name}
+                    </Text>
+                    <span className={styles.collectionConvCount}>
+                      {col.conversationIds.length}
+                    </span>
+                  </Flex>
+                </Box>
+              ))}
+            </Box>
+          )}
+
+          {isCollectionsOpen && collections.length === 0 && !isCreatingCollection && (
+            <Box className={styles.collectionsEmpty}>
+              <Text variant="caption" color="secondary">
+                Create notebooks to organize research
+              </Text>
+            </Box>
+          )}
+        </Box>
+      )}
 
       {/* Conversations List */}
       <Box className={styles.conversationsList}>
