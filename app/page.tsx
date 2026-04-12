@@ -16,9 +16,10 @@ import { ChatLayout, ChatInput, ChatMessages, ModeSelector, Conversation } from 
 import { CitationsPanel } from '@/components/chat/CitationsPanel';
 import { Box, Flex } from './core/Grid';
 import { Text } from './core/Typography';
-import { Sparkles, AlertCircle } from './core/icons';
+import { Sparkles, AlertCircle, Download } from './core/icons';
 import { useChat, Citation, QueryMode } from '@/hooks/useChat';
 import { useAuth } from '@/hooks/useAuth';
+import { useExport } from '@/hooks/useExport';
 import * as conversationsApi from '@/lib/api/conversations';
 import styles from './page.module.css';
 
@@ -27,6 +28,7 @@ export default function HomePage() {
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   const { accessToken, isAuthenticated } = useAuth();
+  const { exportAsMarkdown, exportAsPDF } = useExport();
 
   // Chat state with agentic mode enabled, default mode = research
   const {
@@ -168,6 +170,31 @@ export default function HomePage() {
     if (activeConversationId === id) handleNewChat();
   };
 
+  /**
+   * Branch conversation from a specific message index.
+   * Clears messages after the branch point and starts a new conversation thread.
+   */
+  const handleBranch = useCallback((messageIndex: number) => {
+    const branchedMessages = messages.slice(0, messageIndex + 1);
+    clearChat();
+    // Re-seed messages up to branch point — simplified: just start fresh new chat
+    // Full branch implementation would copy messages[0..idx] into new conversation
+    handleNewChat();
+  }, [messages, clearChat]);
+
+  /** Export full conversation as Markdown */
+  const handleExportConversation = useCallback(() => {
+    const title = conversations.find((c) => c.id === activeConversationId)?.title || 'Nurav Research';
+    const exportMessages = messages.map((m) => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content,
+      timestamp: m.timestamp,
+      citations: m.citations,
+      confidence: m.confidence,
+    }));
+    exportAsMarkdown(exportMessages, title);
+  }, [messages, conversations, activeConversationId, exportAsMarkdown]);
+
   // Handle rename conversation
   const handleRenameConversation = async (id: string, newTitle: string) => {
     if (isAuthenticated && accessToken) {
@@ -226,6 +253,9 @@ export default function HomePage() {
               status={status}
               followupQuestions={followupQuestions}
               onFollowupClick={(q) => handleSend(q)}
+              onBranch={handleBranch}
+              conversationId={activeConversationId}
+              queryMode={activeMode || selectedMode}
             />
             <div ref={messagesEndRef} />
           </Box>

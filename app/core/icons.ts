@@ -154,6 +154,18 @@ export {
   BarChart2,             // Stock live data widget
 } from 'lucide-react';
 
+// Research & Intelligence Icons - for new platform features
+export {
+  GitBranch,             // Conversation branching
+  Clock,                 // Research timeline
+  AlertTriangle,         // Contradiction/conflict detection
+  TrendingUp,            // Analysis category / trending
+  Lightbulb,             // Prompt templates / ideas
+  FolderOpen,            // Collections / notebooks
+  FolderPlus,            // Create new collection
+  Network,               // Citation graph / source network
+} from 'lucide-react';
+
 // Communication & Social Icons - for messaging and social features
 export {
   MessageSquare,         // Chat/messaging

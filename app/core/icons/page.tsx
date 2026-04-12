@@ -198,6 +198,13 @@ import {
   Newspaper,
   Bitcoin,
   BarChart2,
+  // Research & Intelligence Icons (added 2026-04-08)
+  GitBranch,
+  FolderOpen,
+  FolderPlus,
+  Network,
+  Crown,
+  ExternalLink,
   type LucideIcon,
 } from "lucide-react";
 
@@ -376,6 +383,13 @@ const IconMap: Record<string, LucideIcon> = {
   Newspaper,
   Bitcoin,
   BarChart2,
+  // Research & Intelligence (added 2026-04-08)
+  GitBranch,
+  FolderOpen,
+  FolderPlus,
+  Network,
+  Crown,
+  ExternalLink,
 };
 
 // Icon categories
@@ -572,6 +586,12 @@ const iconCategories = {
     "Newspaper",
     "Bitcoin",
     "BarChart2",
+    "GitBranch",
+    "FolderOpen",
+    "FolderPlus",
+    "Network",
+    "Crown",
+    "ExternalLink",
   ],
 };
 

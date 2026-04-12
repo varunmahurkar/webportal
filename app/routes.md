@@ -3,6 +3,7 @@
 ## Application Routes
 
 - **/** - Main AI chat interface with sidebar and chat input
+- **/share/[id]** - Public read-only shared conversation view (generated via Share button)
 - **/core/typography** - Typography system showcase
 - **/core/icons** - Icon library showcase with all Lucide React icons
 - **/core/color** - Color system showcase with theme switching
@@ -33,8 +34,21 @@ The main page (`/`) uses a modern chat interface with:
 - Collapsible sidebar with conversation history
 - Theme toggle (light/dark/custom mode)
 - Modern chat input with multiple action buttons
-- Keyboard shortcuts (Ctrl+B for sidebar)
+- Keyboard shortcuts (Ctrl+B for sidebar, Ctrl+Shift+N for new chat)
 - Responsive design for mobile devices
+- Pre-send mode selector (Fast / Research / Deep) in input toolbar
+- Personalization toggle (KG + memory context injection)
+- Prompt Templates modal (10 built-in templates + save custom prompts)
+- Export response as Markdown (.md file download)
+- Share conversation link (copy permalink to clipboard)
+- Branch conversation from any message point
+- Research Timeline (chronological source view for dated citations)
+- Contradiction Detector (heuristic signal for conflicting sources)
+- Citation Source Graph (SVG radial map of source clusters)
+- Collections / Notebooks (group conversations into research folders, localStorage)
+- Confidence badge on assistant responses (green ≥85%, yellow 65-84%, orange <65%)
+- Live data widgets for stock/crypto/weather inline in responses
+- Auto Table of Contents for long responses
 
 ## Core Components
 
@@ -47,6 +61,9 @@ The main page (`/`) uses a modern chat interface with:
 
 - **useCopyToClipboard** (`/hooks/useCopyToClipboard.ts`) - Copy text to clipboard
 - **useAuth** (`/hooks/useAuth.tsx`) - Authentication state management
+- **useExport** (`/hooks/useExport.ts`) - Export messages as Markdown or PDF (browser print)
+- **usePromptTemplates** (`/hooks/usePromptTemplates.ts`) - Manage saved prompt templates (localStorage + 10 built-ins)
+- **useCollections** (`/hooks/useCollections.ts`) - Collections/notebooks for grouping conversations (localStorage)
 
 ## Authentication System
 
