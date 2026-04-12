@@ -4,7 +4,9 @@
  * pre-send mode selector (Fast / Research / Deep).
  * Mode selector lives in the toolbar — user picks mode BEFORE sending.
  * Personalization toggle (Sparkles icon) enables KG + memory context injection.
- * Connected to: page.tsx (handleSend), useChat (sendMessage, stopGeneration, selectedMode, usePersonalization).
+ * Templates button opens the PromptTemplatesModal for quick prompt insertion.
+ * Connected to: page.tsx (handleSend), useChat (sendMessage, stopGeneration, selectedMode, usePersonalization),
+ *               PromptTemplatesModal (template selection).
  */
 
 'use client';
@@ -19,8 +21,6 @@ import {
   Paperclip,
   Image,
   Mic,
-  Globe,
-  Code,
   Sparkles,
   Zap,
   BookOpen,
@@ -28,8 +28,10 @@ import {
   FileText,
   Video,
   Square,
+  Lightbulb,
 } from '@/app/core/icons';
 import styles from './ChatInput.module.css';
+import { PromptTemplatesModal } from './PromptTemplatesModal';
 import type { QueryMode } from '@/hooks/useChat';
 
 /** Labels and icons for each query mode chip */
@@ -71,7 +73,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [showTemplatesModal, setShowTemplatesModal] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  /** Insert selected template text into the input */
+  const handleTemplateSelect = (promptText: string) => {
+    setMessage(promptText);
+    setShowTemplatesModal(false);
+    setTimeout(() => textareaRef.current?.focus(), 50);
+  };
 
   /** Handle send message */
   const handleSend = () => {
@@ -181,6 +191,20 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
             <div className={styles.divider} />
 
+            {/* Templates Button — opens PromptTemplatesModal for quick prompt insertion */}
+            <button
+              type="button"
+              className={styles.modeChip}
+              onClick={() => setShowAttachMenu(false) || setShowTemplatesModal(true)}
+              title="Browse prompt templates"
+              disabled={disabled}
+            >
+              <Lightbulb size={13} />
+              <span>Templates</span>
+            </button>
+
+            <div className={styles.divider} />
+
             {/* Personalisation Toggle — opt-in KG + memory context injection */}
             <button
               type="button"
@@ -228,6 +252,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       <p className={styles.footerText}>
         Nurav AI may produce inaccurate information. Verify important details.
       </p>
+
+      {/* Prompt Templates Modal */}
+      <PromptTemplatesModal
+        isOpen={showTemplatesModal}
+        onClose={() => setShowTemplatesModal(false)}
+        onSelectTemplate={handleTemplateSelect}
+      />
     </Box>
   );
 };

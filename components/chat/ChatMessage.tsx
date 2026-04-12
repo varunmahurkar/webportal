@@ -1,8 +1,11 @@
 /**
  * Chat Message Component — Nurav AI
  * Renders user questions and assistant responses with citation sources.
- * Layout: question at top -> source pills -> streamed markdown answer -> follow-ups.
- * Connected to: ChatMessages (parent list), MarkdownRenderer (content), useChat (data).
+ * Layout: question at top → source pills → streamed markdown answer → confidence → actions → follow-ups.
+ * Features: copy, export Markdown, share link, branch conversation, contradiction detection,
+ *           research timeline, citation source graph.
+ * Connected to: ChatMessages (parent list), MarkdownRenderer (content), useChat (data),
+ *               useExport (markdown/PDF export), ShareModal, ResearchTimeline, ContradictionAlert, CitationGraph.
  */
 
 "use client";
@@ -24,11 +27,19 @@ import {
   FileText,
   Sparkles,
   ShieldCheck,
+  Download,
+  Share,
+  GitBranch,
+  Database,
 } from "@/app/core/icons";
 import styles from "./ChatMessage.module.css";
 import { MarkdownRenderer } from "./MarkdownRenderer";
+import { ShareModal } from "./ShareModal";
+import { ResearchTimeline } from "./ResearchTimeline";
+import { ContradictionAlert } from "./ContradictionAlert";
+import { CitationGraph } from "./CitationGraph";
+import { useExport } from "@/hooks/useExport";
 import type { StreamStatus, ConfidenceScore } from "@/hooks/useChat";
-import { Database } from "@/app/core/icons";
 
 export type MessageRole = "user" | "assistant" | "system";
 
@@ -114,6 +125,12 @@ export interface ChatMessageProps {
   followupQuestions?: string[];
   /** Callback when user clicks a follow-up question */
   onFollowupClick?: (question: string) => void;
+  /** Called to branch conversation from this message point */
+  onBranch?: () => void;
+  /** Active conversation ID — used for share link generation */
+  conversationId?: string;
+  /** Query mode — enables timeline/graph for research/deep responses */
+  queryMode?: 'simple' | 'research' | 'deep';
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -122,12 +139,18 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   status = "idle",
   followupQuestions = [],
   onFollowupClick,
+  onBranch,
+  conversationId,
+  queryMode = 'simple',
 }) => {
   const [copied, setCopied] = useState(false);
   const [sourcesExpanded, setSourcesExpanded] = useState(true);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const { exportMessageAsMarkdown, exportAsPDF } = useExport();
+
   const isUser = message.role === "user";
-  const hasCitations =
-    !isUser && message.citations && message.citations.length > 0;
+  const hasCitations = !isUser && message.citations && message.citations.length > 0;
+  const isResearchMode = queryMode === 'research' || queryMode === 'deep';
 
   const handleCopy = async () => {
     try {
@@ -137,6 +160,21 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     } catch (err) {
       console.error("Failed to copy:", err);
     }
+  };
+
+  const handleExportMarkdown = () => {
+    exportMessageAsMarkdown({
+      role: message.role,
+      content: message.content,
+      timestamp: message.timestamp,
+      citations: message.citations?.map((c) => ({
+        id: c.id,
+        title: c.title,
+        url: c.url,
+        source_type: c.source_type,
+      })),
+      confidence: message.confidence,
+    });
   };
 
   // User message - simple question display
@@ -327,8 +365,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               <ConfidenceBadge confidence={message.confidence} />
             )}
 
-            {/* Actions */}
-            <Flex className={styles.actions} gap={2}>
+            {/* Actions — copy, export, share, branch */}
+            <Flex className={styles.actions} gap={2} wrap="wrap">
               <Button
                 variant="ghost"
                 size="sm"
@@ -338,7 +376,57 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 {copied ? <Check size={14} /> : <Copy size={14} />}
                 <span>{copied ? "Copied" : "Copy"}</span>
               </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleExportMarkdown}
+                className={styles.actionButton}
+                title="Export this answer as Markdown"
+              >
+                <Download size={14} />
+                <span>Export</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowShareModal(true)}
+                className={styles.actionButton}
+                title="Share this response"
+              >
+                <Share size={14} />
+                <span>Share</span>
+              </Button>
+
+              {onBranch && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onBranch}
+                  className={styles.actionButton}
+                  title="Branch conversation from this point"
+                >
+                  <GitBranch size={14} />
+                  <span>Branch</span>
+                </Button>
+              )}
             </Flex>
+
+            {/* Contradiction Alert — heuristic signal for conflicting sources */}
+            {hasCitations && isResearchMode && (
+              <ContradictionAlert citations={message.citations!} />
+            )}
+
+            {/* Research Timeline — chronological source view for dated citations */}
+            {hasCitations && isResearchMode && (
+              <ResearchTimeline citations={message.citations!} />
+            )}
+
+            {/* Citation Graph — visual source map for deep research */}
+            {hasCitations && queryMode === 'deep' && (
+              <CitationGraph citations={message.citations!} />
+            )}
 
             {/* Follow-up Question Chips */}
             {followupQuestions.length > 0 && (
@@ -362,6 +450,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           </>
         ) : null}
       </Box>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        conversationId={conversationId}
+        content={message.content}
+      />
     </Box>
   );
 };
@@ -469,6 +565,12 @@ export interface ChatMessagesProps {
   followupQuestions?: string[];
   /** Callback when user clicks a follow-up question */
   onFollowupClick?: (question: string) => void;
+  /** Called when user branches from a specific message index */
+  onBranch?: (messageIndex: number) => void;
+  /** Active conversation ID passed to share modal */
+  conversationId?: string;
+  /** Current query mode for enabling timeline/graph features */
+  queryMode?: 'simple' | 'research' | 'deep';
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -477,6 +579,9 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   status = "idle",
   followupQuestions = [],
   onFollowupClick,
+  onBranch,
+  conversationId,
+  queryMode = 'simple',
 }) => (
   <Box className={cn(styles.messagesContainer, className)}>
     {messages.map((message, index) => {
@@ -493,6 +598,9 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           status={isActiveAssistant ? status : "idle"}
           followupQuestions={isLastAssistantDone ? followupQuestions : []}
           onFollowupClick={onFollowupClick}
+          onBranch={onBranch ? () => onBranch(index) : undefined}
+          conversationId={conversationId}
+          queryMode={queryMode}
         />
       );
     })}
