@@ -163,6 +163,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   };
 
   const handleExportMarkdown = () => {
+    if (message.role === "system") return;
     exportMessageAsMarkdown({
       role: message.role,
       content: message.content,
